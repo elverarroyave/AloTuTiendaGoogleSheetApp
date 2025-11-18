@@ -15,10 +15,9 @@
       <h1>Nueva venta</h1>
     </div>
 
-    <form class="container mt-4 mb-2" onsubmit="sendInformationSale(this)">
+  <form class="container mt-4 mb-2" onsubmit="sendInformationSale(event, this)">
 
       <div class="accordion" id="accordionVenta">
-
         <div class="accordion-item">
           <h2 class="accordion-header">
             <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCliente">
@@ -28,10 +27,14 @@
 
           <div id="collapseCliente" class="accordion-collapse collapse show" data-bs-parent="#accordionVenta">
             <div class="accordion-body">
+
               <div class="mb-2">
-                <label for="clientCode" class="form-label">Código de cliente:</label>
-                <input type="text" id="clientCode" name="clientCode" class="form-control" placeholder="CLNT000">
+                <label for="clientName" class="form-label">Lista de cliente:</label>
+                <select class="form-select" id="clientName" name="clientName" aria-label="Lista de cliente">
+                </select>
               </div>
+
+              <input type="hidden" id="clientCode" name="clientCode">
 
               <div class="mb-2">
                 <label for="plazo" class="form-label">Plazo de pago:</label>
@@ -51,7 +54,7 @@
 
                 <div class="col-md-6 d-flex align-items-end">
                   <div class="form-check ms-2">
-                    <input class="form-check-input" type="checkbox" id="checkIsCredict">
+                    <input class="form-check-input" type="checkbox" id="checkIsCredict" name="checkIsCredict">
                     <label class="form-check-label" for="checkIsCredict">Es crédito?</label>
                   </div>
                 </div>
@@ -59,16 +62,16 @@
 
               <div class="mb-2" id="firstPaymentContainer">
                 <label for="firstPayment" class="form-label">Primer abono:</label>
-                <input type="number" id="firstPayment" class="form-control" placeholder="$">
+                <input type="text" id="firstPayment" class="form-control" name="firstPayment" placeholder="$">
               </div>
 
               <div class="mb-2">
                 <label for="paymentMethod" class="form-label">Método de pago:</label>
                 <select id="paymentMethod" class="form-select" name="paymentMethod" aria-label="Método de pago">
-                  <option value="" selected>Seleccione...</option>
+                  <option value="" selected></option>
                   <option value="Efectivo">Efectivo</option>
-                  <option value="Bancolombia Katy">Bancolombia Katy</option>
-                  <option value="Bancolombia Elver">Bancolombia Elver</option>
+                  <option value="B/bia K">Bancolombia Katy</option>
+                  <option value="B/bia E">Bancolombia Elver</option>
                   <option value="Nequi Katy">Nequi Katy</option>
                   <option value="Addi">Addi</option>
                   <option value="SisteCredito">SisteCredito</option>
@@ -89,25 +92,22 @@
           <div id="collapseProducto" class="accordion-collapse collapse" data-bs-parent="#accordionVenta">
             <div class="accordion-body">
               <div class="mb-2">
-                <label for="productCode" class="form-label">Código producto:</label>
-                <input type="text" id="productCode" name="productCode" class="form-control" placeholder="PDCT000">
-              </div>
-
-              <div class="mb-2">
                 <label for="productName" class="form-label">Lista producto:</label>
                 <select class="form-select" id="productName" name="productName" aria-label="Lista de producto">
                   
                 </select>
               </div>
 
+              <input type="hidden" id="productCode" name="productCode" readonly>
+
               <div class="mb-2">
-                <label class="form-label mb-1">Precio:</label>
-                <input type="number" class="form-control-plaintext" id="priceProduct" name="priceProduct" value="1200000" readonly>
+                <label for="priceProduct" class="form-label mb-1">Precio:</label>
+                <input type="text" class="form-control-plaintext" id="priceProduct" name="priceProduct" readonly>
               </div>
 
               <div class="mb-2">
-                <label class="form-label mb-1">dad disponible:</label>
-                <input type="text" class="form-control-plaintext" id="stockProduct" value="12 unidades" readonly>
+                <label for="stockProduct" class="form-label mb-1">cantidad disponible:</label>
+                <input type="text" class="form-control-plaintext" id="stockProduct" readonly>
               </div>
             </div>
           </div>
@@ -174,11 +174,14 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Tom Select JS (autocompletable select) -->
     <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
+
+    <!-- Script to initialize Tom Select and load inventory data -->
     <script>
       // Inicializar Tom Select para el select de método de pago
       document.addEventListener('DOMContentLoaded', function () {
         loadSelectValue();
         loadInventoryData();
+        loadClientsData();
       });
 
       function loadSelectValue(){
@@ -205,17 +208,55 @@
 
       function loadInventoryData(){
         google.script.run
-          .withSuccessHandler(pupulateProductSelect('productName')) // La función que manejará la respuesta exitosa
+          .withSuccessHandler(pupulateProductSelect()) // La función que manejará la respuesta exitosa
           .getInventory(); // La función de Apps Script a ejecutar
       }
 
-      /**
-   * Recibe el array de datos y pobla el select con el ID proporcionado.
-   * @param {string} elementId El ID del elemento select en el HTML (ej: 'socio').
-   */
-      function pupulateProductSelect(elementId) {
+      function loadClientsData(){
+        google.script.run
+          .withSuccessHandler(pupulateClientsSelect()) // La función que manejará la respuesta exitosa
+          .getClients(); // La función de Apps Script a ejecutar
+      }
+
+      function pupulateClientsSelect() {
         return function(optionsArray) {
-          const selectElement = document.getElementById(elementId);
+          const selectElement = document.getElementById('clientName');
+
+          // Manejar errores si la hoja no fue encontrada
+          if (optionsArray.error) {
+              selectElement.innerHTML = `<option value="">Error al cargar: ${optionsArray.error}</option>`;
+              return;
+          }
+          // Limpiar opciones anteriores
+          selectElement.innerHTML = '<option value="" disabled selected>Seleccione una opción</option>';
+          for (const client of optionsArray) {
+            const option = document.createElement('option');
+            option.value = client.NOMBRE || '';
+            option.textContent = `${client.NOMBRE || 'Sin nombre'} - ${client.CODIGO || ''}`;
+
+            // Guardar código en atributo data-*
+            option.dataset.code = client.CODIGO || 'Código no existe';
+
+            selectElement.appendChild(option);
+          }
+          // Cuando el usuario seleccione un cliente, precargar código
+          selectElement.addEventListener('change', function() {
+            const selected = selectElement.options[selectElement.selectedIndex];
+            const code = selected && selected.dataset ? selected.dataset.code : '';
+
+            const codeInput = document.getElementById('clientCode');
+            if (codeInput) codeInput.value = code || '';
+            // Actualizar resumen si la función está definida
+            if (typeof actualizarResumen === 'function') actualizarResumen();
+          });
+        };
+      }
+
+      function pupulateProductSelect() {
+        return function(optionsArray) {
+          const selectElement = document.getElementById('productName');
+          const selectElementPlazo = document.getElementById('plazo');
+          const selectElementAmount = document.getElementById('amount');
           
           // Manejar errores si la hoja no fue encontrada
           if (optionsArray.error) {
@@ -225,23 +266,87 @@
 
           // Limpiar opciones anteriores
           selectElement.innerHTML = '<option value="" disabled selected>Seleccione una opción</option>'; 
-          
-          optionsArray.forEach(product => {
+
+          for (const product of optionsArray) {
             const option = document.createElement('option');
-            option.value = product.CODIGO; // Valor que se enviará en el formulario
-            option.textContent = `${product.NOMBRE} - ${product.CODIGO}`; // Texto que se muestra al usuario
+            option.value = product.CODIGO || '';
+            option.textContent = `${product.NOMBRE || 'Sin nombre'} - ${product.CODIGO || ''}`;
+            option.dataset.price = product.UNO;
+            option.dataset.priceDos = product.DOS;
+            option.dataset.priceTres = product.TRES;
+            option.dataset.priceCuatro = product.CUATRO;
+            option.dataset.priceCinco = product.CINCO;
+            option.dataset.stock = product.STOCK;
+            option.dataset.code = product.CODIGO || 'Código no existe';
+
             selectElement.appendChild(option);
-          });
+          }
+
+          // Cuando el usuario seleccione un producto, precargar precio y stock
+          selectElement.addEventListener('change', updateProductValues);
+          selectElementPlazo.addEventListener('change', updateProductValues);
+          selectElementAmount.addEventListener('input', updateProductValues);
+
+          function updateProductValues() {
+            const selected = selectElement.options[selectElement.selectedIndex];
+            const productPrice = {
+              UNO: selected.dataset.price,
+              DOS: selected.dataset.priceDos,
+              TRES: selected.dataset.priceTres,
+              CUATRO: selected.dataset.priceCuatro,
+              CINCO: selected.dataset.priceCinco
+            };
+            const price = selected && selected.dataset ? calculatePriceByPlazo(productPrice) : '';
+            const stock = selected && selected.dataset ? selected.dataset.stock : '';
+            const code = selected && selected.dataset ? selected.dataset.code : '';
+
+            const priceInput = document.getElementById('priceProduct');
+            const stockInput = document.getElementById('stockProduct');
+            const codeInput = document.getElementById('productCode');
+
+            if (priceInput) priceInput.value = price || '';
+            if (stockInput) stockInput.value = stock || '';
+            if (codeInput) codeInput.value = code || '';
+            // Actualizar resumen si la función está definida
+            if (typeof actualizarResumen === 'function') actualizarResumen();
+          }
         };
+      }
+
+      function calculatePriceByPlazo(product) {
+        console.log('Calculating price for product:', product);
+        let priceResult // Precio base
+        let plazo = document.getElementById("plazo").value || 'UNO';
+        const amount = Number(document.getElementById("amount").value) || 1;
+        switch (plazo) {
+          case 'UNO':
+            priceResult = product.UNO;
+            break;
+          case 'DOS':
+            priceResult = product.DOS;
+            break;
+          case 'TRES':
+            priceResult = product.TRES;
+            break;
+          case 'CUATRO':
+            priceResult = product.CUATRO;
+            break;
+          case 'CINCO':
+            priceResult = product.CINCO;
+            break;
+          default:
+            priceResult = product.UNO;
+        }
+        return Number(priceResult * amount);
       }
 
     </script>
 
-
-    <script>
+    <!-- Script to update summary -->
+    <script> 
       function actualizarResumen() {
         document.getElementById("resCliente").innerText =
-          document.getElementById("clientCode").value || "—";
+          document.getElementById("clientName").value || "—";
 
         document.getElementById("resPlazo").innerText =
           document.getElementById("plazo").value || "—";
@@ -258,8 +363,10 @@
         document.getElementById("resMetodoPago").innerText =
           document.getElementById("paymentMethod").value || "—";
 
+        // Mostrar el texto de la opción seleccionada (ej: "Nombre - CODIGO") en lugar del value (código)
+        const _prodSelect = document.getElementById("productName");
         document.getElementById("resProducto").innerText =
-          document.getElementById("productCode").value || "—";
+          (_prodSelect && _prodSelect.options[_prodSelect.selectedIndex] && _prodSelect.options[_prodSelect.selectedIndex].text) || "—";
 
         document.getElementById("resPrecio").innerText =
           document.getElementById("priceProduct").value || "—";
@@ -289,6 +396,7 @@
       actualizarResumen();
     </script>
 
+    <!-- Script to toggle first payment visibility -->
     <script>
       const checkIsCredict = document.getElementById("checkIsCredict");
       const firstPaymentContainer = document.getElementById("firstPaymentContainer");
@@ -317,11 +425,32 @@
       toggleFirstPayment();
     </script>
 
+    <!-- Script to send sale information -->
     <script>
-      function sendInformationSale(form){
-        google.script.run.createNewSale(form);
-        event.preventDefault();
+      function sendInformationSale(e, form){
+        e.preventDefault();
+
+        const data = Object.fromEntries(new FormData(form));
+        data.checkIsCredict = form.checkIsCredict ? form.checkIsCredict.checked : false;
+
+        console.log('Form result to send:', data);
+        console.log('Form priceProduct:', data.priceProduct);
+        console.log('Form isCredit:', data.checkIsCredict);
+        google.script.run.createNewSale(data);
       }
+    </script>
+
+    <script>
+    function formatCurrency(value) {
+    if (typeof value !== 'number' || Number.isNaN(value)) {
+            return ''; // Devuelve vacío si no es un número válido
+        }
+        return new Intl.NumberFormat('es-CO', { 
+            style: 'currency', 
+            currency: 'COP', // O 'USD', 'EUR', etc.
+            minimumFractionDigits: 0 // No muestra decimales para números enteros
+        }).format(value);
+    }
     </script>
 
   </body>

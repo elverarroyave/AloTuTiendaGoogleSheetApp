@@ -53,12 +53,20 @@ function createNewSale(form) {
   
   // Columna I: Código Cliente
   sheet.getRange('I' + targetRow).setValue(form.clientCode); 
-  
+
   // Columna L: Precio
   sheet.getRange('L' + targetRow).setValue(form.priceProduct); 
 
+  if(form.checkIsCredict){
+    // Columna N: Pago
+    sheet.getRange('N' + targetRow).setValue(form.firstPayment);
+  }else{
+    // Columna N: Pago
+    sheet.getRange('N' + targetRow).setValue(form.priceProduct); 
+  }
+
   //Metodo de pago
-  sheet.getRange('N' + targetRow).setValue(form.paymentMethod); 
+  sheet.getRange('M' + targetRow).setValue(form.paymentMethod); 
   
   // Opcional: Cerrar el sidebar después de la venta
   SpreadsheetApp.getUi().showSidebar(HtmlService.createHtmlOutput('<h2>¡Venta Registrada!</h2>'));
@@ -132,6 +140,14 @@ function getInventory() {
   const startColumn = 1;
   const endColumn = 14;
   return getRowDataAsObjects(sheetName, rowIndex, startColumn, endColumn);
+}
+
+function getClients(){
+    const sheetName = "CLIENTES";
+    const rowIndex = 3;
+    const startColumn = 1;
+    const endColumn = 3;
+    return getRowDataAsObjects(sheetName, rowIndex, startColumn, endColumn);
 }
 
 
