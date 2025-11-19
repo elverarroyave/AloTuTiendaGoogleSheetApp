@@ -137,6 +137,7 @@
             <h3 class="mb-3">Resumen de la venta</h3>
             <div class="card shadow-sm">
                 <div class="card-body">
+                    <p class="mb-1"><strong>Código de venta:</strong> <span id="resCodigoVenta" class="fw-normal"> —</span></p>
                     <p class="mb-1"><strong>Cliente:</strong> <span id="resCliente" class="fw-normal"> —</span></p>
                     <p class="mb-1"><strong>Plazo:</strong> <span id="resPlazo" class="fw-normal"> —</span></p>
                     <p class="mb-1"><strong>Cantidad:</strong> <span id="resCantidad" class="fw-normal"> —</span></p>
@@ -205,6 +206,7 @@
         }
 
         const DOM = {
+            resCodigoVenta: document.getElementById('resCodigoVenta'),
             clientName: document.getElementById('clientName'),
             clientCode: document.getElementById('clientCode'),
             plazo: document.getElementById('plazo'),
@@ -260,6 +262,13 @@
             google.script.run
                 .withSuccessHandler(populateClientsSelect)
                 .getClients();
+        }
+
+        /** Carga los datos de las secuencias llamando a Apps Script. */
+        function loadSequencesData() {
+            google.script.run
+                .withSuccessHandler(getSequences)
+                .getSequences();
         }
 
 
@@ -420,6 +429,20 @@
             });
         }
 
+        // Get secuences
+        var saleSequence;
+        function getSequences(sequencesArray) {
+            console.log('Secuencias obtenidas:', sequencesArray);
+            saleSequence = sequencesArray.find(seq => seq.NAME === 'VENTA');
+            console.log('Secuencia de venta:', saleSequence);
+            if (saleSequence) {
+                let newSaleNumber = saleSequence.PREFIX + saleSequence.NEXT || 'N/A';
+                DOM.resCodigoVenta.innerText = newSaleNumber;
+            } else {
+                DOM.resCodigoVenta.innerText = 'N/A';
+            }
+        }
+
         // --- 4. Resumen y Envío ---
 
         /** Actualiza el bloque de resumen con los valores actuales del formulario. */
@@ -476,7 +499,7 @@
                     if (submitBtn) submitBtn.disabled = false;
                     alert('Error al crear la venta: ' + (err && err.message ? err.message : JSON.stringify(err)));
                 })
-                .createNewSale(data);
+                .createNewSale(data, saleSequence);
         }
 
         /** Muestra el modal con el resumen que devuelve el servidor. */
@@ -495,7 +518,7 @@
                 <div class="card">
                     <div class="card-body">
                         <p><strong>Fecha:</strong> ${response.date}</p>
-                        <p><strong>Número de venta:</strong> ${response.saleNumber}</p>
+                        <p><strong>Código de venta:</strong> ${response.saleCode}</p>
                         <hr>
                         <p><strong>Cliente:</strong> ${DOM.clientName.value || '—'} (${DOM.clientCode.value || '—'})</p>
                         <p><strong>Plazo:</strong> ${DOM.plazo.options[DOM.plazo.selectedIndex].text || '—'}</p>
@@ -531,6 +554,9 @@
             // Resetear todos los campos nativos
             form.reset();
 
+            // Update saleCode 
+            loadSequencesData();
+
             // Limpiar TomSelects si se inicializaron
             try {
                 if (TS.paymentMethodSelect && typeof TS.paymentMethodSelect.clear === 'function') TS.paymentMethodSelect.clear();
@@ -563,6 +589,7 @@
             // Cargar datos asíncronos y poblar selects
             loadClientsData();
             loadInventoryData();
+            loadSequencesData();
             
             // Inicializar Tom Selects que no dependen de la carga de datos
             initializeTomSelect();

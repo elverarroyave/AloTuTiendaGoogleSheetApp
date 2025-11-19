@@ -8,7 +8,7 @@ function openCurstomerSidebar(){
   SpreadsheetApp.getUi().showSidebar(html);
 }
 
-function createNewSale(form) {
+function createNewSale(form, saleSequence) {
   let sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("CONTROL_VENTAS");
   let targetRow = 3;
 
@@ -21,15 +21,8 @@ function createNewSale(form) {
   let timeZone = SpreadsheetApp.getActive().getSpreadsheetTimeZone();
   let formattedDate = Utilities.formatDate(now, timeZone, "dd/MM/yyyy HH:mm:ss");
 
-  // --- 3. LÓGICA DE NÚMERO DE VENTA (Columna B) ---
-  // Para obtener el último número de venta y sumarle 1 (ej: 001, 002, 003, etc.)
-  // Asumimos que la Columna B es el contador de ventas y la fila 4 es el último dato antes de insertar.
-  // Lee el valor de la celda B4 (la fila inmediatamente debajo de tu punto de inserción)
-  let lastSaleNumber = sheet.getRange('B' + (targetRow + 1)).getValue();
-  
-  // Si la celda está vacía o es 0, inicia en 1, sino, suma 1.
-  let newSaleNumber = (lastSaleNumber && typeof lastSaleNumber === 'number') ? lastSaleNumber + 1 : 1;
-
+  //Set sale number;
+  const newSaleNumber = saleSequence.NEXT;
 
   // --- 4. ESCRITURA DE DATOS EN LA FILA targetRow (Fila 3) ---
   
@@ -38,6 +31,9 @@ function createNewSale(form) {
   
   // Columna B: Número de Venta (Valor calculado)
   sheet.getRange('B' + targetRow).setValue(newSaleNumber); 
+  
+  //UPDATE SALE SEQUENCE
+  setSequences(saleSequence.NUMBER, newSaleNumber)
 
   // Columna d: Socio
   sheet.getRange('D' + targetRow).setValue(form.socio); 
@@ -71,7 +67,7 @@ function createNewSale(form) {
   // Devuelve un objeto con información de la venta para que el cliente (sidebar) muestre el resumen
   return {
     success: true,
-    saleNumber: newSaleNumber,
+    saleCode: saleSequence.PREFIX + newSaleNumber,
     date: formattedDate,
     insertedRow: targetRow,
     form: form
@@ -166,7 +162,7 @@ function getSequences(){
 
 function setSequences(targetRow, nextValue){
   let sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("SEQUENCES");
-    // Columna D: CurrenValue
-  sheet.getRange('D' + targetRow).setValue(nextValue);
+    // Columna D: CurrenValue, targetRow + 1, porque la secuencia inicia desde la fila 2
+  sheet.getRange('D' + (targetRow + 1)).setValue(nextValue);
 }
 
