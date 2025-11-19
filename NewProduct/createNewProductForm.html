@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Nuevo Producto</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; }
+        .required-asterisk { color: red; margin-left: 3px; }
+        .preview-code { font-family: monospace; font-weight: bold; color: #0d6efd; }
+    </style>
+</head>
+
+<body>
+    <div class="container mt-3 mb-5">
+        <div class="text-center mb-4">
+            <h3>Nuevo Producto</h3>
+            <p class="text-muted small">Complete la información para registrar inventario.</p>
+        </div>
+
+        <form id="productForm" class="card shadow-sm p-4" onsubmit="handleSubmit(event)">
+            
+            <div class="mb-3">
+                <label for="productName" class="form-label fw-bold">
+                    Nombre del producto<span class="required-asterisk">*</span>
+                </label>
+                <input type="text" class="form-control" id="productName" name="productName" 
+                       placeholder="Ej: Lavadora Samsung 15kg..." required>
+            </div>
+
+            <div class="mb-3">
+                <label for="productCodeDisplay" class="form-label fw-bold">
+                    Código del producto<span class="required-asterisk">*</span>
+                </label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light">Auto</span>
+                    <input type="text" class="form-control preview-code" id="productCodeDisplay" readonly value="Cargando...">
+                </div>
+                <div class="form-text">El código se asignará según la secuencia actual.</div>
+            </div>
+
+            <div class="mb-3">
+                <label for="category" class="form-label fw-bold">
+                    Categoría de venta
+                </label>
+                <select class="form-select" id="category" name="category">
+                    <option value="Electrodomestico" selected>Electrodoméstico</option>
+                    </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="salePrice" class="form-label fw-bold">
+                    Precio de venta<span class="required-asterisk">*</span>
+                </label>
+                <div class="input-group">
+                    <span class="input-group-text">$</span>
+                    <input type="number" class="form-control" id="salePrice" name="salePrice" 
+                           placeholder="0" min="0" required>
+                </div>
+            </div>
+
+            <div class="d-grid gap-2 mt-4">
+                <button type="submit" id="btnSubmit" class="btn btn-primary btn-lg" disabled>
+                    Registrar Producto
+                </button>
+            </div>
+        </form>
+
+        <div id="successAlert" class="alert alert-success mt-3 d-none" role="alert">
+            <h5 class="alert-heading">¡Producto registrado!</h5>
+            <p>Código: <strong id="resCode"></strong></p>
+            <p class="mb-0">Nombre: <span id="resName"></span></p>
+            <hr>
+            <button type="button" class="btn btn-sm btn-outline-success" onclick="resetForm()">Registrar otro</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // ELEMENTOS DOM
+        const DOM = {
+            form: document.getElementById('productForm'),
+            productName: document.getElementById('productName'),
+            productCodeDisplay: document.getElementById('productCodeDisplay'),
+            salePrice: document.getElementById('salePrice'),
+            btnSubmit: document.getElementById('btnSubmit'),
+            successAlert: document.getElementById('successAlert'),
+            resCode: document.getElementById('resCode'),
+            resName: document.getElementById('resName')
+        };
+
+        // --- 1. INICIALIZACIÓN ---
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSequencePreview();
+            addValidationListeners();
+        });
+
+        // Cargar secuencia desde Apps Script
+        function loadSequencePreview() {
+            google.script.run
+                .withSuccessHandler(displaySequence)
+                .withFailureHandler(err => {
+                    DOM.productCodeDisplay.value = "Error";
+                    alert("Error cargando secuencias: " + err);
+                })
+                .getSequences();
+        }
+
+        function displaySequence(sequences) {
+            const prodSeq = sequences.find(s => s.NAME === 'PRODUCTO');
+            if (prodSeq) {
+                // Solo previsualización visual. El valor real se recalcula en el backend para seguridad.
+                // Formato: PREFIX + NEXT (ej: PDCT091)
+                // Nota: Agrego un '0' manual antes del número para que coincida con tu ejemplo PDCT090
+                DOM.productCodeDisplay.value = `${prodSeq.PREFIX}0${prodSeq.NEXT}`;
+            } else {
+                DOM.productCodeDisplay.value = "N/A";
+            }
+        }
+
+        // --- 2. VALIDACIÓN ---
+        function addValidationListeners() {
+            // Escuchar cambios en los campos obligatorios
+            DOM.productName.addEventListener('input', validateForm);
+            DOM.salePrice.addEventListener('input', validateForm);
+        }
+
+        function validateForm() {
+            const nameValid = DOM.productName.value.trim() !== "";
+            const priceValue = parseFloat(DOM.salePrice.value);
+            const priceValid = !isNaN(priceValue) && priceValue > 0;
+
+            // Habilitar botón solo si ambos campos requeridos son válidos
+            if (nameValid && priceValid) {
+                DOM.btnSubmit.disabled = false;
+            } else {
+                DOM.btnSubmit.disabled = true;
+            }
+        }
+
+        // --- 3. ENVÍO ---
+        function handleSubmit(e) {
+            e.preventDefault();
+            
+            DOM.btnSubmit.disabled = true;
+            DOM.btnSubmit.innerText = "Registrando...";
+            DOM.successAlert.classList.add('d-none');
+
+            const formData = {
+                productName: DOM.productName.value,
+                category: document.getElementById('category').value,
+                salePrice: DOM.salePrice.value
+            };
+
+            google.script.run
+                .withSuccessHandler(onSuccess)
+                .withFailureHandler(onFailure)
+                .createNewProduct(formData);
+        }
+
+        function onSuccess(response) {
+            DOM.btnSubmit.innerText = "Registrar Producto";
+            DOM.form.classList.add('d-none'); // Ocultar formulario
+            
+            // Mostrar resumen
+            DOM.resCode.innerText = response.code;
+            DOM.resName.innerText = response.name;
+            DOM.successAlert.classList.remove('d-none');
+        }
+
+        function onFailure(error) {
+            DOM.btnSubmit.disabled = false;
+            DOM.btnSubmit.innerText = "Registrar Producto";
+            alert("Error al registrar: " + error.message);
+        }
+
+        // --- 4. REINICIAR ---
+        function resetForm() {
+            DOM.form.reset();
+            DOM.form.classList.remove('d-none');
+            DOM.successAlert.classList.add('d-none');
+            
+            DOM.productCodeDisplay.value = "Actualizando...";
+            DOM.btnSubmit.disabled = true; // Deshabilitar de nuevo
+
+            loadSequencePreview(); // Recargar secuencia nueva
+        }
+    </script>
+</body>
+</html>
