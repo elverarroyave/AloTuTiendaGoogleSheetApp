@@ -3,180 +3,189 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Nueva Venta - Bootstrap Accordion Form</title>
+    <title>Nueva Venta</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.bootstrap5.css" rel="stylesheet">
     <style>
-        /* Estilo para los campos de solo lectura dentro de un formulario (form-control-plaintext) */
+        body { background-color: #f8f9fa; } /* Fondo gris suave unificado */
+        
+        /* Estilo para los campos de solo lectura (form-control-plaintext) */
         .form-control-plaintext {
-            padding-left: 0.75rem; /* Ajuste para que se vea alineado con otros inputs */
+            padding-left: 0.75rem; 
+            color: #212529;
+        }
+
+        /* Estilo para asteriscos de campos obligatorios */
+        .required-asterisk {
+            color: red;
+            margin-left: 3px;
+            font-weight: bold;
+        }
+
+        /* Ajuste para que la tarjeta se vea bien */
+        .card-form {
+            border: none;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
         }
     </style>
 </head>
 
 <body>
-    <div class="mt-3 text-center">
-        <h1>Nueva venta</h1>
-    </div>
+    <div class="container mt-3 mb-5">
+        <div class="text-center mb-4">
+            <h3>Nueva Venta</h3>
+            <p class="text-muted small">Registre los detalles de la transacción.</p>
+        </div>
 
-    <form class="container mt-4 mb-5" onsubmit="sendInformationSale(event, this)">
-        <div class="accordion" id="accordionVenta">
+        <form class="card card-form p-4" onsubmit="sendInformationSale(event, this)">
+            
+            <div class="accordion" id="accordionVenta">
 
-            <div class="accordion-item">
-                <h2 class="accordion-header">
-                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCliente" aria-expanded="true" aria-controls="collapseCliente">
-                        Cliente
-                    </button>
-                </h2>
-                <div id="collapseCliente" class="accordion-collapse collapse show" data-bs-parent="#accordionVenta">
-                    <div class="accordion-body">
-                        <div class="mb-3">
-                            <label for="clientName" class="form-label">Lista de cliente:</label>
-                            <select class="form-select" id="clientName" name="clientName" aria-label="Lista de cliente"></select>
-                            <input type="hidden" id="clientCode" name="clientCode">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="plazo" class="form-label">Plazo de pago:</label>
-                            <select class="form-select" id="plazo" name="plazo" aria-label="Plazo de pago">
-                                <option value="UNO">Contado</option>
-                                <option value="DOS">1 meses</option>
-                                <option value="TRES">2 meses</option>
-                                <option value="CUATRO">3 meses</option>
-                            </select>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6 mb-3 mb-md-0">
-                                <label for="amount" class="form-label">Cantidad:</label>
-                                <input type="number" id="amount" name="amount" class="form-control" value="1" min="1">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCliente" aria-expanded="true" aria-controls="collapseCliente">
+                            <strong>1. Datos del Cliente y Pago</strong>
+                        </button>
+                    </h2>
+                    <div id="collapseCliente" class="accordion-collapse collapse show" data-bs-parent="#accordionVenta">
+                        <div class="accordion-body">
+                            <div class="mb-3">
+                                <label for="clientName" class="form-label fw-bold">Cliente<span class="required-asterisk">*</span></label>
+                                <select class="form-select" id="clientName" name="clientName" aria-label="Lista de cliente"></select>
+                                <input type="hidden" id="clientCode" name="clientCode">
                             </div>
 
-                            <div class="col-md-6 d-flex align-items-center">
-                                <div class="form-check pt-md-4">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="plazo" class="form-label fw-bold">Plazo de pago<span class="required-asterisk">*</span></label>
+                                    <select class="form-select" id="plazo" name="plazo">
+                                        <option value="UNO">Contado</option>
+                                        <option value="DOS">1 mes</option>
+                                        <option value="TRES">2 meses</option>
+                                        <option value="CUATRO">3 meses</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="amount" class="form-label fw-bold">Cantidad<span class="required-asterisk">*</span></label>
+                                    <input type="number" id="amount" name="amount" class="form-control" value="1" min="1">
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
                                     <input class="form-check-input" type="checkbox" id="checkIsCredict" name="checkIsCredict">
-                                    <label class="form-check-label" for="checkIsCredict">Es crédito?</label>
+                                    <label class="form-check-label" for="checkIsCredict">¿Es una venta a crédito?</label>
+                                </div>
+                            </div>
+
+                            <div class="mb-3" id="firstPaymentContainer" style="display: none;">
+                                <label for="firstPayment" class="form-label fw-bold">Primer abono<span class="required-asterisk">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="text" id="firstPayment" class="form-control" name="firstPayment" placeholder="0">
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="paymentMethod" class="form-label fw-bold">Método de pago<span class="required-asterisk">*</span></label>
+                                <select id="paymentMethod" class="form-select" name="paymentMethod">
+                                    <option value="" selected>Seleccione método...</option>
+                                    <option value="Efectivo">Efectivo</option>
+                                    <option value="B/bia K">Bancolombia Katy</option>
+                                    <option value="B/bia E">Bancolombia Elver</option>
+                                    <option value="Nequi K">Nequi Katy</option>
+                                    <option value="Nequi E">Nequi Elver</option>
+                                    <option value="Addi">Addi</option>
+                                    <option value="SisteCredito">SisteCredito</option>
+                                    <option value="BoldDatafono">BoldDatafono</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseProducto" aria-expanded="false" aria-controls="collapseProducto">
+                            <strong>2. Selección de Producto</strong>
+                        </button>
+                    </h2>
+                    <div id="collapseProducto" class="accordion-collapse collapse" data-bs-parent="#accordionVenta">
+                        <div class="accordion-body">
+                            <div class="mb-3">
+                                <label for="productName" class="form-label fw-bold">Producto<span class="required-asterisk">*</span></label>
+                                <select class="form-select" id="productName" name="productName"></select>
+                                <input type="hidden" id="productCode" name="productCode" readonly>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-6 mb-3">
+                                    <label class="form-label text-muted small mb-0">Precio Total</label>
+                                    <input type="text" class="form-control-plaintext fw-bold fs-5 text-primary" id="priceProduct" name="priceProduct" readonly value="—"> 
+                                </div>
+                                <div class="col-6 mb-3">
+                                    <label class="form-label text-muted small mb-0">Stock</label>
+                                    <input type="text" class="form-control-plaintext fw-bold" id="stockProduct" readonly value="—">
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
 
-                        <div class="mb-3" id="firstPaymentContainer">
-                            <label for="firstPayment" class="form-label">Primer abono:</label>
-                            <input type="text" id="firstPayment" class="form-control" name="firstPayment" placeholder="$">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="paymentMethod" class="form-label">Método de pago:</label>
-                            <select id="paymentMethod" class="form-select" name="paymentMethod" aria-label="Método de pago">
-                                <option value="" selected>Seleccione método de pago...</option>
-                                <option value="Efectivo">Efectivo</option>
-                                <option value="B/bia K">Bancolombia Katy</option>
-                                <option value="B/bia E">Bancolombia Elver</option>
-                                <option value="Nequi K">Nequi Katy</option>
-                                <option value="Nequi E">Nequi Elver</option>
-                                <option value="Addi">Addi</option>
-                                <option value="SisteCredito">SisteCredito</option>
-                                <option value="BoldDatafono">BoldDatafono</option>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSocio" aria-expanded="false" aria-controls="collapseSocio">
+                            <strong>3. Vendedor / Socio</strong>
+                        </button>
+                    </h2>
+                    <div id="collapseSocio" class="accordion-collapse collapse" data-bs-parent="#accordionVenta">
+                        <div class="accordion-body">
+                            <label for="socio" class="form-label fw-bold">Socio responsable<span class="required-asterisk">*</span></label>
+                            <select id="socio" class="form-select" name="socio">
+                                <option value="" selected>Seleccione socio...</option>
+                                <option value="YINA ATENCIA">Yina Atencia</option>
+                                <option value="KATY IRIARTE">Katy Iriarte</option>
+                                <option value="YARIS RODRIGUEZ">Yaris Rodriguez</option>
+                                <option value="MARIA PATERNINA">Maria Paternina</option>
+                                <option value="ELVER ARROYAVE">Elver Arroyave</option>
+                                <option value="KAREN EDITH BRACAMONTE">Karen Bracamonte</option>
+                                <option value="VANESSA ARROYAVE">Vanessa Arroyave</option>
                             </select>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="accordion-item">
-                <h2 class="accordion-header">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseProducto" aria-expanded="false" aria-controls="collapseProducto">
-                        Producto
-                    </button>
-                </h2>
-                <div id="collapseProducto" class="accordion-collapse collapse" data-bs-parent="#accordionVenta">
-                    <div class="accordion-body">
-                        <div class="mb-3">
-                            <label for="productName" class="form-label">Lista producto:</label>
-                            <select class="form-select" id="productName" name="productName" aria-label="Lista de producto"></select>
-                            <input type="hidden" id="productCode" name="productCode" readonly>
-                        </div>
+            <div class="mt-4 p-3 bg-light rounded border">
+                <h5 class="mb-3 text-secondary">Resumen preliminar</h5>
+                <div class="row g-2 small">
+                    <div class="col-6"><strong>Código Venta:</strong> <span id="resCodigoVenta" class="text-primary">...</span></div>
+                    <div class="col-6"><strong>Cliente:</strong> <span id="resCliente">—</span></div>
+                    <div class="col-6"><strong>Producto:</strong> <span id="resProducto">—</span></div>
+                    <div class="col-6"><strong>Total a pagar:</strong> <span id="resPrecio" class="fw-bold text-success">—</span></div>
+                </div>
+            </div>
 
-                        <div class="mb-3">
-                            <label for="priceProduct" class="form-label mb-1">Precio Total (según plazo y cantidad):</label>
-                            <input type="text" class="form-control-plaintext fw-bold" id="priceProduct" name="priceProduct" readonly value="—"> 
-                        </div>
+            <div class="d-grid gap-2 mt-4">
+                <button type="submit" id="btnSubmit" class="btn btn-primary btn-lg" disabled>
+                    Registrar Venta
+                </button>
+            </div>
+        </form>
 
-                        <div class="mb-3">
-                            <label for="stockProduct" class="form-label mb-1">Cantidad disponible:</label>
-                            <input type="text" class="form-control-plaintext" id="stockProduct" readonly value="—">
-                        </div>
+        <div class="modal fade" id="saleSummaryModal" tabindex="-1" aria-labelledby="saleSummaryModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title" id="saleSummaryModalLabel">¡Venta Exitosa!</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                </div>
-            </div>
-
-            <div class="accordion-item">
-                <h2 class="accordion-header">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSocio" aria-expanded="false" aria-controls="collapseSocio">
-                        Socio
-                    </button>
-                </h2>
-                <div id="collapseSocio" class="accordion-collapse collapse" data-bs-parent="#accordionVenta">
-                    <div class="accordion-body">
-                        <select id="socio" class="form-select" name="socio" aria-label="Sin socio asociado">
-                            <option value="" selected>Seleccione socio...</option>
-                            <option value="YINA ATENCIA">Yina Atencia</option>
-                            <option value="KATY IRIARTE">Katy Iriarte</option>
-                            <option value="YARIS RODRIGUEZ">Yaris Rodriguez</option>
-                            <option value="MARIA PATERNINA">Maria Paternina</option>
-                            <option value="ELVER ARROYAVE">Elver Arroyave</option>
-                            <option value="KAREN EDITH BRACAMONTE">Karen Bracamonte</option>
-                            <option value="VANESSA ARROYAVE">Vanessa Arroyave</option>
-                        </select>
+                    <div class="modal-body">
+                        <div id="saleSummaryContent"></div>
                     </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="mt-4">
-            <h3 class="mb-3">Resumen de la venta</h3>
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <p class="mb-1"><strong>Código de venta:</strong> <span id="resCodigoVenta" class="fw-normal"> —</span></p>
-                    <p class="mb-1"><strong>Cliente:</strong> <span id="resCliente" class="fw-normal"> —</span></p>
-                    <p class="mb-1"><strong>Plazo:</strong> <span id="resPlazo" class="fw-normal"> —</span></p>
-                    <p class="mb-1"><strong>Cantidad:</strong> <span id="resCantidad" class="fw-normal"> —</span></p>
-                    <p class="mb-1"><strong>Es crédito:</strong> <span id="resCredito" class="fw-normal"> —</span></p>
-                    <p class="mb-1"><strong>Primer abono:</strong> $<span id="resPrimerAbono" class="fw-normal"> —</span></p>
-                    <p><strong>Método de pago:</strong> <span id="resMetodoPago" class="fw-normal"> —</span></p>
-
-                    <hr>
-
-                    <p class="mb-1"><strong>Producto:</strong> <span id="resProducto" class="fw-normal"> —</span></p>
-                    <p class="mb-1"><strong>Precio Total:</strong> $<span id="resPrecio" class="text-danger fw-bold"> —</span></p>
-                    <p><strong>Stock disponible:</strong> <span id="resStock" class="fw-normal"> —</span></p>
-
-                    <hr>
-
-                    <p><strong>Socio:</strong> <span id="resSocio" class="fw-normal"> —</span></p>
-                </div>
-
-                <div class="container text-center pt-0 pb-3">
-                    <button type="submit" class="btn btn-primary btn-lg w-75">Vender</button>
-                </div>
-            </div>
-        </div>
-    </form>
-
-    <!-- Modal para mostrar el resumen después de realizar la venta -->
-    <div class="modal fade" id="saleSummaryModal" tabindex="-1" aria-labelledby="saleSummaryModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="saleSummaryModalLabel">Resumen de la venta</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <!-- Contenido será llenado dinámicamente -->
-                    <div id="saleSummaryContent"></div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar y Nueva Venta</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -188,19 +197,13 @@
     <script>
         // --- 1. Utilidades y Constantes ---
 
-        /**
-         * Formatea un número como moneda colombiana (o el formato local que necesites).
-         * @param {number} value El número a formatear.
-         * @returns {string} El valor formateado (ej: "$ 1.200.000").
-         */
         function formatCurrency(value) {
             if (typeof value !== 'number' || Number.isNaN(value)) {
-                return ''; // Devuelve vacío si no es un número válido
+                return ''; 
             }
-
             return new Intl.NumberFormat('es-CO', {
                 style: 'currency',
-                currency: 'COP', // Moneda de Colombia
+                currency: 'COP', 
                 minimumFractionDigits: 0
             }).format(value);
         }
@@ -220,93 +223,67 @@
             priceProduct: document.getElementById('priceProduct'),
             stockProduct: document.getElementById('stockProduct'),
             socio: document.getElementById('socio'),
+            btnSubmit: document.getElementById('btnSubmit') 
         };
 
-        // TomSelect instances holder so we can reset/clear them later
         const TS = {};
 
         // --- 2. Funciones de Inicialización ---
 
-        /** Inicializa Tom Select en los elementos necesarios. */
         function initializeTomSelect() {
             try {
-                // Métodos de Pago
                 TS.paymentMethodSelect = new TomSelect(DOM.paymentMethod, {
                     create: false,
                     maxItems: 1,
                     allowEmptyOption: true,
-                    sortField: { field: 'text', direction: 'asc' }
+                    placeholder: "Buscar método...",
+                    sortField: { field: 'text', direction: 'asc' },
+                    onChange: validateForm 
                 });
 
-                // Socio
                 TS.socioSelect = new TomSelect(DOM.socio, {
                     create: false,
                     maxItems: 1,
                     allowEmptyOption: true,
-                    sortField: { field: 'text', direction: 'asc' }
+                    placeholder: "Buscar socio...",
+                    sortField: { field: 'text', direction: 'asc' },
+                    onChange: validateForm
                 });
             } catch (e) {
                 console.warn('TomSelect no pudo inicializarse:', e);
             }
         }
 
-        /** Carga los datos de inventario llamando a Apps Script. */
         function loadInventoryData() {
-            google.script.run
-                .withSuccessHandler(populateProductSelect)
-                .getInventory();
+            google.script.run.withSuccessHandler(populateProductSelect).getInventory();
         }
 
-        /** Carga los datos de clientes llamando a Apps Script. */
         function loadClientsData() {
-            google.script.run
-                .withSuccessHandler(populateClientsSelect)
-                .getClients();
+            google.script.run.withSuccessHandler(populateClientsSelect).getClients();
         }
 
-        /** Carga los datos de las secuencias llamando a Apps Script. */
         function loadSequencesData() {
-            google.script.run
-                .withSuccessHandler(getSequences)
-                .getSequences();
+            google.script.run.withSuccessHandler(getSequences).getSequences();
         }
 
+        // --- 3. Funciones de Lógica ---
 
-        // --- 3. Funciones de Lógica y Manejo de Datos ---
-
-        /** * Calcula el precio total basado en el plazo y la cantidad.
-         * @param {Object} product - Objeto con los precios según el plazo (UNO, DOS, etc.).
-         * @returns {number} - El precio total calculado.
-         */
         function calculatePriceByPlazo(product) {
             const plazo = DOM.plazo.value || 'UNO';
             const amount = Number(DOM.amount.value) || 1;
             let priceResult;
 
             switch (plazo) {
-                case 'UNO':
-                    priceResult = product.UNO;
-                    break;
-                case 'DOS':
-                    priceResult = product.DOS;
-                    break;
-                case 'TRES':
-                    priceResult = product.TRES;
-                    break;
-                case 'CUATRO':
-                    priceResult = product.CUATRO;
-                    break;
-                case 'CINCO':
-                    priceResult = product.CINCO;
-                    break;
-                default:
-                    priceResult = product.UNO;
+                case 'UNO': priceResult = product.UNO; break;
+                case 'DOS': priceResult = product.DOS; break;
+                case 'TRES': priceResult = product.TRES; break;
+                case 'CUATRO': priceResult = product.CUATRO; break;
+                case 'CINCO': priceResult = product.CINCO; break;
+                default: priceResult = product.UNO;
             }
-            // Retorna el valor numérico total
             return Number(priceResult) * amount;
         }
 
-        /** Maneja la actualización de los valores de producto (precio y stock). */
         function updateProductValues() {
             const selectedOption = DOM.productName.options[DOM.productName.selectedIndex];
 
@@ -315,10 +292,10 @@
                 DOM.stockProduct.value = '—';
                 DOM.productCode.value = '';
                 updateSummary();
+                validateForm(); 
                 return;
             }
 
-            // Datos de precios del producto desde los data attributes
             const productPrices = {
                 UNO: selectedOption.dataset.price,
                 DOS: selectedOption.dataset.priceDos,
@@ -331,111 +308,98 @@
             const stock = selectedOption.dataset.stock;
             const code = selectedOption.dataset.code;
 
-            // Actualiza los inputs de solo lectura
-            DOM.priceProduct.value = totalPrice; // Aplica formato de moneda
+            DOM.priceProduct.value = formatCurrency(totalPrice); // Formateado visualmente
+            // Nota: Para el envío guardamos el valor numérico crudo si es necesario, 
+            // pero aquí se muestra bonito. Al enviar, asegúrate de limpiar el formato si el backend espera numero.
+            // En tu código original enviabas el valor del input. 
+            
             DOM.stockProduct.value = stock;
             DOM.productCode.value = code;
 
             updateSummary();
+            validateForm(); 
         }
 
-        /** Oculta o muestra el campo de Primer Abono según si es crédito. */
         function toggleFirstPayment() {
             if (DOM.checkIsCredict.checked) {
                 DOM.firstPaymentContainer.style.display = "block";
             } else {
                 DOM.firstPaymentContainer.style.display = "none";
-                DOM.firstPayment.value = ""; // Limpiar si se oculta
+                DOM.firstPayment.value = ""; 
             }
-            updateSummary(); // Reflejar el cambio en el resumen
+            updateSummary();
+            validateForm();
         }
 
-        /** * Popula el select de productos con datos de Apps Script. 
-         * @param {Array<Object>} optionsArray - Array de objetos con datos de productos.
-         */
         function populateProductSelect(optionsArray) {
             if (optionsArray.error) {
-                DOM.productName.innerHTML = `<option value="">Error al cargar: ${optionsArray.error}</option>`;
+                DOM.productName.innerHTML = `<option value="">Error: ${optionsArray.error}</option>`;
                 return;
             }
-
-            DOM.productName.innerHTML = '<option value="" disabled selected>Seleccione una opción</option>';
+            DOM.productName.innerHTML = '<option value="" disabled selected>Seleccione producto...</option>';
 
             for (const product of optionsArray) {
                 const option = document.createElement('option');
-                option.value = product.CODIGO || ''; // El valor del option será el código
-                option.textContent = `${product.NOMBRE || 'Sin nombre'} - ${product.CODIGO || ''}`;
-
-                // Guardar todos los precios y stock en data attributes
+                option.value = product.CODIGO || ''; 
+                option.textContent = `${product.NOMBRE || 'Sin nombre'} (${product.CODIGO || ''})`;
                 option.dataset.price = product.UNO;
                 option.dataset.priceDos = product.DOS;
                 option.dataset.priceTres = product.TRES;
                 option.dataset.priceCuatro = product.CUATRO;
                 option.dataset.priceCinco = product.CINCO;
                 option.dataset.stock = product.STOCK;
-                option.dataset.code = product.CODIGO || 'Código no existe';
-
+                option.dataset.code = product.CODIGO || 'No Code';
                 DOM.productName.appendChild(option);
             }
 
-            // Inicializar Tom Select para product Name DESPUÉS de poblarlo
             TS.productNameSelect = new TomSelect(DOM.productName, {
                 create: false,
                 maxItems: 1,
                 allowEmptyOption: true,
-                sortField: { field: 'text', direction: 'asc' }
+                placeholder: "Buscar producto...",
+                sortField: { field: 'text', direction: 'asc' },
+                onChange: function() {
+                    updateProductValues(); 
+                }
             });
-            
-            // Agregar listeners para actualizaciones
-            DOM.productName.addEventListener('change', updateProductValues);
-            DOM.plazo.addEventListener('change', updateProductValues);
-            DOM.amount.addEventListener('input', updateProductValues);
         }
 
-        /** * Popula el select de clientes con datos de Apps Script. 
-         * @param {Array<Object>} optionsArray - Array de objetos con datos de clientes.
-         */
         function populateClientsSelect(optionsArray) {
             if (optionsArray.error) {
-                DOM.clientName.innerHTML = `<option value="">Error al cargar: ${optionsArray.error}</option>`;
+                DOM.clientName.innerHTML = `<option value="">Error: ${optionsArray.error}</option>`;
                 return;
             }
-
-            DOM.clientName.innerHTML = '<option value="" disabled selected>Seleccione un cliente</option>';
+            DOM.clientName.innerHTML = '<option value="" disabled selected>Seleccione cliente...</option>';
 
             for (const client of optionsArray) {
                 const option = document.createElement('option');
-                option.value = client.NOMBRE || ''; // El valor del option será el nombre
-                option.textContent = `${client.NOMBRE || 'Sin nombre'} - ${client.CODIGO || ''}`;
-                option.dataset.code = client.CODIGO || 'Código no existe';
-
+                option.value = client.NOMBRE || ''; 
+                option.textContent = `${client.NOMBRE || 'Sin nombre'} (${client.CODIGO || ''})`;
+                option.dataset.code = client.CODIGO || '';
                 DOM.clientName.appendChild(option);
             }
 
-            // Inicializar Tom Select para client Name DESPUÉS de poblarlo
             TS.clientNameSelect = new TomSelect(DOM.clientName, {
                 create: false,
                 maxItems: 1,
                 allowEmptyOption: true,
-                sortField: { field: 'text', direction: 'asc' }
-            });
-            
-            // Cuando se selecciona un cliente, actualizar el código oculto
-            DOM.clientName.addEventListener('change', function() {
-                const selected = DOM.clientName.options[DOM.clientName.selectedIndex];
-                const code = selected && selected.dataset ? selected.dataset.code : '';
-                DOM.clientCode.value = code || '';
-                updateSummary();
+                placeholder: "Buscar cliente...",
+                sortField: { field: 'text', direction: 'asc' },
+                onChange: function() {
+                    const selected = DOM.clientName.options[DOM.clientName.selectedIndex];
+                    const code = selected && selected.dataset ? selected.dataset.code : '';
+                    DOM.clientCode.value = code || '';
+                    updateSummary();
+                    validateForm(); 
+                }
             });
         }
 
-        // Get secuences
         var saleSequence;
         function getSequences(sequencesArray) {
-            console.log('Secuencias obtenidas:', sequencesArray);
             saleSequence = sequencesArray.find(seq => seq.NAME === 'VENTA');
-            console.log('Secuencia de venta:', saleSequence);
             if (saleSequence) {
+                // Asumiendo lógica de prefijo + numero
                 let newSaleNumber = saleSequence.PREFIX + saleSequence.NEXT || 'N/A';
                 DOM.resCodigoVenta.innerText = newSaleNumber;
             } else {
@@ -443,97 +407,116 @@
             }
         }
 
-        // --- 4. Resumen y Envío ---
+        // --- 4. Validaciones y Envío ---
 
-        /** Actualiza el bloque de resumen con los valores actuales del formulario. */
-        function updateSummary() {
-            // Cliente
-            document.getElementById("resCliente").innerText = DOM.clientName.value || "—";
-            document.getElementById("resPlazo").innerText = DOM.plazo.options[DOM.plazo.selectedIndex].text || "—";
-            document.getElementById("resCantidad").innerText = DOM.amount.value || "—";
-            document.getElementById("resCredito").innerText = DOM.checkIsCredict.checked ? "Sí" : "No";
-            document.getElementById("resPrimerAbono").innerText = DOM.firstPayment.value || "—";
-            document.getElementById("resMetodoPago").innerText = DOM.paymentMethod.value || "—";
+        function validateForm() {
+            let isValid = true;
 
-            // Producto
-            const _prodSelected = DOM.productName.options[DOM.productName.selectedIndex];
-            document.getElementById("resProducto").innerText = (_prodSelected && _prodSelected.text) || "—";
-            document.getElementById("resPrecio").innerText = DOM.priceProduct.value || "—";
-            document.getElementById("resStock").innerText = DOM.stockProduct.value || "—";
+            if (!DOM.clientName.value || DOM.clientName.value === "") isValid = false;
+            if (!DOM.plazo.value || DOM.plazo.value === "") isValid = false;
+            
+            const amountVal = parseFloat(DOM.amount.value);
+            if (isNaN(amountVal) || amountVal <= 0) isValid = false;
 
-            // Socio
-            const _socioSelected = DOM.socio.options[DOM.socio.selectedIndex];
-            document.getElementById("resSocio").innerText = (_socioSelected && _socioSelected.text) || "—";
+            if (DOM.checkIsCredict.checked) {
+                if (!DOM.firstPayment.value || DOM.firstPayment.value.trim() === "") {
+                    isValid = false;
+                }
+            }
+
+            if (!DOM.paymentMethod.value || DOM.paymentMethod.value === "") isValid = false;
+            if (!DOM.productName.value || DOM.productName.value === "") isValid = false;
+            if (!DOM.socio.value || DOM.socio.value === "") isValid = false;
+
+            DOM.btnSubmit.disabled = !isValid;
+            return isValid;
         }
 
-        /** * Maneja el envío del formulario a Apps Script.
-         * @param {Event} e - El evento de submit.
-         * @param {HTMLFormElement} form - El elemento del formulario.
-         */
+        function updateSummary() {
+            // Actualización del resumen pequeño en el formulario principal
+            document.getElementById("resCliente").innerText = DOM.clientName.value || "—";
+            
+            const _prodSelected = DOM.productName.options[DOM.productName.selectedIndex];
+            document.getElementById("resProducto").innerText = (_prodSelected && _prodSelected.text) ? _prodSelected.text.split('-')[0] : "—";
+            
+            document.getElementById("resPrecio").innerText = DOM.priceProduct.value || "—";
+        }
+
         function sendInformationSale(e, form) {
             e.preventDefault();
 
-            const submitBtn = form.querySelector('button[type="submit"]');
-            if (submitBtn) submitBtn.disabled = true;
+            if (!validateForm()) {
+                alert("Por favor complete todos los campos obligatorios.");
+                return;
+            }
+
+            const stockAvailable = parseInt(DOM.stockProduct.value);
+            const amountRequested = parseInt(DOM.amount.value);
+            
+            // Validación básica de stock (opcional, remover si no se necesita estricta)
+            if (!isNaN(stockAvailable) && stockAvailable < amountRequested) {
+                alert("Stock insuficiente para la cantidad solicitada.");
+                return;
+            }
+
+            const submitBtn = DOM.btnSubmit;
+            submitBtn.disabled = true; 
+            submitBtn.innerText = "Procesando...";
 
             const formData = new FormData(form);
             const data = Object.fromEntries(formData);
 
-            // Asegurar que el booleano del checkbox esté presente
             data.checkIsCredict = DOM.checkIsCredict.checked;
-
-            // Asegurar que algunos campos visibles se envíen correctamente
-            data.priceProduct = DOM.priceProduct.value;
+            // Importante: Si priceProduct tiene formato moneda (e.g. $1.000), el backend debe limpiarlo o limpiarlo aquí
+            // Aquí lo enviamos tal cual, asumiendo que el backend lo maneja o que getRange().setValue() lo acepta.
+            data.priceProduct = DOM.priceProduct.value; 
             data.productCode = DOM.productCode.value;
             data.clientName = DOM.clientName.value;
 
-            console.log('Form result to send:', data);
-
-            // Enviar a Apps Script y mostrar el resumen en el callback
             google.script.run
                 .withSuccessHandler(function(response) {
-                    if (submitBtn) submitBtn.disabled = false;
+                    submitBtn.innerText = "Registrar Venta"; 
                     showSummary(response);
                 })
                 .withFailureHandler(function(err) {
-                    if (submitBtn) submitBtn.disabled = false;
+                    submitBtn.disabled = false; 
+                    submitBtn.innerText = "Registrar Venta";
                     alert('Error al crear la venta: ' + (err && err.message ? err.message : JSON.stringify(err)));
                 })
                 .createNewSale(data, saleSequence);
         }
 
-        /** Muestra el modal con el resumen que devuelve el servidor. */
         function showSummary(response) {
             if (!response || !response.success) {
                 alert('No se pudo registrar la venta.');
+                DOM.btnSubmit.disabled = false;
                 return;
             }
 
-            // Construir contenido del resumen usando los valores actuales del DOM y la respuesta del servidor
             const contentEl = document.getElementById('saleSummaryContent');
-            const _prodSelected = DOM.productName.options[DOM.productName.selectedIndex];
-            const _socioSelected = DOM.socio.options[DOM.socio.selectedIndex];
-
+            // Reconstrucción del HTML para el Modal de éxito
             const html = `
-                <div class="card">
-                    <div class="card-body">
-                        <p><strong>Fecha:</strong> ${response.date}</p>
-                        <p><strong>Código de venta:</strong> ${response.saleCode}</p>
-                        <hr>
-                        <p><strong>Cliente:</strong> ${DOM.clientName.value || '—'} (${DOM.clientCode.value || '—'})</p>
-                        <p><strong>Plazo:</strong> ${DOM.plazo.options[DOM.plazo.selectedIndex].text || '—'}</p>
-                        <p><strong>Cantidad:</strong> ${DOM.amount.value || '—'}</p>
-                        <p><strong>Es crédito:</strong> ${DOM.checkIsCredict.checked ? 'Sí' : 'No'}</p>
-                        <p><strong>Primer abono:</strong> ${DOM.firstPayment.value || '—'}</p>
-                        <p><strong>Método de pago:</strong> ${DOM.paymentMethod.value || '—'}</p>
-                        <hr>
-                        <p><strong>Producto:</strong> ${(_prodSelected && _prodSelected.text) || '—'}</p>
-                        <p><strong>Precio Total:</strong> ${DOM.priceProduct.value || '—'}</p>
-                        <p><strong>Stock disponible:</strong> ${DOM.stockProduct.value || '—'}</p>
-                        <hr>
-                        <p><strong>Socio:</strong> ${(_socioSelected && _socioSelected.text) || '—'}</p>
-                    </div>
+                <div class="text-center mb-4">
+                    <h2 class="text-success display-6">${response.saleCode}</h2>
+                    <p class="text-muted">${response.date}</p>
                 </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>Cliente:</span> <strong>${DOM.clientName.value}</strong>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>Producto:</span> <strong>${DOM.productName.options[DOM.productName.selectedIndex].text}</strong>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>Cantidad:</span> <strong>${DOM.amount.value}</strong>
+                    </li>
+                     <li class="list-group-item d-flex justify-content-between">
+                        <span>Total:</span> <strong class="text-success">${DOM.priceProduct.value}</strong>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>Vendedor:</span> <span>${DOM.socio.value}</span>
+                    </li>
+                </ul>
             `;
 
             contentEl.innerHTML = html;
@@ -543,72 +526,53 @@
             bsModal.show();
         }
 
-        /**
-         * Resetea el formulario completamente cuando se cierra el modal de resumen.
-         * Limpia inputs, campos de sólo lectura, y vacía TomSelects si existen.
-         */
         function resetForm() {
             const form = document.querySelector('form');
             if (!form) return;
 
-            // Resetear todos los campos nativos
             form.reset();
-
-            // Update saleCode 
             loadSequencesData();
 
-            // Limpiar TomSelects si se inicializaron
             try {
-                if (TS.paymentMethodSelect && typeof TS.paymentMethodSelect.clear === 'function') TS.paymentMethodSelect.clear();
-                if (TS.socioSelect && typeof TS.socioSelect.clear === 'function') TS.socioSelect.clear();
-                if (TS.clientNameSelect && typeof TS.clientNameSelect.clear === 'function') TS.clientNameSelect.clear();
-                if (TS.productNameSelect && typeof TS.productNameSelect.clear === 'function') TS.productNameSelect.clear();
+                if (TS.paymentMethodSelect) TS.paymentMethodSelect.clear();
+                if (TS.socioSelect) TS.socioSelect.clear();
+                if (TS.clientNameSelect) TS.clientNameSelect.clear();
+                if (TS.productNameSelect) TS.productNameSelect.clear();
             } catch (e) {
-                console.warn('No se pudo limpiar TomSelects durante reset:', e);
+                console.warn('Clean TS error:', e);
             }
 
-            // Resetear campos de sólo lectura
             DOM.priceProduct.value = '—';
             DOM.stockProduct.value = '—';
             DOM.productCode.value = '';
             DOM.clientCode.value = '';
 
-            // Asegurar que el contenedor de primer abono quede oculto si corresponde
             toggleFirstPayment();
-
-            // Actualizar el resumen visual
             updateSummary();
+            validateForm();
+            DOM.btnSubmit.disabled = true; 
         }
 
         // --- 5. Inicialización Global ---
-
         document.addEventListener('DOMContentLoaded', function() {
-            // Ocultar campo de abono por defecto
             toggleFirstPayment();
-
-            // Cargar datos asíncronos y poblar selects
             loadClientsData();
             loadInventoryData();
             loadSequencesData();
-            
-            // Inicializar Tom Selects que no dependen de la carga de datos
             initializeTomSelect();
 
-            // Event listener para mostrar/ocultar primer abono
             DOM.checkIsCredict.addEventListener("change", toggleFirstPayment);
 
-            // Agregar listeners para todos los inputs/selects para actualizar el resumen
             for (const key in DOM) {
-                if (DOM[key] && DOM[key].tagName) {
-                    DOM[key].addEventListener("input", updateSummary);
-                    DOM[key].addEventListener("change", updateSummary);
+                if (DOM[key] && DOM[key].tagName && DOM[key].id !== 'btnSubmit') {
+                    DOM[key].addEventListener("input", () => { updateSummary(); validateForm(); });
+                    DOM[key].addEventListener("change", () => { updateSummary(); validateForm(); });
                 }
             }
 
-            // Inicializar el resumen
             updateSummary();
+            validateForm();
 
-            // Cuando se cierre el modal de resumen, resetear el formulario
             const modalEl = document.getElementById('saleSummaryModal');
             if (modalEl) {
                 modalEl.addEventListener('hidden.bs.modal', resetForm);

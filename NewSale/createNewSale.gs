@@ -1,11 +1,16 @@
 function onOpen() {
-  SpreadsheetApp.getUi().createMenu("Venta").addItem("Nueva venta", "openCurstomerSidebar").addToUi();
+  SpreadsheetApp.getUi().createMenu("Venta").addItem("Nueva venta", "openCurstomerModal").addToUi();
 }
 
 
-function openCurstomerSidebar(){
-  let html = HtmlService.createHtmlOutputFromFile("createNewSaleForm").setTitle("Crear nueva venta");
-  SpreadsheetApp.getUi().showSidebar(html);
+function openCurstomerModal(){
+  // 1. Crear el HTML desde el archivo
+    let html = HtmlService.createHtmlOutputFromFile("createNewSaleForm")
+        .setWidth(800)   // Ancho en píxeles (puedes ajustarlo, ej: 800 o 1000)
+        .setHeight(700); // Alto en píxeles (ajusta según el largo de tu formulario)
+
+    // 2. Mostrar como "Diálogo Modal" (Popup centrado)
+    SpreadsheetApp.getUi().showModalDialog(html, "Crear nueva venta");
 }
 
 function createNewSale(form, saleSequence) {
