@@ -1,457 +1,592 @@
 <!DOCTYPE html>
-<html>
-  <head>
+<html lang="es">
+<head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Bootstrap Accordion Form</title>
-
+    <title>Nueva Venta - Bootstrap Accordion Form</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Tom Select CSS (bootstrap theme) -->
     <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.bootstrap5.css" rel="stylesheet">
-  </head>
+    <style>
+        /* Estilo para los campos de solo lectura dentro de un formulario (form-control-plaintext) */
+        .form-control-plaintext {
+            padding-left: 0.75rem; /* Ajuste para que se vea alineado con otros inputs */
+        }
+    </style>
+</head>
 
-  <body>
+<body>
     <div class="mt-3 text-center">
-      <h1>Nueva venta</h1>
+        <h1>Nueva venta</h1>
     </div>
 
-  <form class="container mt-4 mb-2" onsubmit="sendInformationSale(event, this)">
+    <form class="container mt-4 mb-5" onsubmit="sendInformationSale(event, this)">
+        <div class="accordion" id="accordionVenta">
 
-      <div class="accordion" id="accordionVenta">
-        <div class="accordion-item">
-          <h2 class="accordion-header">
-            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCliente">
-              Cliente
-            </button>
-          </h2>
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCliente" aria-expanded="true" aria-controls="collapseCliente">
+                        Cliente
+                    </button>
+                </h2>
+                <div id="collapseCliente" class="accordion-collapse collapse show" data-bs-parent="#accordionVenta">
+                    <div class="accordion-body">
+                        <div class="mb-3">
+                            <label for="clientName" class="form-label">Lista de cliente:</label>
+                            <select class="form-select" id="clientName" name="clientName" aria-label="Lista de cliente"></select>
+                            <input type="hidden" id="clientCode" name="clientCode">
+                        </div>
 
-          <div id="collapseCliente" class="accordion-collapse collapse show" data-bs-parent="#accordionVenta">
-            <div class="accordion-body">
+                        <div class="mb-3">
+                            <label for="plazo" class="form-label">Plazo de pago:</label>
+                            <select class="form-select" id="plazo" name="plazo" aria-label="Plazo de pago">
+                                <option value="UNO">Contado</option>
+                                <option value="DOS">1 meses</option>
+                                <option value="TRES">2 meses</option>
+                                <option value="CUATRO">3 meses</option>
+                            </select>
+                        </div>
 
-              <div class="mb-2">
-                <label for="clientName" class="form-label">Lista de cliente:</label>
-                <select class="form-select" id="clientName" name="clientName" aria-label="Lista de cliente">
-                </select>
-              </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6 mb-3 mb-md-0">
+                                <label for="amount" class="form-label">Cantidad:</label>
+                                <input type="number" id="amount" name="amount" class="form-control" value="1" min="1">
+                            </div>
 
-              <input type="hidden" id="clientCode" name="clientCode">
+                            <div class="col-md-6 d-flex align-items-center">
+                                <div class="form-check pt-md-4">
+                                    <input class="form-check-input" type="checkbox" id="checkIsCredict" name="checkIsCredict">
+                                    <label class="form-check-label" for="checkIsCredict">Es crédito?</label>
+                                </div>
+                            </div>
+                        </div>
 
-              <div class="mb-2">
-                <label for="plazo" class="form-label">Plazo de pago:</label>
-                <select class="form-select" id="plazo" name="plazo" aria-label="Plazo de pago">
-                  <option value="UNO">Contado</option>
-                  <option value="DOS">1 meses</option>
-                  <option value="TRES">2 meses</option>
-                  <option value="CUATRO">3 meses</option>
-                </select>
-              </div>
+                        <div class="mb-3" id="firstPaymentContainer">
+                            <label for="firstPayment" class="form-label">Primer abono:</label>
+                            <input type="text" id="firstPayment" class="form-control" name="firstPayment" placeholder="$">
+                        </div>
 
-              <div class="row mb-2">
-                <div class="col-md-6 mb-2">
-                  <label for="amount" class="form-label">Cantidad:</label>
-                  <input type="number" id="amount" name="amount" class="form-control" value="1">
+                        <div class="mb-3">
+                            <label for="paymentMethod" class="form-label">Método de pago:</label>
+                            <select id="paymentMethod" class="form-select" name="paymentMethod" aria-label="Método de pago">
+                                <option value="" selected>Seleccione método de pago...</option>
+                                <option value="Efectivo">Efectivo</option>
+                                <option value="B/bia K">Bancolombia Katy</option>
+                                <option value="B/bia E">Bancolombia Elver</option>
+                                <option value="Nequi K">Nequi Katy</option>
+                                <option value="Nequi E">Nequi Elver</option>
+                                <option value="Addi">Addi</option>
+                                <option value="SisteCredito">SisteCredito</option>
+                                <option value="BoldDatafono">BoldDatafono</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseProducto" aria-expanded="false" aria-controls="collapseProducto">
+                        Producto
+                    </button>
+                </h2>
+                <div id="collapseProducto" class="accordion-collapse collapse" data-bs-parent="#accordionVenta">
+                    <div class="accordion-body">
+                        <div class="mb-3">
+                            <label for="productName" class="form-label">Lista producto:</label>
+                            <select class="form-select" id="productName" name="productName" aria-label="Lista de producto"></select>
+                            <input type="hidden" id="productCode" name="productCode" readonly>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="priceProduct" class="form-label mb-1">Precio Total (según plazo y cantidad):</label>
+                            <input type="text" class="form-control-plaintext fw-bold" id="priceProduct" name="priceProduct" readonly value="—"> 
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="stockProduct" class="form-label mb-1">Cantidad disponible:</label>
+                            <input type="text" class="form-control-plaintext" id="stockProduct" readonly value="—">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSocio" aria-expanded="false" aria-controls="collapseSocio">
+                        Socio
+                    </button>
+                </h2>
+                <div id="collapseSocio" class="accordion-collapse collapse" data-bs-parent="#accordionVenta">
+                    <div class="accordion-body">
+                        <select id="socio" class="form-select" name="socio" aria-label="Sin socio asociado">
+                            <option value="" selected>Seleccione socio...</option>
+                            <option value="YINA ATENCIA">Yina Atencia</option>
+                            <option value="KATY IRIARTE">Katy Iriarte</option>
+                            <option value="YARIS RODRIGUEZ">Yaris Rodriguez</option>
+                            <option value="MARIA PATERNINA">Maria Paternina</option>
+                            <option value="ELVER ARROYAVE">Elver Arroyave</option>
+                            <option value="KAREN EDITH BRACAMONTE">Karen Bracamonte</option>
+                            <option value="VANESSA ARROYAVE">Vanessa Arroyave</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <h3 class="mb-3">Resumen de la venta</h3>
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <p class="mb-1"><strong>Cliente:</strong> <span id="resCliente" class="fw-normal"> —</span></p>
+                    <p class="mb-1"><strong>Plazo:</strong> <span id="resPlazo" class="fw-normal"> —</span></p>
+                    <p class="mb-1"><strong>Cantidad:</strong> <span id="resCantidad" class="fw-normal"> —</span></p>
+                    <p class="mb-1"><strong>Es crédito:</strong> <span id="resCredito" class="fw-normal"> —</span></p>
+                    <p class="mb-1"><strong>Primer abono:</strong> $<span id="resPrimerAbono" class="fw-normal"> —</span></p>
+                    <p><strong>Método de pago:</strong> <span id="resMetodoPago" class="fw-normal"> —</span></p>
+
+                    <hr>
+
+                    <p class="mb-1"><strong>Producto:</strong> <span id="resProducto" class="fw-normal"> —</span></p>
+                    <p class="mb-1"><strong>Precio Total:</strong> $<span id="resPrecio" class="text-danger fw-bold"> —</span></p>
+                    <p><strong>Stock disponible:</strong> <span id="resStock" class="fw-normal"> —</span></p>
+
+                    <hr>
+
+                    <p><strong>Socio:</strong> <span id="resSocio" class="fw-normal"> —</span></p>
                 </div>
 
-                <div class="col-md-6 d-flex align-items-end">
-                  <div class="form-check ms-2">
-                    <input class="form-check-input" type="checkbox" id="checkIsCredict" name="checkIsCredict">
-                    <label class="form-check-label" for="checkIsCredict">Es crédito?</label>
-                  </div>
+                <div class="container text-center pt-0 pb-3">
+                    <button type="submit" class="btn btn-primary btn-lg w-75">Vender</button>
                 </div>
-              </div>
-
-              <div class="mb-2" id="firstPaymentContainer">
-                <label for="firstPayment" class="form-label">Primer abono:</label>
-                <input type="text" id="firstPayment" class="form-control" name="firstPayment" placeholder="$">
-              </div>
-
-              <div class="mb-2">
-                <label for="paymentMethod" class="form-label">Método de pago:</label>
-                <select id="paymentMethod" class="form-select" name="paymentMethod" aria-label="Método de pago">
-                  <option value="" selected></option>
-                  <option value="Efectivo">Efectivo</option>
-                  <option value="B/bia K">Bancolombia Katy</option>
-                  <option value="B/bia E">Bancolombia Elver</option>
-                  <option value="Nequi Katy">Nequi Katy</option>
-                  <option value="Addi">Addi</option>
-                  <option value="SisteCredito">SisteCredito</option>
-                  <option value="BoldDatafono">BoldDatafono</option>
-                </select>
-              </div>
             </div>
-          </div>
         </div>
-
-        <div class="accordion-item">
-          <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseProducto">
-              Producto
-            </button>
-          </h2>
-
-          <div id="collapseProducto" class="accordion-collapse collapse" data-bs-parent="#accordionVenta">
-            <div class="accordion-body">
-              <div class="mb-2">
-                <label for="productName" class="form-label">Lista producto:</label>
-                <select class="form-select" id="productName" name="productName" aria-label="Lista de producto">
-                  
-                </select>
-              </div>
-
-              <input type="hidden" id="productCode" name="productCode" readonly>
-
-              <div class="mb-2">
-                <label for="priceProduct" class="form-label mb-1">Precio:</label>
-                <input type="text" class="form-control-plaintext" id="priceProduct" name="priceProduct" readonly>
-              </div>
-
-              <div class="mb-2">
-                <label for="stockProduct" class="form-label mb-1">cantidad disponible:</label>
-                <input type="text" class="form-control-plaintext" id="stockProduct" readonly>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="accordion-item">
-          <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSocio">
-              Socio
-            </button>
-          </h2>
-
-          <div id="collapseSocio" class="accordion-collapse collapse" data-bs-parent="#accordionVenta">
-            <div class="accordion-body">
-              <select id="socio" class="form-select" name="socio" aria-label="Sin socio asociado">
-                <option value="" selected>Seleccione socio...</option>
-                <option value="YINA ATENCIA">Yina Atencia</option>
-                <option value="KATY IRIARTE">Katy Iriarte</option>
-                <option value="YARIS RODRIGUEZ">Yaris Rodriguez</option>
-                <option value="MARIA PATERNINA">Maria Paternina</option>
-                <option value="ELVER ARROYAVE">Elver Arroyave</option>
-                <option value="KAREN EDITH BRACAMONTE">Karen Bracamonte</option>
-                <option value="VANESSA ARROYAVE">Vanessa Arroyave</option>
-              </select>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="mt-4">
-        <h3 class="mb-3">Resumen de la venta</h3>
-
-        <div class="card">
-          <div class="card-body">
-
-            <p><strong>Cliente:</strong> <span id="resCliente">—</span></p>
-            <p><strong>Cantidad pagos:</strong> <span id="resPlazo">—</span></p>
-            <p><strong>Cantidad:</strong> <span id="resCantidad">—</span></p>
-            <p><strong>Es crédito:</strong> <span id="resCredito">—</span></p>
-            <p><strong>Primer abono:</strong> <span id="resPrimerAbono">—</span></p>
-            <p><strong>Método de pago:</strong> <span id="resMetodoPago">—</span></p>
-
-            <hr>
-
-            <p><strong>Producto:</strong> <span id="resProducto">—</span></p>
-            <p><strong>Precio:$</strong> <span id="resPrecio">—</span></p>
-            <p><strong>Stock disponible:</strong> <span id="resStock">—</span></p>
-
-            <hr>
-
-            <p><strong>Socio:</strong> <span id="resSocio">—</span></p>
-
-          </div>
-
-          <div class="container text-center">
-            <button type="submit" class="btn btn-primary mb-2">Vender</button>
-          </div>
-
-        </div>
-      </div>
-      
     </form>
 
+    <!-- Modal para mostrar el resumen después de realizar la venta -->
+    <div class="modal fade" id="saleSummaryModal" tabindex="-1" aria-labelledby="saleSummaryModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="saleSummaryModalLabel">Resumen de la venta</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Contenido será llenado dinámicamente -->
+                    <div id="saleSummaryContent"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Tom Select JS (autocompletable select) -->
     <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
 
-    <!-- Script to initialize Tom Select and load inventory data -->
     <script>
-      // Inicializar Tom Select para el select de método de pago
-      document.addEventListener('DOMContentLoaded', function () {
-        loadSelectValue();
-        loadInventoryData();
-        loadClientsData();
-      });
+        // --- 1. Utilidades y Constantes ---
 
-      function loadSelectValue(){
-        try {
-          new TomSelect('#paymentMethod', {
-            create: false,
-            maxItems: 1,
-            allowEmptyOption: true,
-            sortField: { field: 'text', direction: 'asc' }
-          });
+        /**
+         * Formatea un número como moneda colombiana (o el formato local que necesites).
+         * @param {number} value El número a formatear.
+         * @returns {string} El valor formateado (ej: "$ 1.200.000").
+         */
+        function formatCurrency(value) {
+            if (typeof value !== 'number' || Number.isNaN(value)) {
+                return ''; // Devuelve vacío si no es un número válido
+            }
 
-          // Inicializar Tom Select para socio
-          new TomSelect('#socio', {
-            create: false,
-            maxItems: 1,
-            allowEmptyOption: true,
-            sortField: { field: 'text', direction: 'asc' }
-          });
-        } catch (e) {
-          // Si ocurre algún error (por ejemplo el script no cargó), no romper la página
-          console.warn('TomSelect no pudo inicializarse:', e);
+            return new Intl.NumberFormat('es-CO', {
+                style: 'currency',
+                currency: 'COP', // Moneda de Colombia
+                minimumFractionDigits: 0
+            }).format(value);
         }
-      }
 
-      function loadInventoryData(){
-        google.script.run
-          .withSuccessHandler(pupulateProductSelect()) // La función que manejará la respuesta exitosa
-          .getInventory(); // La función de Apps Script a ejecutar
-      }
-
-      function loadClientsData(){
-        google.script.run
-          .withSuccessHandler(pupulateClientsSelect()) // La función que manejará la respuesta exitosa
-          .getClients(); // La función de Apps Script a ejecutar
-      }
-
-      function pupulateClientsSelect() {
-        return function(optionsArray) {
-          const selectElement = document.getElementById('clientName');
-
-          // Manejar errores si la hoja no fue encontrada
-          if (optionsArray.error) {
-              selectElement.innerHTML = `<option value="">Error al cargar: ${optionsArray.error}</option>`;
-              return;
-          }
-          // Limpiar opciones anteriores
-          selectElement.innerHTML = '<option value="" disabled selected>Seleccione una opción</option>';
-          for (const client of optionsArray) {
-            const option = document.createElement('option');
-            option.value = client.NOMBRE || '';
-            option.textContent = `${client.NOMBRE || 'Sin nombre'} - ${client.CODIGO || ''}`;
-
-            // Guardar código en atributo data-*
-            option.dataset.code = client.CODIGO || 'Código no existe';
-
-            selectElement.appendChild(option);
-          }
-          // Cuando el usuario seleccione un cliente, precargar código
-          selectElement.addEventListener('change', function() {
-            const selected = selectElement.options[selectElement.selectedIndex];
-            const code = selected && selected.dataset ? selected.dataset.code : '';
-
-            const codeInput = document.getElementById('clientCode');
-            if (codeInput) codeInput.value = code || '';
-            // Actualizar resumen si la función está definida
-            if (typeof actualizarResumen === 'function') actualizarResumen();
-          });
+        const DOM = {
+            clientName: document.getElementById('clientName'),
+            clientCode: document.getElementById('clientCode'),
+            plazo: document.getElementById('plazo'),
+            amount: document.getElementById('amount'),
+            checkIsCredict: document.getElementById('checkIsCredict'),
+            firstPayment: document.getElementById('firstPayment'),
+            firstPaymentContainer: document.getElementById('firstPaymentContainer'),
+            paymentMethod: document.getElementById('paymentMethod'),
+            productName: document.getElementById('productName'),
+            productCode: document.getElementById('productCode'),
+            priceProduct: document.getElementById('priceProduct'),
+            stockProduct: document.getElementById('stockProduct'),
+            socio: document.getElementById('socio'),
         };
-      }
 
-      function pupulateProductSelect() {
-        return function(optionsArray) {
-          const selectElement = document.getElementById('productName');
-          const selectElementPlazo = document.getElementById('plazo');
-          const selectElementAmount = document.getElementById('amount');
-          
-          // Manejar errores si la hoja no fue encontrada
-          if (optionsArray.error) {
-              selectElement.innerHTML = `<option value="">Error al cargar: ${optionsArray.error}</option>`;
-              return;
-          }
+        // TomSelect instances holder so we can reset/clear them later
+        const TS = {};
 
-          // Limpiar opciones anteriores
-          selectElement.innerHTML = '<option value="" disabled selected>Seleccione una opción</option>'; 
+        // --- 2. Funciones de Inicialización ---
 
-          for (const product of optionsArray) {
-            const option = document.createElement('option');
-            option.value = product.CODIGO || '';
-            option.textContent = `${product.NOMBRE || 'Sin nombre'} - ${product.CODIGO || ''}`;
-            option.dataset.price = product.UNO;
-            option.dataset.priceDos = product.DOS;
-            option.dataset.priceTres = product.TRES;
-            option.dataset.priceCuatro = product.CUATRO;
-            option.dataset.priceCinco = product.CINCO;
-            option.dataset.stock = product.STOCK;
-            option.dataset.code = product.CODIGO || 'Código no existe';
+        /** Inicializa Tom Select en los elementos necesarios. */
+        function initializeTomSelect() {
+            try {
+                // Métodos de Pago
+                TS.paymentMethodSelect = new TomSelect(DOM.paymentMethod, {
+                    create: false,
+                    maxItems: 1,
+                    allowEmptyOption: true,
+                    sortField: { field: 'text', direction: 'asc' }
+                });
 
-            selectElement.appendChild(option);
-          }
+                // Socio
+                TS.socioSelect = new TomSelect(DOM.socio, {
+                    create: false,
+                    maxItems: 1,
+                    allowEmptyOption: true,
+                    sortField: { field: 'text', direction: 'asc' }
+                });
+            } catch (e) {
+                console.warn('TomSelect no pudo inicializarse:', e);
+            }
+        }
 
-          // Cuando el usuario seleccione un producto, precargar precio y stock
-          selectElement.addEventListener('change', updateProductValues);
-          selectElementPlazo.addEventListener('change', updateProductValues);
-          selectElementAmount.addEventListener('input', updateProductValues);
+        /** Carga los datos de inventario llamando a Apps Script. */
+        function loadInventoryData() {
+            google.script.run
+                .withSuccessHandler(populateProductSelect)
+                .getInventory();
+        }
 
-          function updateProductValues() {
-            const selected = selectElement.options[selectElement.selectedIndex];
-            const productPrice = {
-              UNO: selected.dataset.price,
-              DOS: selected.dataset.priceDos,
-              TRES: selected.dataset.priceTres,
-              CUATRO: selected.dataset.priceCuatro,
-              CINCO: selected.dataset.priceCinco
+        /** Carga los datos de clientes llamando a Apps Script. */
+        function loadClientsData() {
+            google.script.run
+                .withSuccessHandler(populateClientsSelect)
+                .getClients();
+        }
+
+
+        // --- 3. Funciones de Lógica y Manejo de Datos ---
+
+        /** * Calcula el precio total basado en el plazo y la cantidad.
+         * @param {Object} product - Objeto con los precios según el plazo (UNO, DOS, etc.).
+         * @returns {number} - El precio total calculado.
+         */
+        function calculatePriceByPlazo(product) {
+            const plazo = DOM.plazo.value || 'UNO';
+            const amount = Number(DOM.amount.value) || 1;
+            let priceResult;
+
+            switch (plazo) {
+                case 'UNO':
+                    priceResult = product.UNO;
+                    break;
+                case 'DOS':
+                    priceResult = product.DOS;
+                    break;
+                case 'TRES':
+                    priceResult = product.TRES;
+                    break;
+                case 'CUATRO':
+                    priceResult = product.CUATRO;
+                    break;
+                case 'CINCO':
+                    priceResult = product.CINCO;
+                    break;
+                default:
+                    priceResult = product.UNO;
+            }
+            // Retorna el valor numérico total
+            return Number(priceResult) * amount;
+        }
+
+        /** Maneja la actualización de los valores de producto (precio y stock). */
+        function updateProductValues() {
+            const selectedOption = DOM.productName.options[DOM.productName.selectedIndex];
+
+            if (!selectedOption || selectedOption.value === "") {
+                DOM.priceProduct.value = '—';
+                DOM.stockProduct.value = '—';
+                DOM.productCode.value = '';
+                updateSummary();
+                return;
+            }
+
+            // Datos de precios del producto desde los data attributes
+            const productPrices = {
+                UNO: selectedOption.dataset.price,
+                DOS: selectedOption.dataset.priceDos,
+                TRES: selectedOption.dataset.priceTres,
+                CUATRO: selectedOption.dataset.priceCuatro,
+                CINCO: selectedOption.dataset.priceCinco
             };
-            const price = selected && selected.dataset ? calculatePriceByPlazo(productPrice) : '';
-            const stock = selected && selected.dataset ? selected.dataset.stock : '';
-            const code = selected && selected.dataset ? selected.dataset.code : '';
 
-            const priceInput = document.getElementById('priceProduct');
-            const stockInput = document.getElementById('stockProduct');
-            const codeInput = document.getElementById('productCode');
+            const totalPrice = calculatePriceByPlazo(productPrices);
+            const stock = selectedOption.dataset.stock;
+            const code = selectedOption.dataset.code;
 
-            if (priceInput) priceInput.value = price || '';
-            if (stockInput) stockInput.value = stock || '';
-            if (codeInput) codeInput.value = code || '';
-            // Actualizar resumen si la función está definida
-            if (typeof actualizarResumen === 'function') actualizarResumen();
-          }
-        };
-      }
+            // Actualiza los inputs de solo lectura
+            DOM.priceProduct.value = totalPrice; // Aplica formato de moneda
+            DOM.stockProduct.value = stock;
+            DOM.productCode.value = code;
 
-      function calculatePriceByPlazo(product) {
-        console.log('Calculating price for product:', product);
-        let priceResult // Precio base
-        let plazo = document.getElementById("plazo").value || 'UNO';
-        const amount = Number(document.getElementById("amount").value) || 1;
-        switch (plazo) {
-          case 'UNO':
-            priceResult = product.UNO;
-            break;
-          case 'DOS':
-            priceResult = product.DOS;
-            break;
-          case 'TRES':
-            priceResult = product.TRES;
-            break;
-          case 'CUATRO':
-            priceResult = product.CUATRO;
-            break;
-          case 'CINCO':
-            priceResult = product.CINCO;
-            break;
-          default:
-            priceResult = product.UNO;
+            updateSummary();
         }
-        return Number(priceResult * amount);
-      }
 
-    </script>
-
-    <!-- Script to update summary -->
-    <script> 
-      function actualizarResumen() {
-        document.getElementById("resCliente").innerText =
-          document.getElementById("clientName").value || "—";
-
-        document.getElementById("resPlazo").innerText =
-          document.getElementById("plazo").value || "—";
-
-        document.getElementById("resCantidad").innerText =
-          document.getElementById("amount").value || "—";
-
-        document.getElementById("resCredito").innerText =
-          document.getElementById("checkIsCredict").checked ? "Sí" : "No";
-
-        document.getElementById("resPrimerAbono").innerText =
-          document.getElementById("firstPayment").value || "—";
-
-        document.getElementById("resMetodoPago").innerText =
-          document.getElementById("paymentMethod").value || "—";
-
-        // Mostrar el texto de la opción seleccionada (ej: "Nombre - CODIGO") en lugar del value (código)
-        const _prodSelect = document.getElementById("productName");
-        document.getElementById("resProducto").innerText =
-          (_prodSelect && _prodSelect.options[_prodSelect.selectedIndex] && _prodSelect.options[_prodSelect.selectedIndex].text) || "—";
-
-        document.getElementById("resPrecio").innerText =
-          document.getElementById("priceProduct").value || "—";
-
-        document.getElementById("resStock").innerText =
-          document.getElementById("stockProduct").value || "—";
-
-        const socio = document.getElementById("socio");
-        if (socio) {
-          document.getElementById("resSocio").innerText =
-            (socio.options[socio.selectedIndex] && socio.options[socio.selectedIndex].text) || "—";
-        } else {
-          // Fallback si por alguna razón no existe el select con id 'socio'
-          const socioFallback = document.querySelector("#collapseSocio select");
-          document.getElementById("resSocio").innerText =
-            (socioFallback && socioFallback.options[socioFallback.selectedIndex] && socioFallback.options[socioFallback.selectedIndex].text) || "—";
+        /** Oculta o muestra el campo de Primer Abono según si es crédito. */
+        function toggleFirstPayment() {
+            if (DOM.checkIsCredict.checked) {
+                DOM.firstPaymentContainer.style.display = "block";
+            } else {
+                DOM.firstPaymentContainer.style.display = "none";
+                DOM.firstPayment.value = ""; // Limpiar si se oculta
+            }
+            updateSummary(); // Reflejar el cambio en el resumen
         }
-      }
 
-      // Escuchar cambios en todos los inputs
-      for (const elem of document.querySelectorAll("input, select")) {
-        elem.addEventListener("input", actualizarResumen);
-        elem.addEventListener("change", actualizarResumen);
-      }
+        /** * Popula el select de productos con datos de Apps Script. 
+         * @param {Array<Object>} optionsArray - Array de objetos con datos de productos.
+         */
+        function populateProductSelect(optionsArray) {
+            if (optionsArray.error) {
+                DOM.productName.innerHTML = `<option value="">Error al cargar: ${optionsArray.error}</option>`;
+                return;
+            }
 
-      // Inicializar resumen al cargar
-      actualizarResumen();
-    </script>
+            DOM.productName.innerHTML = '<option value="" disabled selected>Seleccione una opción</option>';
 
-    <!-- Script to toggle first payment visibility -->
-    <script>
-      const checkIsCredict = document.getElementById("checkIsCredict");
-      const firstPaymentContainer = document.getElementById("firstPaymentContainer");
+            for (const product of optionsArray) {
+                const option = document.createElement('option');
+                option.value = product.CODIGO || ''; // El valor del option será el código
+                option.textContent = `${product.NOMBRE || 'Sin nombre'} - ${product.CODIGO || ''}`;
 
-      function toggleFirstPayment() {
-        // La sección de cliente tiene el ID 'firstPaymentContainer'
-        const firstPaymentContainerCliente = document.querySelector('#collapseCliente #firstPaymentContainer');
+                // Guardar todos los precios y stock en data attributes
+                option.dataset.price = product.UNO;
+                option.dataset.priceDos = product.DOS;
+                option.dataset.priceTres = product.TRES;
+                option.dataset.priceCuatro = product.CUATRO;
+                option.dataset.priceCinco = product.CINCO;
+                option.dataset.stock = product.STOCK;
+                option.dataset.code = product.CODIGO || 'Código no existe';
 
-        if (checkIsCredict.checked) {
-          // Mostrar el contenedor dentro de la sección Cliente
-          if (firstPaymentContainerCliente) {
-            firstPaymentContainerCliente.style.display = "block";
-          }
-        } else {
-          // Ocultar el contenedor dentro de la sección Cliente
-          if (firstPaymentContainerCliente) {
-            firstPaymentContainerCliente.style.display = "none";
-          }
-          document.getElementById("firstPayment").value = ""; // limpiar si se oculta
+                DOM.productName.appendChild(option);
+            }
+
+            // Inicializar Tom Select para product Name DESPUÉS de poblarlo
+            TS.productNameSelect = new TomSelect(DOM.productName, {
+                create: false,
+                maxItems: 1,
+                allowEmptyOption: true,
+                sortField: { field: 'text', direction: 'asc' }
+            });
+            
+            // Agregar listeners para actualizaciones
+            DOM.productName.addEventListener('change', updateProductValues);
+            DOM.plazo.addEventListener('change', updateProductValues);
+            DOM.amount.addEventListener('input', updateProductValues);
         }
-      }
 
-      checkIsCredict.addEventListener("change", toggleFirstPayment);
+        /** * Popula el select de clientes con datos de Apps Script. 
+         * @param {Array<Object>} optionsArray - Array de objetos con datos de clientes.
+         */
+        function populateClientsSelect(optionsArray) {
+            if (optionsArray.error) {
+                DOM.clientName.innerHTML = `<option value="">Error al cargar: ${optionsArray.error}</option>`;
+                return;
+            }
 
-      // Ocultar por defecto al cargar
-      toggleFirstPayment();
-    </script>
+            DOM.clientName.innerHTML = '<option value="" disabled selected>Seleccione un cliente</option>';
 
-    <!-- Script to send sale information -->
-    <script>
-      function sendInformationSale(e, form){
-        e.preventDefault();
+            for (const client of optionsArray) {
+                const option = document.createElement('option');
+                option.value = client.NOMBRE || ''; // El valor del option será el nombre
+                option.textContent = `${client.NOMBRE || 'Sin nombre'} - ${client.CODIGO || ''}`;
+                option.dataset.code = client.CODIGO || 'Código no existe';
 
-        const data = Object.fromEntries(new FormData(form));
-        data.checkIsCredict = form.checkIsCredict ? form.checkIsCredict.checked : false;
+                DOM.clientName.appendChild(option);
+            }
 
-        console.log('Form result to send:', data);
-        console.log('Form priceProduct:', data.priceProduct);
-        console.log('Form isCredit:', data.checkIsCredict);
-        google.script.run.createNewSale(data);
-      }
-    </script>
-
-    <script>
-    function formatCurrency(value) {
-    if (typeof value !== 'number' || Number.isNaN(value)) {
-            return ''; // Devuelve vacío si no es un número válido
+            // Inicializar Tom Select para client Name DESPUÉS de poblarlo
+            TS.clientNameSelect = new TomSelect(DOM.clientName, {
+                create: false,
+                maxItems: 1,
+                allowEmptyOption: true,
+                sortField: { field: 'text', direction: 'asc' }
+            });
+            
+            // Cuando se selecciona un cliente, actualizar el código oculto
+            DOM.clientName.addEventListener('change', function() {
+                const selected = DOM.clientName.options[DOM.clientName.selectedIndex];
+                const code = selected && selected.dataset ? selected.dataset.code : '';
+                DOM.clientCode.value = code || '';
+                updateSummary();
+            });
         }
-        return new Intl.NumberFormat('es-CO', { 
-            style: 'currency', 
-            currency: 'COP', // O 'USD', 'EUR', etc.
-            minimumFractionDigits: 0 // No muestra decimales para números enteros
-        }).format(value);
-    }
-    </script>
 
-  </body>
+        // --- 4. Resumen y Envío ---
+
+        /** Actualiza el bloque de resumen con los valores actuales del formulario. */
+        function updateSummary() {
+            // Cliente
+            document.getElementById("resCliente").innerText = DOM.clientName.value || "—";
+            document.getElementById("resPlazo").innerText = DOM.plazo.options[DOM.plazo.selectedIndex].text || "—";
+            document.getElementById("resCantidad").innerText = DOM.amount.value || "—";
+            document.getElementById("resCredito").innerText = DOM.checkIsCredict.checked ? "Sí" : "No";
+            document.getElementById("resPrimerAbono").innerText = DOM.firstPayment.value || "—";
+            document.getElementById("resMetodoPago").innerText = DOM.paymentMethod.value || "—";
+
+            // Producto
+            const _prodSelected = DOM.productName.options[DOM.productName.selectedIndex];
+            document.getElementById("resProducto").innerText = (_prodSelected && _prodSelected.text) || "—";
+            document.getElementById("resPrecio").innerText = DOM.priceProduct.value || "—";
+            document.getElementById("resStock").innerText = DOM.stockProduct.value || "—";
+
+            // Socio
+            const _socioSelected = DOM.socio.options[DOM.socio.selectedIndex];
+            document.getElementById("resSocio").innerText = (_socioSelected && _socioSelected.text) || "—";
+        }
+
+        /** * Maneja el envío del formulario a Apps Script.
+         * @param {Event} e - El evento de submit.
+         * @param {HTMLFormElement} form - El elemento del formulario.
+         */
+        function sendInformationSale(e, form) {
+            e.preventDefault();
+
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) submitBtn.disabled = true;
+
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData);
+
+            // Asegurar que el booleano del checkbox esté presente
+            data.checkIsCredict = DOM.checkIsCredict.checked;
+
+            // Asegurar que algunos campos visibles se envíen correctamente
+            data.priceProduct = DOM.priceProduct.value;
+            data.productCode = DOM.productCode.value;
+            data.clientName = DOM.clientName.value;
+
+            console.log('Form result to send:', data);
+
+            // Enviar a Apps Script y mostrar el resumen en el callback
+            google.script.run
+                .withSuccessHandler(function(response) {
+                    if (submitBtn) submitBtn.disabled = false;
+                    showSummary(response);
+                })
+                .withFailureHandler(function(err) {
+                    if (submitBtn) submitBtn.disabled = false;
+                    alert('Error al crear la venta: ' + (err && err.message ? err.message : JSON.stringify(err)));
+                })
+                .createNewSale(data);
+        }
+
+        /** Muestra el modal con el resumen que devuelve el servidor. */
+        function showSummary(response) {
+            if (!response || !response.success) {
+                alert('No se pudo registrar la venta.');
+                return;
+            }
+
+            // Construir contenido del resumen usando los valores actuales del DOM y la respuesta del servidor
+            const contentEl = document.getElementById('saleSummaryContent');
+            const _prodSelected = DOM.productName.options[DOM.productName.selectedIndex];
+            const _socioSelected = DOM.socio.options[DOM.socio.selectedIndex];
+
+            const html = `
+                <div class="card">
+                    <div class="card-body">
+                        <p><strong>Fecha:</strong> ${response.date}</p>
+                        <p><strong>Número de venta:</strong> ${response.saleNumber}</p>
+                        <hr>
+                        <p><strong>Cliente:</strong> ${DOM.clientName.value || '—'} (${DOM.clientCode.value || '—'})</p>
+                        <p><strong>Plazo:</strong> ${DOM.plazo.options[DOM.plazo.selectedIndex].text || '—'}</p>
+                        <p><strong>Cantidad:</strong> ${DOM.amount.value || '—'}</p>
+                        <p><strong>Es crédito:</strong> ${DOM.checkIsCredict.checked ? 'Sí' : 'No'}</p>
+                        <p><strong>Primer abono:</strong> ${DOM.firstPayment.value || '—'}</p>
+                        <p><strong>Método de pago:</strong> ${DOM.paymentMethod.value || '—'}</p>
+                        <hr>
+                        <p><strong>Producto:</strong> ${(_prodSelected && _prodSelected.text) || '—'}</p>
+                        <p><strong>Precio Total:</strong> ${DOM.priceProduct.value || '—'}</p>
+                        <p><strong>Stock disponible:</strong> ${DOM.stockProduct.value || '—'}</p>
+                        <hr>
+                        <p><strong>Socio:</strong> ${(_socioSelected && _socioSelected.text) || '—'}</p>
+                    </div>
+                </div>
+            `;
+
+            contentEl.innerHTML = html;
+
+            const modalEl = document.getElementById('saleSummaryModal');
+            const bsModal = new bootstrap.Modal(modalEl);
+            bsModal.show();
+        }
+
+        /**
+         * Resetea el formulario completamente cuando se cierra el modal de resumen.
+         * Limpia inputs, campos de sólo lectura, y vacía TomSelects si existen.
+         */
+        function resetForm() {
+            const form = document.querySelector('form');
+            if (!form) return;
+
+            // Resetear todos los campos nativos
+            form.reset();
+
+            // Limpiar TomSelects si se inicializaron
+            try {
+                if (TS.paymentMethodSelect && typeof TS.paymentMethodSelect.clear === 'function') TS.paymentMethodSelect.clear();
+                if (TS.socioSelect && typeof TS.socioSelect.clear === 'function') TS.socioSelect.clear();
+                if (TS.clientNameSelect && typeof TS.clientNameSelect.clear === 'function') TS.clientNameSelect.clear();
+                if (TS.productNameSelect && typeof TS.productNameSelect.clear === 'function') TS.productNameSelect.clear();
+            } catch (e) {
+                console.warn('No se pudo limpiar TomSelects durante reset:', e);
+            }
+
+            // Resetear campos de sólo lectura
+            DOM.priceProduct.value = '—';
+            DOM.stockProduct.value = '—';
+            DOM.productCode.value = '';
+            DOM.clientCode.value = '';
+
+            // Asegurar que el contenedor de primer abono quede oculto si corresponde
+            toggleFirstPayment();
+
+            // Actualizar el resumen visual
+            updateSummary();
+        }
+
+        // --- 5. Inicialización Global ---
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Ocultar campo de abono por defecto
+            toggleFirstPayment();
+
+            // Cargar datos asíncronos y poblar selects
+            loadClientsData();
+            loadInventoryData();
+            
+            // Inicializar Tom Selects que no dependen de la carga de datos
+            initializeTomSelect();
+
+            // Event listener para mostrar/ocultar primer abono
+            DOM.checkIsCredict.addEventListener("change", toggleFirstPayment);
+
+            // Agregar listeners para todos los inputs/selects para actualizar el resumen
+            for (const key in DOM) {
+                if (DOM[key] && DOM[key].tagName) {
+                    DOM[key].addEventListener("input", updateSummary);
+                    DOM[key].addEventListener("change", updateSummary);
+                }
+            }
+
+            // Inicializar el resumen
+            updateSummary();
+
+            // Cuando se cierre el modal de resumen, resetear el formulario
+            const modalEl = document.getElementById('saleSummaryModal');
+            if (modalEl) {
+                modalEl.addEventListener('hidden.bs.modal', resetForm);
+            }
+        });
+    </script>
+</body>
 </html>

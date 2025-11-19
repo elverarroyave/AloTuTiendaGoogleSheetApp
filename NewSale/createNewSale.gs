@@ -68,8 +68,14 @@ function createNewSale(form) {
   //Metodo de pago
   sheet.getRange('M' + targetRow).setValue(form.paymentMethod); 
   
-  // Opcional: Cerrar el sidebar después de la venta
-  SpreadsheetApp.getUi().showSidebar(HtmlService.createHtmlOutput('<h2>¡Venta Registrada!</h2>'));
+  // Devuelve un objeto con información de la venta para que el cliente (sidebar) muestre el resumen
+  return {
+    success: true,
+    saleNumber: newSaleNumber,
+    date: formattedDate,
+    insertedRow: targetRow,
+    form: form
+  };
 }
 
 /**
@@ -150,4 +156,17 @@ function getClients(){
     return getRowDataAsObjects(sheetName, rowIndex, startColumn, endColumn);
 }
 
+function getSequences(){
+  const sheetName = "SEQUENCES";
+  const rowIndex = 2;
+  const startColumn = 1;
+  const endColumn = 5;
+  return getRowDataAsObjects(sheetName, rowIndex, startColumn, endColumn);
+}
+
+function setSequences(targetRow, nextValue){
+  let sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("SEQUENCES");
+    // Columna D: CurrenValue
+  sheet.getRange('D' + targetRow).setValue(nextValue);
+}
 
