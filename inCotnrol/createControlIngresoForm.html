@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Control de Ingreso</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.bootstrap5.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; }
+        .required-asterisk { color: red; margin-left: 3px; font-weight: bold; }
+        .card-form { border: none; box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); }
+        .preview-total { font-size: 1.5rem; font-weight: bold; color: #198754; }
+    </style>
+</head>
+
+<body>
+    <div class="container mt-4 mb-5">
+        <div class="text-center mb-4">
+            <h3>Ingresar Pedido</h3>
+            <p class="text-muted small">Control de ingreso de mercancía al inventario.</p>
+        </div>
+
+        <form id="ingresoForm" class="card card-form p-4" onsubmit="handleSubmit(event)">
+            
+            <div class="row g-3">
+                
+                <div class="col-md-12">
+                    <label for="productName" class="form-label fw-bold">Producto<span class="required-asterisk">*</span></label>
+                    <select id="productName" name="productName" placeholder="Buscar producto por nombre o código..."></select>
+                    <input type="hidden" id="codPrdt" name="codPrdt">
+                    <input type="hidden" id="nombrePrdt" name="nombrePrdt">
+                </div>
+
+                <div class="col-md-6">
+                    <label for="proveedor" class="form-label fw-bold">Proveedor<span class="required-asterisk">*</span></label>
+                    <select id="proveedor" name="proveedor" placeholder="Buscar proveedor..."></select>
+                    <input type="hidden" id="codProv" name="codProv">
+                    <input type="hidden" id="nombreProv" name="nombreProv">
+                </div>
+
+                <div class="col-md-6">
+                    <label for="empleado" class="form-label fw-bold">Quien recibe<span class="required-asterisk">*</span></label>
+                    <select class="form-select" id="empleado" name="empleado">
+                        <option value="" selected disabled>Seleccione...</option>
+                        <option value="ELVER ARROYAVE">Elver Arroyave</option>
+                        <option value="KATY IRIARTE">Katy Iriarte</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label for="cantidad" class="form-label fw-bold">Cantidad<span class="required-asterisk">*</span></label>
+                    <input type="number" class="form-control" id="cantidad" name="cantidad" min="1" placeholder="0" required>
+                </div>
+
+                <div class="col-md-6">
+                    <label for="precioUnitario" class="form-label fw-bold">Precio Unitario<span class="required-asterisk">*</span></label>
+                    <div class="input-group">
+                        <span class="input-group-text">$</span>
+                        <input type="number" class="form-control" id="precioUnitario" name="precioUnitario" min="0" placeholder="0" required>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <label for="metodoPago" class="form-label fw-bold">Método de Pago<span class="required-asterisk">*</span></label>
+                    <select id="metodoPago" name="metodoPago" placeholder="Seleccione método..."></select>
+                </div>
+
+                <div class="col-md-6">
+                    <label for="estado" class="form-label fw-bold">Estado<span class="required-asterisk">*</span></label>
+                    <select class="form-select" id="estado" name="estado">
+                        <option value="RECIBIDO" selected>RECIBIDO</option>
+                        <option value="EN ESPERA">EN ESPERA</option>
+                        <option value="DEVOLUCION">DEVOLUCION</option>
+                        <option value="RECLAMO">RECLAMO</option>
+                    </select>
+                </div>
+
+                <div class="col-12">
+                    <label for="enlaceFactura" class="form-label">Enlace de factura (Opcional)</label>
+                    <input type="text" class="form-control" id="enlaceFactura" name="enlaceFactura" placeholder="Pegar link aquí...">
+                </div>
+
+            </div>
+
+            <div class="mt-4 p-3 bg-light rounded border text-center">
+                <span class="text-muted text-uppercase small">Total Estimado</span>
+                <div id="displayTotal" class="preview-total">$ 0</div>
+            </div>
+
+            <div class="d-grid gap-2 mt-4">
+                <button type="submit" id="btnSubmit" class="btn btn-primary btn-lg" disabled>
+                    Registrar Ingreso
+                </button>
+            </div>
+        </form>
+
+        <div id="successAlert" class="alert alert-success mt-3 d-none shadow-sm" role="alert">
+            <h4 class="alert-heading"><i class="bi bi-check-circle-fill"></i> ¡Ingreso registrado!</h4>
+            <p>Se ha generado el ingreso <strong id="resCode"></strong> por valor de <strong id="resTotal"></strong>.</p>
+            <hr>
+            <div class="d-flex justify-content-end">
+                <button type="button" class="btn btn-success btn-sm" onclick="resetForm()">Nuevo Ingreso</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
+
+    <script>
+        const DOM = {
+            form: document.getElementById('ingresoForm'),
+            productSelect: document.getElementById('productName'),
+            codPrdt: document.getElementById('codPrdt'),
+            nombrePrdt: document.getElementById('nombrePrdt'),
+            provSelect: document.getElementById('proveedor'),
+            codProv: document.getElementById('codProv'),
+            nombreProv: document.getElementById('nombreProv'),
+            cantidad: document.getElementById('cantidad'),
+            precioUnitario: document.getElementById('precioUnitario'),
+            metodoPago: document.getElementById('metodoPago'),
+            empleado: document.getElementById('empleado'),
+            displayTotal: document.getElementById('displayTotal'),
+            btnSubmit: document.getElementById('btnSubmit'),
+            successAlert: document.getElementById('successAlert'),
+            resCode: document.getElementById('resCode'),
+            resTotal: document.getElementById('resTotal')
+        };
+
+        const TS = {};
+
+        // --- 1. Inicialización ---
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeTomSelects();
+            loadData();
+            addEventListeners();
+        });
+
+        function initializeTomSelects() {
+            // Producto
+            TS.product = new TomSelect(DOM.productSelect, {
+                create: false, maxItems: 1, valueField: 'value', labelField: 'text', searchField: 'text',
+                onChange: (value) => {
+                    if(value) {
+                        const option = TS.product.options[value];
+                        DOM.codPrdt.value = option.code;
+                        DOM.nombrePrdt.value = option.nameOnly;
+                    } else {
+                        DOM.codPrdt.value = "";
+                        DOM.nombrePrdt.value = "";
+                    }
+                    validateForm();
+                }
+            });
+
+            // Proveedor
+            TS.provider = new TomSelect(DOM.provSelect, {
+                create: false, maxItems: 1, valueField: 'value', labelField: 'text', searchField: 'text',
+                onChange: (value) => {
+                    if(value) {
+                        const option = TS.provider.options[value];
+                        DOM.codProv.value = option.code;
+                        DOM.nombreProv.value = option.nameOnly;
+                    } else {
+                        DOM.codProv.value = "";
+                        DOM.nombreProv.value = "";
+                    }
+                    validateForm();
+                }
+            });
+
+            // Método de Pago
+            TS.payment = new TomSelect(DOM.metodoPago, {
+                create: false, maxItems: 1, valueField: 'value', labelField: 'text', searchField: 'text',
+                onChange: validateForm
+            });
+        }
+
+        // --- 2. Carga de Datos ---
+        function loadData() {
+            // Cargar Productos
+            google.script.run.withSuccessHandler(products => {
+                const options = products.map(p => ({
+                    value: p.CODIGO,
+                    text: `${p.NOMBRE} (${p.CODIGO})`, // Formato solicitado
+                    code: p.CODIGO,
+                    nameOnly: p.NOMBRE
+                }));
+                TS.product.addOptions(options);
+            }).getInventory();
+
+            // Cargar Proveedores
+            google.script.run.withSuccessHandler(providers => {
+                const options = providers.map(p => ({
+                    value: p.CODIGO,
+                    text: p.NOMBRE, 
+                    code: p.CODIGO,
+                    nameOnly: p.NOMBRE
+                }));
+                TS.provider.addOptions(options);
+            }).getActiveSuppliers();
+
+            // Cargar Métodos de Pago
+            google.script.run.withSuccessHandler(methods => {
+                const options = methods.map(m => ({
+                    value: m.NOMBRE, // Guardamos el NOMBRE en la BD según tu ejemplo
+                    text: m.NOMBRE
+                }));
+                TS.payment.addOptions(options);
+            }).getActivePaymentMethods();
+        }
+
+        // --- 3. Lógica y Validación ---
+        function addEventListeners() {
+            ['cantidad', 'precioUnitario', 'empleado'].forEach(id => {
+                document.getElementById(id).addEventListener('input', () => {
+                    calculateTotal();
+                    validateForm();
+                });
+            });
+        }
+
+        function calculateTotal() {
+            const qty = parseFloat(DOM.cantidad.value) || 0;
+            const price = parseFloat(DOM.precioUnitario.value) || 0;
+            const total = qty * price;
+            
+            // Formato moneda Colombia
+            DOM.displayTotal.innerText = new Intl.NumberFormat('es-CO', { 
+                style: 'currency', currency: 'COP', minimumFractionDigits: 0 
+            }).format(total);
+        }
+
+        function validateForm() {
+            let isValid = true;
+
+            // Validar Producto
+            if (!DOM.productSelect.value) isValid = false;
+            // Validar Proveedor
+            if (!DOM.provSelect.value) isValid = false;
+            // Validar Cantidad (> 0)
+            const qty = parseFloat(DOM.cantidad.value);
+            if (isNaN(qty) || qty <= 0) isValid = false;
+            // Validar Precio (> 0)
+            const price = parseFloat(DOM.precioUnitario.value);
+            if (isNaN(price) || price <= 0) isValid = false; // Asumimos precio positivo
+            // Validar Método Pago
+            if (!DOM.metodoPago.value) isValid = false;
+            // Validar Empleado
+            if (!DOM.empleado.value) isValid = false;
+
+            DOM.btnSubmit.disabled = !isValid;
+        }
+
+        // --- 4. Envío ---
+        function handleSubmit(e) {
+            e.preventDefault();
+            DOM.btnSubmit.disabled = true;
+            DOM.btnSubmit.innerText = "Guardando...";
+            DOM.successAlert.classList.add('d-none');
+
+            const formData = {
+                codPrdt: DOM.codPrdt.value,
+                nombrePrdt: DOM.nombrePrdt.value,
+                codProv: DOM.codProv.value,
+                nombreProv: DOM.nombreProv.value,
+                empleado: DOM.empleado.value,
+                cantidad: DOM.cantidad.value,
+                precioUnitario: DOM.precioUnitario.value,
+                metodoPago: DOM.metodoPago.value,
+                estado: document.getElementById('estado').value,
+                enlaceFactura: document.getElementById('enlaceFactura').value
+            };
+
+            google.script.run
+                .withSuccessHandler(onSuccess)
+                .withFailureHandler(err => {
+                    alert("Error: " + err.message);
+                    DOM.btnSubmit.disabled = false;
+                    DOM.btnSubmit.innerText = "Registrar Ingreso";
+                })
+                .createControlIngreso(formData);
+        }
+
+        function onSuccess(res) {
+            DOM.form.classList.add('d-none');
+            DOM.resCode.innerText = res.code;
+            DOM.resTotal.innerText = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(res.total);
+            DOM.successAlert.classList.remove('d-none');
+            DOM.btnSubmit.innerText = "Registrar Ingreso";
+        }
+
+        function resetForm() {
+            DOM.form.reset();
+            DOM.form.classList.remove('d-none');
+            DOM.successAlert.classList.add('d-none');
+            
+            // Limpiar TomSelects
+            TS.product.clear();
+            TS.provider.clear();
+            TS.payment.clear();
+            
+            DOM.displayTotal.innerText = "$ 0";
+            DOM.btnSubmit.disabled = true;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Nuevo Cliente</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; }
+        .required-asterisk { color: red; margin-left: 3px; font-weight: bold; }
+        .card-form { border: none; box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); }
+        .preview-code { font-family: monospace; color: #0d6efd; font-weight: bold; background-color: #e9ecef; }
+    </style>
+</head>
+
+<body>
+    <div class="container mt-4 mb-5">
+        <div class="text-center mb-4">
+            <h3>Nuevo Cliente</h3>
+            <p class="text-muted small">Complete la información para registrar un nuevo cliente.</p>
+        </div>
+
+        <form id="clientForm" class="card card-form p-4" onsubmit="handleSubmit(event)">
+            
+            <h5 class="text-primary mb-3">Información Principal</h5>
+            
+            <div class="row mb-3">
+                <div class="col-md-8">
+                    <label for="clientName" class="form-label fw-bold">Nombre del cliente<span class="required-asterisk">*</span></label>
+                    <input type="text" class="form-control" id="clientName" name="clientName" placeholder="Nombre completo" required>
+                </div>
+                <div class="col-md-4">
+                    <label for="clientCodeDisplay" class="form-label fw-bold">Código<span class="required-asterisk">*</span></label>
+                    <input type="text" class="form-control preview-code" id="clientCodeDisplay" readonly value="Cargando...">
+                    <div class="form-text small">Asignado automáticamente</div>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="clientPhone" class="form-label fw-bold">Teléfono<span class="required-asterisk">*</span></label>
+                    <input type="tel" class="form-control" id="clientPhone" name="clientPhone" placeholder="300 123 4567" required>
+                </div>
+                <div class="col-md-6">
+                    <label for="clientEmail" class="form-label fw-bold">Correo<span class="required-asterisk">*</span></label>
+                    <input type="email" class="form-control" id="clientEmail" name="clientEmail" placeholder="correo@ejemplo.com" required>
+                </div>
+            </div>
+
+            <hr class="my-4">
+
+            <h5 class="text-secondary mb-3">Información Adicional</h5>
+
+            <div class="mb-3">
+                <label for="clientDoc" class="form-label">Documento / Identificación</label>
+                <input type="text" class="form-control" id="clientDoc" name="clientDoc" placeholder="Cédula o NIT">
+            </div>
+
+            <div class="mb-3">
+                <label for="clientAddress" class="form-label">Dirección</label>
+                <input type="text" class="form-control" id="clientAddress" name="clientAddress" placeholder="Dirección de residencia">
+            </div>
+
+            <div class="mb-3">
+                <label for="socio" class="form-label">Socio Asociado</label>
+                <select id="socio" class="form-select" name="socio">
+                    <option value="" selected>Sin socio particular...</option>
+                    <option value="YINA ATENCIA">Yina Atencia</option>
+                    <option value="KATY IRIARTE">Katy Iriarte</option>
+                    <option value="YARIS RODRIGUEZ">Yaris Rodriguez</option>
+                    <option value="MARIA PATERNINA">Maria Paternina</option>
+                    <option value="ELVER ARROYAVE">Elver Arroyave</option>
+                    <option value="KAREN EDITH BRACAMONTE">Karen Bracamonte</option>
+                    <option value="VANESSA ARROYAVE">Vanessa Arroyave</option>
+                </select>
+            </div>
+
+            <div class="d-grid gap-2 mt-4">
+                <button type="submit" id="btnSubmit" class="btn btn-primary btn-lg" disabled>
+                    Registrar Cliente
+                </button>
+            </div>
+        </form>
+
+        <div id="successAlert" class="alert alert-success mt-3 d-none shadow-sm" role="alert">
+            <h4 class="alert-heading"><i class="bi bi-check-circle-fill"></i> ¡Cliente creado!</h4>
+            <p>Se ha registrado a <strong id="resName"></strong> con el código <strong id="resCode"></strong>.</p>
+            <hr>
+            <div class="d-flex justify-content-end">
+                <button type="button" class="btn btn-success btn-sm" onclick="resetForm()">Registrar otro</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        const DOM = {
+            form: document.getElementById('clientForm'),
+            clientName: document.getElementById('clientName'),
+            clientCodeDisplay: document.getElementById('clientCodeDisplay'),
+            clientPhone: document.getElementById('clientPhone'),
+            clientEmail: document.getElementById('clientEmail'),
+            btnSubmit: document.getElementById('btnSubmit'),
+            successAlert: document.getElementById('successAlert'),
+            resCode: document.getElementById('resCode'),
+            resName: document.getElementById('resName')
+        };
+
+        // --- 1. Inicialización ---
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSequencePreview();
+            // Listeners para validación
+            DOM.clientName.addEventListener('input', validateForm);
+            DOM.clientPhone.addEventListener('input', validateForm);
+            DOM.clientEmail.addEventListener('input', validateForm);
+        });
+
+        function loadSequencePreview() {
+            google.script.run
+                .withSuccessHandler(displaySequence)
+                .withFailureHandler(err => {
+                    DOM.clientCodeDisplay.value = "Error";
+                    console.error(err);
+                })
+                .getSequences();
+        }
+
+        function displaySequence(sequences) {
+            const clientSeq = sequences.find(s => s.NAME === 'CLIENTE');
+            if (clientSeq) {
+                // Muestra una previsualización (El backend tiene la verdad final)
+                DOM.clientCodeDisplay.value = `${clientSeq.PREFIX}${clientSeq.NEXT}`;
+            } else {
+                DOM.clientCodeDisplay.value = "N/A";
+            }
+        }
+
+        // --- 2. Validación ---
+        function validateForm() {
+            const nameValid = DOM.clientName.value.trim() !== "";
+            const phoneValid = DOM.clientPhone.value.trim() !== "";
+            const emailValid = DOM.clientEmail.value.trim() !== ""; // Puedes agregar regex de email si gustas
+
+            if (nameValid && phoneValid && emailValid) {
+                DOM.btnSubmit.disabled = false;
+            } else {
+                DOM.btnSubmit.disabled = true;
+            }
+        }
+
+        // --- 3. Envío ---
+        function handleSubmit(e) {
+            e.preventDefault();
+            
+            DOM.btnSubmit.disabled = true;
+            DOM.btnSubmit.innerText = "Guardando...";
+            DOM.successAlert.classList.add('d-none');
+
+            const formData = {
+                clientName: DOM.clientName.value,
+                clientDoc: document.getElementById('clientDoc').value,
+                clientPhone: DOM.clientPhone.value,
+                clientEmail: DOM.clientEmail.value,
+                clientAddress: document.getElementById('clientAddress').value,
+                socio: document.getElementById('socio').value
+            };
+
+            google.script.run
+                .withSuccessHandler(onSuccess)
+                .withFailureHandler(onFailure)
+                .createNewClient(formData);
+        }
+
+        function onSuccess(response) {
+            DOM.btnSubmit.innerText = "Registrar Cliente";
+            DOM.form.classList.add('d-none'); // Ocultar formulario
+            
+            DOM.resCode.innerText = response.code;
+            DOM.resName.innerText = response.name;
+            DOM.successAlert.classList.remove('d-none');
+        }
+
+        function onFailure(error) {
+            DOM.btnSubmit.disabled = false;
+            DOM.btnSubmit.innerText = "Registrar Cliente";
+            alert("Error al registrar: " + error.message);
+        }
+
+        function resetForm() {
+            DOM.form.reset();
+            DOM.form.classList.remove('d-none');
+            DOM.successAlert.classList.add('d-none');
+            
+            DOM.clientCodeDisplay.value = "Actualizando...";
+            DOM.btnSubmit.disabled = true; 
+
+            loadSequencePreview();
+        }
+    </script>
+</body>
+</html>

@@ -1,16 +1,3 @@
-// ==========================================
-// 1. MENÚ Y APERTURA DE SIDEBAR
-// ==========================================
-
-function onOpen() {
-  const ui = SpreadsheetApp.getUi();
-  
-  // Menú Producto (NUEVO)
-  ui.createMenu("Producto")
-    .addItem("Nuevo producto", "openProductModal")
-    .addToUi();
-}
-
 function openProductModal() {
   // 1. Crear el HTML desde el archivo
   let html = HtmlService.createHtmlOutputFromFile("createNewProductForm")
@@ -68,58 +55,4 @@ function createNewProduct(form) {
     code: fullCode,
     name: form.productName
   };
-}
-
-// ==========================================
-// 3. UTILIDADES (Revisar que existan)
-// ==========================================
-
-function getSequences(){
-  const sheetName = "SEQUENCES";
-  const rowIndex = 2;
-  const startColumn = 1;
-  const endColumn = 5;
-  return getRowDataAsObjects(sheetName, rowIndex, startColumn, endColumn);
-}
-
-// Función ajustada para escribir en la columna CURRENT (Columna D)
-function setSequences(sequenceNumber, newCurrentValue){
-  let sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("SEQUENCES");
-  
-  // sequenceNumber viene de la columna A (NUMBER). 
-  // Asumimos que NUMBER corresponde a la fila relativa + 1 o buscamos la fila.
-  // Dado tu tabla: 1->Fila 2, 2->Fila 3 (Producto). 
-  // Fórmula general basada en tu tabla: Fila = sequenceNumber + 1
-  
-  const rowToUpdate = parseInt(sequenceNumber) + 1;
-  
-  // Actualizamos la columna D (CURRENT)
-  sheet.getRange('D' + rowToUpdate).setValue(newCurrentValue);
-}
-
-// Función auxiliar necesaria (ya la tenías, pero asegúrate de que esté en el archivo)
-function getRowDataAsObjects(sheetName, rowIndex, startColumn, endColumn) {
-    // ... (Usa la misma función que proporcionaste en tu prompt)
-    // Si no la copiaste aquí, asegúrate de que esté en tu archivo Code.gs original
-    try {
-    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
-    if (!sheet) throw new Error(`Hoja no encontrada: ${sheetName}`);
-    const lastRow = sheet.getLastRow();
-    if (lastRow < rowIndex) return [];
-    const numColumns = endColumn - startColumn + 1;
-    const values = sheet.getRange(rowIndex, startColumn, lastRow - rowIndex + 1, numColumns).getValues();
-    const headers = sheet.getRange(rowIndex - 1, startColumn, 1, numColumns).getValues()[0];
-    const result = [];
-    values.forEach(row => {
-      if (row.every(cell => cell === '')) return;
-      const rowObject = {};
-      headers.forEach((header, index) => {
-        rowObject[header] = row[index];
-      });
-      result.push(rowObject);
-    });
-    return result;
-  } catch (e) {
-    return { error: e.message };
-  }
 }
