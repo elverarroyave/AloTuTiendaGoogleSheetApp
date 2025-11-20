@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Registrar Abono</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.bootstrap5.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; }
+        .required-asterisk { color: red; margin-left: 3px; font-weight: bold; }
+        .card-form { border: none; box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); }
+        .preview-code { font-family: monospace; color: #0d6efd; font-weight: bold; background-color: #e9ecef; }
+        .abono-value { font-size: 1.5rem; font-weight: bold; color: #dc3545; }
+    </style>
+</head>
+
+<body>
+    <div class="container mt-4 mb-5">
+        <div class="text-center mb-4">
+            <h3>Registrar Abono</h3>
+            <p class="text-muted small">Registra un pago parcial o total a una venta.</p>
+        </div>
+
+        <form id="abonoForm" class="card card-form p-4" onsubmit="handleSubmit(event)">
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="abonoCodeDisplay" class="form-label fw-bold">Código de Abono</label>
+                    <input type="text" class="form-control preview-code" id="abonoCodeDisplay" readonly value="Cargando...">
+                </div>
+            </div>
+
+            <hr>
+
+            <div class="mb-3">
+                <label for="ventaCode" class="form-label fw-bold">Código de Venta<span class="required-asterisk">*</span></label>
+                <input id="ventaCode" class="form-control" name="ventaCode" placeholder="VENTA000" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="abonoValue" class="form-label fw-bold">Valor del Abono<span class="required-asterisk">*</span></label>
+                <div class="input-group">
+                    <span class="input-group-text">$</span>
+                    <input type="number" class="form-control" id="abonoValue" name="abonoValue" min="1" placeholder="0" required>
+                </div>
+                <div class="abono-value mt-2 text-end" id="abonoValueDisplay"></div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="metodoPago" class="form-label fw-bold">Método de pago<span class="required-asterisk">*</span></label>
+                <select id="metodoPago" class="form-select" name="metodoPago">
+                    <option value="" selected>Seleccione método...</option>
+                    <option value="Efectivo">Efectivo</option>
+                    <option value="B/bia K">Bancolombia Katy</option>
+                    <option value="B/bia E">Bancolombia Elver</option>
+                    <option value="Nequi K">Nequi Katy</option>
+                    <option value="Nequi E">Nequi Elver</option>
+                    <option value="Addi">Addi</option>
+                    <option value="SisteCredito">SisteCredito</option>
+                    <option value="BoldDatafono">BoldDatafono</option>
+                </select>
+            </div>
+
+            <div class="d-grid gap-2 mt-4">
+                <button type="submit" id="btnSubmit" class="btn btn-danger btn-lg" disabled>
+                    Registrar Abono (Abonar)
+                </button>
+            </div>
+        </form>
+
+        <div id="successAlert" class="alert alert-success mt-3 d-none shadow-sm" role="alert">
+            <h4 class="alert-heading"><i class="bi bi-check-circle-fill"></i> ¡Abono registrado!</h4>
+            <p>Se ha registrado el abono <strong id="resCode"></strong> por un valor de <strong id="resValue"></strong>.</p>
+            <hr>
+            <div class="d-flex justify-content-end">
+                <button type="button" class="btn btn-success btn-sm" onclick="resetForm()">Registrar otro Abono</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
+
+    <script>
+      const DOM = {
+          form: document.getElementById('abonoForm'),
+          abonoCodeDisplay: document.getElementById('abonoCodeDisplay'),
+          ventaCode: document.getElementById('ventaCode'),
+          abonoValue: document.getElementById('abonoValue'),
+          abonoValueDisplay: document.getElementById('abonoValueDisplay'),
+          metodoPago: document.getElementById('metodoPago'),
+          btnSubmit: document.getElementById('btnSubmit'),
+          successAlert: document.getElementById('successAlert'),
+          resCode: document.getElementById('resCode'),
+          resValue: document.getElementById('resValue')
+      };
+
+      // La variable TS ya no es necesaria, se remueve.
+
+      // --- 1. Inicialización ---
+      document.addEventListener('DOMContentLoaded', () => {
+          loadData();
+          addEventListeners();
+      });
+
+      // --- 2. Carga de Datos ---
+      function loadData() {
+          // Cargar preview del código de abono
+          google.script.run
+              .withSuccessHandler(displaySequence)
+              .withFailureHandler(err => {
+                  DOM.abonoCodeDisplay.value = "Error";
+                  console.error("Error al cargar secuencia:", err);
+              })
+              .getSequences();
+          
+          // NOTA: La carga de Métodos de Pago se eliminó porque las opciones están manuales en el HTML.
+      }
+
+      // Usaremos una variable local para la secuencia para hacerla más robusta.
+      var abonoSeq = null; 
+      
+      function displaySequence(sequences) {
+          // Buscamos la secuencia por nombre 'ABONO'
+          abonoSeq = sequences.find(s => s.PREFIX === 'INOUT'); 
+          
+          if (abonoSeq) {
+              DOM.abonoCodeDisplay.value = `${abonoSeq.PREFIX}${abonoSeq.NEXT}`;
+          } else {
+              DOM.abonoCodeDisplay.value = "ERROR: Secuencia 'ABONO' no encontrada.";
+          }
+      }
+
+      // --- 3. Lógica y Validación (AÑADIMOS LISTENERS FALTANTES) ---
+      function addEventListeners() {
+          // 1. Valor del Abono (Para formato y validación)
+          DOM.abonoValue.addEventListener('input', () => {
+              formatValueDisplay();
+              validateForm();
+          });
+
+          // 2. Código de Venta (NUEVO: Llama a la validación al escribir)
+          DOM.ventaCode.addEventListener('input', validateForm);
+          
+          // 3. Método de Pago (NUEVO: Llama a la validación al seleccionar)
+          DOM.metodoPago.addEventListener('change', validateForm);
+      }
+
+      function formatValueDisplay() {
+          const value = parseFloat(DOM.abonoValue.value) || 0;
+          // Formato moneda Colombia
+          DOM.abonoValueDisplay.innerText = new Intl.NumberFormat('es-CO', { 
+              style: 'currency', currency: 'COP', minimumFractionDigits: 0 
+          }).format(value);
+      }
+
+      function validateForm() {
+          let isValid = true;
+
+          // Validar Código de Venta
+          if (!DOM.ventaCode.value) isValid = false;
+          
+          // Validar Valor del Abono (> 0)
+          const value = parseFloat(DOM.abonoValue.value);
+          if (isNaN(value) || value <= 0) isValid = false;
+          
+          // Validar Método Pago
+          // Si el valor es "", la validación falla (lo que queremos si no elige nada)
+          if (!DOM.metodoPago.value) isValid = false; 
+
+          // 1. Establece el estado del botón
+          DOM.btnSubmit.disabled = !isValid;
+
+          // 2. RETORNA el valor booleano para que handleSubmit lo pueda usar
+          return isValid; 
+      }
+
+      // --- 4. Envío ---
+      function handleSubmit(e) {
+          e.preventDefault();
+          
+          // Revisión final de validación antes de enviar
+          if (!validateForm()) {
+              alert("Por favor, complete todos los campos obligatorios.");
+              return;
+          }
+
+          DOM.btnSubmit.disabled = true;
+          DOM.btnSubmit.innerText = "Registrando Abono...";
+          DOM.successAlert.classList.add('d-none');
+
+          const formData = {
+              ventaCode: DOM.ventaCode.value,
+              abonoValue: DOM.abonoValue.value,
+              metodoPago: DOM.metodoPago.value
+          };
+
+          google.script.run
+              .withSuccessHandler(onSuccess)
+              .withFailureHandler(err => {
+                  alert("Error al registrar Abono: " + err.message);
+                  DOM.btnSubmit.disabled = false;
+                  DOM.btnSubmit.innerText = "Registrar Abono (Abonar)";
+              })
+              // Se envía el form data, la secuencia la busca el backend.
+              .createAbono(formData, abonoSeq); 
+      }
+
+      function onSuccess(res) {
+          DOM.form.classList.add('d-none');
+          DOM.resCode.innerText = res.code;
+          
+          DOM.resValue.innerText = new Intl.NumberFormat('es-CO', { 
+              style: 'currency', currency: 'COP', minimumFractionDigits: 0 
+          }).format(res.value);
+
+          DOM.successAlert.classList.remove('d-none');
+          DOM.btnSubmit.innerText = "Registrar Abono (Abonar)";
+      }
+
+      function resetForm() {
+          DOM.form.reset();
+          DOM.form.classList.remove('d-none');
+          DOM.successAlert.classList.add('d-none');
+          
+          // No hay TomSelects que limpiar, solo reset del form
+          
+          DOM.abonoCodeDisplay.value = "Actualizando...";
+          DOM.abonoValueDisplay.innerText = "";
+          DOM.btnSubmit.disabled = true;
+
+          loadData(); // Recargar secuencia
+      }
+    </script>
+</body>
+</html>
