@@ -20,6 +20,8 @@ function createNewSale(form, saleSequence) {
 
   //Set sale number;
   const newSaleNumber = saleSequence.NEXT;
+  //Set code sale;
+  const saleCode = saleSequence.PREFIX + newSaleNumber;
 
   // --- 4. ESCRITURA DE DATOS EN LA FILA targetRow (Fila 3) ---
   
@@ -28,6 +30,9 @@ function createNewSale(form, saleSequence) {
   
   // Columna B: Número de Venta (Valor calculado)
   sheet.getRange('B' + targetRow).setValue(newSaleNumber); 
+
+  // Columna C: Código de venta
+  sheet.getRange('C' + targetRow).setValue(saleCode); 
   
   //UPDATE SALE SEQUENCE
   setSequences(saleSequence.NUMBER, newSaleNumber)
@@ -64,7 +69,7 @@ function createNewSale(form, saleSequence) {
   // Devuelve un objeto con información de la venta para que el cliente (sidebar) muestre el resumen
   return {
     success: true,
-    saleCode: saleSequence.PREFIX + newSaleNumber,
+    saleCode: saleCode,
     date: formattedDate,
     insertedRow: targetRow,
     form: form

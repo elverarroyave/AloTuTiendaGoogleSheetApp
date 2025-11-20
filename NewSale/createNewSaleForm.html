@@ -221,6 +221,7 @@
             productName: document.getElementById('productName'),
             productCode: document.getElementById('productCode'),
             priceProduct: document.getElementById('priceProduct'),
+            priceProductWithOutFormat: 0,
             stockProduct: document.getElementById('stockProduct'),
             socio: document.getElementById('socio'),
             btnSubmit: document.getElementById('btnSubmit') 
@@ -249,6 +250,22 @@
                     sortField: { field: 'text', direction: 'asc' },
                     onChange: validateForm
                 });
+                TS.plazoSelect = new TomSelect(DOM.plazo, {
+                    create: false,
+                    maxItems: 1,
+                    allowEmptyOption: false,
+                    placeholder: "Seleccione plazo...",
+                    sortField: { field: 'text', direction: 'asc' },
+                    onChange: function() {
+                        updateProductValues();
+                    }
+                });
+                TS.amount = DOM.amount;
+                TS.amount.addEventListener('input', function() {
+                    updateProductValues();
+                });
+
+
             } catch (e) {
                 console.warn('TomSelect no pudo inicializarse:', e);
             }
@@ -308,10 +325,8 @@
             const stock = selectedOption.dataset.stock;
             const code = selectedOption.dataset.code;
 
+            DOM.priceProductWithOutFormat = totalPrice; // Precio sin formatear
             DOM.priceProduct.value = formatCurrency(totalPrice); // Formateado visualmente
-            // Nota: Para el envío guardamos el valor numérico crudo si es necesario, 
-            // pero aquí se muestra bonito. Al enviar, asegúrate de limpiar el formato si el backend espera numero.
-            // En tu código original enviabas el valor del input. 
             
             DOM.stockProduct.value = stock;
             DOM.productCode.value = code;
@@ -355,7 +370,7 @@
             TS.productNameSelect = new TomSelect(DOM.productName, {
                 create: false,
                 maxItems: 1,
-                allowEmptyOption: true,
+                allowEmptyOption: false ,
                 placeholder: "Buscar producto...",
                 sortField: { field: 'text', direction: 'asc' },
                 onChange: function() {
@@ -465,14 +480,10 @@
 
             const formData = new FormData(form);
             const data = Object.fromEntries(formData);
+            data.priceProduct = DOM.priceProductWithOutFormat; // Enviar precio sin formatear
 
-            data.checkIsCredict = DOM.checkIsCredict.checked;
-            // Importante: Si priceProduct tiene formato moneda (e.g. $1.000), el backend debe limpiarlo o limpiarlo aquí
-            // Aquí lo enviamos tal cual, asumiendo que el backend lo maneja o que getRange().setValue() lo acepta.
-            data.priceProduct = DOM.priceProduct.value; 
-            data.productCode = DOM.productCode.value;
-            data.clientName = DOM.clientName.value;
-
+            console.log('Enviando datos de venta:', data);
+            console.log('SaleSequence: ', saleSequence);
             google.script.run
                 .withSuccessHandler(function(response) {
                     submitBtn.innerText = "Registrar Venta"; 
