@@ -29,7 +29,7 @@ function createControlIngreso(form) {
   // 3. Preparar Datos Calculados
   let now = new Date();
   let timeZone = ss.getSpreadsheetTimeZone();
-  let formattedDate = Utilities.formatDate(now, timeZone, "MM/dd/yyyy HH:mm");
+  let formattedDate = getCurrentDateTime();
   
   // Parsear números para asegurar cálculos correctos
   const cantidad = Number(form.cantidad);
