@@ -69,8 +69,8 @@
                 <div class="col-md-6">
                     <label for="estado" class="form-label fw-bold">Estado<span class="required-asterisk">*</span></label>
                     <select class="form-select" id="estado" name="estado">
-                        <option value="RECIBIDO" selected>RECIBIDO</option>
-                        <option value="EN ESPERA">EN ESPERA</option>
+                        <option value="EN ESPERA"selected>EN ESPERA</option>
+                        <option value="RECIBIDO">RECIBIDO</option>
                         <option value="DEVOLUCION">DEVOLUCION</option>
                         <option value="RECLAMO">RECLAMO</option>
                     </select>
@@ -193,6 +193,7 @@
 
             // Cargar Proveedores
             google.script.run.withSuccessHandler(providers => {
+                console.log("providers-->", providers)
                 const options = providers.map(p => ({
                     value: p.CODIGO,
                     text: p.NOMBRE, 
@@ -204,6 +205,7 @@
 
             // Cargar Métodos de Pago
             google.script.run.withSuccessHandler(methods => {
+                console.log("methods-->", methods);
                 const options = methods.map(m => ({
                     value: m.NOMBRE, // Guardamos el NOMBRE en la BD según tu ejemplo
                     text: m.NOMBRE
