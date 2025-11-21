@@ -8,15 +8,14 @@ function openAbonoSidebar(){
 // 2. LÓGICA DE ABONOS (NUEVO)
 // ==========================================
 
-function createAbono(form, abonoSeq) {
+function createAbono(form, inOutSeq) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const sheetIngresoEgreso = ss.getSheetByName("INGRESOS_EGRESOS"); 
   const targetRowIngresoEgreso = 4;
   const sheetAbonos = ss.getSheetByName("ABONOS"); 
   const targetRowAbonos = 2;
   
-  const nextNum = abonoSeq.NEXT;
-  const inOutNewCode = abonoSeq.PREFIX + nextNum; // Ej: ABO101
+  const inOutNewCode = inOutSeq.PREFIX + inOutSeq.NEXT; // Ej: ABO101
 
   //Obtener secuencia para abonoSeq
   const abonoSeq = getSequencesAbono();
@@ -27,17 +26,17 @@ function createAbono(form, abonoSeq) {
 
   // 3. Preparar Datos
   const now = getCurrentDateTime();
-  const formulaClientName = '=XLOOKUP(INGRESOS_EGRESOS[COD_VENTA],CONTROL_VENTAS[COD_VENTA],CONTROL_VENTAS[CLIENTE],"CLIENTE NO ENCONTRADO")';
-  const formulaProductName = '=XLOOKUP(INGRESOS_EGRESOS[COD_VENTA],CONTROL_VENTAS[COD_VENTA],CONTROL_VENTAS[PRODUCTO],"PRODUCTO NO ENCONTRADO")';
+  const formulaClientName = '=XLOOKUP(ABONOS[COD_VENTA],CONTROL_VENTAS[CODIGO],CONTROL_VENTAS[CLIENTE],"CLIENTE NO ENCONTRADO")';
+  const formulaProductName = '=XLOOKUP(ABONOS[COD_VENTA],CONTROL_VENTAS[CODIGO],CONTROL_VENTAS[PRODUCTO],"PRODUCTO NO ENCONTRADO")';
   const valorAbono = Number(form.abonoValue);
+  const detalle = `Abono para venta ${form.ventaCode}`;
 
   // 4. Escribir Datos (Estructura asumida: A: FECHA | B: NUM_ABONO | C: COD_ABONO | F: VALOR | H: METODO_PAGO)
   sheetIngresoEgreso.getRange('A' + targetRowIngresoEgreso).setValue(now);
   sheetIngresoEgreso.getRange('B' + targetRowIngresoEgreso).setValue('ABONO');
-  sheetIngresoEgreso.getRange('C' + targetRowIngresoEgreso).setValue(nextNum);                       
-  sheetIngresoEgreso.getRange('D' + targetRowIngresoEgreso).setValue(inOutNewCode);                      
-  //sheetIngresoEgreso.getRange('F' + targetRowIngresoEgreso).setFormula(formulaF);           
-  //sheetIngresoEgreso.getRange('G' + targetRowIngresoEgreso).setFormula(formulaG);  
+  sheetIngresoEgreso.getRange('C' + targetRowIngresoEgreso).setValue(inOutSeq.NEXT);                       
+  sheetIngresoEgreso.getRange('D' + targetRowIngresoEgreso).setValue(inOutNewCode);
+  sheetIngresoEgreso.getRange('E' + targetRowIngresoEgreso).setValue(detalle);
   sheetIngresoEgreso.getRange('F' + targetRowIngresoEgreso).setValue(valorAbono);       
   sheetIngresoEgreso.getRange('H' + targetRowIngresoEgreso).setValue(form.metodoPago);
 
@@ -48,10 +47,11 @@ function createAbono(form, abonoSeq) {
   sheetAbonos.getRange('D' + targetRowAbonos).setValue(form.ventaCode);
   sheetAbonos.getRange('E' + targetRowAbonos).setValue(formulaClientName);
   sheetAbonos.getRange('F' + targetRowAbonos).setValue(formulaProductName);
-  sheetAbonos.getRange('G' + targetRowAbonos).setValue(fvalorAbono);
+  sheetAbonos.getRange('G' + targetRowAbonos).setValue(valorAbono);
   
   // 5. Actualizar Secuencia
-  setSequences(abonoSeq.NUMBER, nextNum);
+  setSequences(inOutSeq.NUMBER, inOutSeq.NEXT);
+  setSequences(abonoSeq.NUMBER, abonoSeq.NEXT);
                
   return {
     success: true,
