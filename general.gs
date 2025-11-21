@@ -7,9 +7,9 @@ function onOpen() {
     .addItem("Nuevo producto", "openProductModal")
     .addItem("Nuevo Cliente", "openClientModal")
     .addItem("Ingresar pedido", "openControlIngresoModal")
-    .addToUi();    
+    .addItem("Agregar Abono", "openAbonoSidebar")
+    .addToUi();
 }
-
 
 // ==========================================
 // 2. UTILIDADES Obtener secuencias
