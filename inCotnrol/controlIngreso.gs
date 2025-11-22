@@ -36,6 +36,8 @@ function createControlIngreso(form) {
   const precioUnitario = Number(form.precioUnitario);
   const total = cantidad * precioUnitario;
 
+  const formulaSaldoRestante = '=SUMIF(PAGOS_PEDIDOS[COD_IN],CONTROL_INGRESO[CODIGO],PAGOS_PEDIDOS[VALOR])';
+
   // 4. Escribir Datos (Mapeo exacto a columnas A-N)
   sheet.getRange('A' + targetRow).setValue(formattedDate);          // FECHA
   sheet.getRange('B' + targetRow).setValue(nextNum);                // NUM_IN
@@ -48,9 +50,11 @@ function createControlIngreso(form) {
   sheet.getRange('I' + targetRow).setValue(cantidad);               // CANTIDAD
   sheet.getRange('J' + targetRow).setValue(precioUnitario);         // PRECIO UNITARIO
   sheet.getRange('K' + targetRow).setValue(form.metodoPago);        // MÉTODO DE PAGO
-  sheet.getRange('L' + targetRow).setValue(total);                  // TOTAL
-  sheet.getRange('M' + targetRow).setValue(form.estado);            // ESTADO
-  sheet.getRange('N' + targetRow).setValue(form.enlaceFactura);     // ENLACE DE FACTURA
+  sheet.getRange('L' + targetRow).setValue(formulaSaldoRestante);   // formula saldo restante
+  sheet.getRange('M' + targetRow).setValue(total);                  // TOTAL
+  sheet.getRange('N' + targetRow).setValue('FALSE');                  // PAGADO
+  sheet.getRange('O' + targetRow).setValue(form.estado);            // ESTADO
+  sheet.getRange('P' + targetRow).setValue(form.enlaceFactura);     // ENLACE DE FACTURA
 
   // 5. Actualizar Secuencia
   setSequences(ingresoSequence.NUMBER, nextNum);
