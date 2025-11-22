@@ -8,6 +8,7 @@ function onOpen() {
     .addItem("Nuevo Cliente", "openClientModal")
     .addItem("Ingresar pedido", "openControlIngresoModal")
     .addItem("Agregar Abono", "openAbonoSidebar")
+    .addItem("Pagar Pedido", "openPagoSidebar")
     .addToUi();
 }
 
@@ -67,8 +68,6 @@ function setSequences(sequenceNumber, newCurrentValue){
 
 // Función auxiliar necesaria (ya la tenías, pero asegúrate de que esté en el archivo)
 function getRowDataAsObjects(sheetName, rowIndex, startColumn, endColumn) {
-    // ... (Usa la misma función que proporcionaste en tu prompt)
-    // Si no la copiaste aquí, asegúrate de que esté en tu archivo Code.gs original
     try {
     const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
     if (!sheet) throw new Error(`Hoja no encontrada: ${sheetName}`);
@@ -91,3 +90,79 @@ function getRowDataAsObjects(sheetName, rowIndex, startColumn, endColumn) {
     return { error: e.message };
   }
 }
+
+
+/**
+ * Busca una fila específica dentro de un rango de datos en una hoja de cálculo
+ * basándose en el valor de una columna y devuelve la fila como un objeto.
+ *
+ * @param {string} sheetName El nombre de la hoja (ej: "CONTROL_INGRESO").
+ * @param {number} dataStartRow La primera fila que contiene datos (excluye encabezados).
+ * @param {number} startColumn La primera columna a considerar (ej: 1 para la columna A).
+ * @param {number} endColumn La última columna a considerar (ej: 15 para la columna O).
+ * @param {string} nameColumnCode El nombre del encabezado de la columna donde buscar el 'code' (ej: "CODIGO").
+ * @param {any} code El valor a buscar en la columna 'nameColumnCode'.
+ * @returns {Object|null} Un objeto que representa la fila encontrada, o null si no se encuentra.
+ * @throws {Error} Si la hoja de cálculo no se encuentra.
+ */
+function getRowDataAsObjectByNameColumn(sheetName, dataStartRow, startColumn, endColumn, nameColumnCode, code) {
+    try {
+        const ss = SpreadsheetApp.getActiveSpreadsheet();
+        const sheet = ss.getSheetByName(sheetName);
+
+        if (!sheet) {
+            throw new Error(`Hoja no encontrada: ${sheetName}`);
+        }
+
+        const lastRow = sheet.getLastRow();
+        if (lastRow < dataStartRow) {
+            console.log(`No hay datos a partir de la fila ${dataStartRow}.`);
+            return null;
+        }
+
+        const numColumns = endColumn - startColumn + 1;
+        
+        // 1. Obtener Encabezados
+        // Se asume que los encabezados están inmediatamente ANTES de dataStartRow
+        const headers = sheet.getRange(dataStartRow - 1, startColumn, 1, numColumns).getValues()[0];
+        
+        // Determinar el índice de la columna de búsqueda
+        const codeColumnIndex = headers.indexOf(nameColumnCode);
+        
+        if (codeColumnIndex === -1) {
+            throw new Error(`Columna de búsqueda no encontrada: ${nameColumnCode}`);
+        }
+
+        // 2. Obtener los Datos
+        const values = sheet.getRange(dataStartRow, startColumn, lastRow - dataStartRow + 1, numColumns).getValues();
+
+        // 3. Buscar la Fila
+        for (let i = 0; i < values.length; i++) {
+            const row = values[i];
+            
+            // Verificar si la celda de la columna de código coincide con el valor buscado
+            // Se utiliza un triple igual (===) para asegurar la coincidencia de tipo y valor.
+            if (row[codeColumnIndex] === code) {
+                
+                // 4. Construir el Objeto de la Fila Encontrada
+                const rowObject = {};
+                headers.forEach((header, index) => {
+                    rowObject[header] = row[index];
+                });
+                
+                console.log(`Fila encontrada para ${nameColumnCode} = ${code}:`, rowObject);
+                return rowObject;
+            }
+        }
+
+        // Si el bucle termina sin encontrar el código
+        console.log(`Código no encontrado en la columna ${nameColumnCode}: ${code}`);
+        return null;
+
+    } catch (e) {
+        console.error("Error en getRowDataAsObjectByNameColumn:", e.message);
+        // Lanzamos el error para que sea manejado por la lógica de google.script.run
+        throw new Error(e.message); 
+    }
+}
+

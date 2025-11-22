@@ -23,6 +23,7 @@ function createAbono(form, inOutSeq) {
 
   // 2. Insertar Fila
   sheetIngresoEgreso.insertRowBefore(targetRowIngresoEgreso);
+  sheetAbonos.insertRowBefore(targetRowAbonos);
 
   // 3. Preparar Datos
   const now = getCurrentDateTime();
