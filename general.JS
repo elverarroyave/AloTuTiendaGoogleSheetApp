@@ -46,6 +46,15 @@ function getClients(){
     return getRowDataAsObjects(sheetName, rowIndex, startColumn, endColumn);
 }
 
+function getSocios(){
+    const sheetName = "SOCIOS";
+    const rowIndex = 2;
+    const startColumn = 1;
+    const endColumn = 6;
+    const socios = getRowDataAsObjects(sheetName, rowIndex, startColumn, endColumn);
+    return socios.filter(socio => socio.ACTIVO === true);
+}
+
 function getCurrentDateTime(){
     // --- 2. OBTENER FECHA Y HORA ---
   let now = new Date();

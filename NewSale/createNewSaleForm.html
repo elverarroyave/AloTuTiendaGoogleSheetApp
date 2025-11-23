@@ -141,16 +141,7 @@
                     <div id="collapseSocio" class="accordion-collapse collapse" data-bs-parent="#accordionVenta">
                         <div class="accordion-body">
                             <label for="socio" class="form-label fw-bold">Socio responsable<span class="required-asterisk">*</span></label>
-                            <select id="socio" class="form-select" name="socio">
-                                <option value="" selected>Seleccione socio...</option>
-                                <option value="YINA ATENCIA">Yina Atencia</option>
-                                <option value="KATY IRIARTE">Katy Iriarte</option>
-                                <option value="YARIS RODRIGUEZ">Yaris Rodriguez</option>
-                                <option value="MARIA PATERNINA">Maria Paternina</option>
-                                <option value="ELVER ARROYAVE">Elver Arroyave</option>
-                                <option value="KAREN EDITH BRACAMONTE">Karen Bracamonte</option>
-                                <option value="VANESSA ARROYAVE">Vanessa Arroyave</option>
-                            </select>
+                            <select class="form-select" id="socio" name="socio" aria-label="Seleccione socio..."></select>
                         </div>
                     </div>
                 </div>
@@ -237,24 +228,6 @@
                     create: false,
                     maxItems: 1,
                     allowEmptyOption: true,
-                    placeholder: "Buscar método...",
-                    sortField: { field: 'text', direction: 'asc' },
-                    onChange: validateForm 
-                });
-
-                TS.socioSelect = new TomSelect(DOM.socio, {
-                    create: false,
-                    maxItems: 1,
-                    allowEmptyOption: true,
-                    placeholder: "Buscar socio...",
-                    sortField: { field: 'text', direction: 'asc' },
-                    onChange: validateForm
-                });
-                TS.plazoSelect = new TomSelect(DOM.plazo, {
-                    create: false,
-                    maxItems: 1,
-                    allowEmptyOption: false,
-                    placeholder: "Seleccione plazo...",
                     sortField: { field: 'text', direction: 'asc' },
                     onChange: function() {
                         updateProductValues();
@@ -281,6 +254,10 @@
 
         function loadSequencesData() {
             google.script.run.withSuccessHandler(getSequences).getSequences();
+        }
+
+        function loadSociosData() {
+            google.script.run.withSuccessHandler(populateSociosSelect).getSocios();
         }
 
         // --- 3. Funciones de Lógica ---
@@ -367,6 +344,10 @@
                 DOM.productName.appendChild(option);
             }
 
+            if (TS.productNameSelect) {
+                TS.productNameSelect.destroy();
+            }
+
             TS.productNameSelect = new TomSelect(DOM.productName, {
                 create: false,
                 maxItems: 1,
@@ -394,6 +375,10 @@
                 DOM.clientName.appendChild(option);
             }
 
+            if (TS.clientNameSelect) {
+                TS.clientNameSelect.destroy();
+            }
+
             TS.clientNameSelect = new TomSelect(DOM.clientName, {
                 create: false,
                 maxItems: 1,
@@ -404,6 +389,40 @@
                     const selected = DOM.clientName.options[DOM.clientName.selectedIndex];
                     const code = selected && selected.dataset ? selected.dataset.code : '';
                     DOM.clientCode.value = code || '';
+                    updateSummary();
+                    validateForm(); 
+                }
+            });
+        }
+
+        function populateSociosSelect(optionsArray) {
+            console.log('optionsArray: ', optionsArray); //<--Sii esta imprimiendo la lista
+
+            if (optionsArray.error) {
+                DOM.socio.innerHTML = `<option value="">Error: ${optionsArray.error}</option>`;
+                return;
+            }
+            DOM.socio.innerHTML = '<option value="" disabled selected>Seleccione socio...</option>';
+
+            for (const socio of optionsArray) {
+                const option = document.createElement('option');
+                option.value = socio.NOMBRE || ''; 
+                option.textContent = `${socio.NOMBRE || 'Sin nombre'}`;
+                option.dataset.code = socio.CODIGO || '';
+                DOM.socio.appendChild(option);
+            }
+
+            if (TS.socioSelect) {
+                TS.socioSelect.destroy();
+            }
+
+            TS.socioSelect = new TomSelect(DOM.socio, {
+                create: false,
+                maxItems: 1,
+                allowEmptyOption: true,
+                placeholder: "Buscar socio...",
+                sortField: { field: 'text', direction: 'asc' },
+                onChange: function() {
                     updateSummary();
                     validateForm(); 
                 }
@@ -570,6 +589,7 @@
             loadClientsData();
             loadInventoryData();
             loadSequencesData();
+            loadSociosData();
             initializeTomSelect();
 
             DOM.checkIsCredict.addEventListener("change", toggleFirstPayment);
