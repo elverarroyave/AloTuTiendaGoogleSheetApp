@@ -39,7 +39,8 @@ CONTROL_VENTAS={
     COD_CLNT: 'I',
     PRECIO: 'L',
     M_PAGO: 'M',
-    PAGO: 'N'
+    PAGO: 'N',
+    ESTADO: 'R',
 }
 
 INVENTARIO={

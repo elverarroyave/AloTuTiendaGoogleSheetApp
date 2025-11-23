@@ -233,6 +233,18 @@
                         updateProductValues();
                     }
                 });
+
+                TS.plazoSelect = new TomSelect(DOM.plazo, {
+                    create: false,
+                    maxItems: 1,
+                    allowEmptyOption: false,
+                    placeholder: "Seleccione plazo...",
+                    sortField: { field: 'text', direction: 'asc' },
+                    onChange: function() {
+                        updateProductValues();
+                    }
+                });
+
                 TS.amount = DOM.amount;
                 TS.amount.addEventListener('input', function() {
                     updateProductValues();

@@ -58,9 +58,11 @@ function createNewSale(form, saleSequence) {
     if(form.checkIsCredict){
       // Columna N: Pago
       sheet.getRange(CONTROL_VENTAS.PAGO + targetRow).setValue(form.firstPayment);
+      sheet.getRange(CONTROL_VENTAS.ESTADO + targetRow).setValue(SALE_STATUS.AL_DIA);
     }else{
       // Columna N: Pago
       sheet.getRange(CONTROL_VENTAS.PAGO + targetRow).setValue(form.priceProduct); 
+      sheet.getRange(CONTROL_VENTAS.ESTADO + targetRow).setValue(SALE_STATUS.PAGADO);
     }
 
     //Metodo de pago
