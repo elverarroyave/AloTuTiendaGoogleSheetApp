@@ -39,22 +39,22 @@ function crearPago(form, inOutSeq) {
         const detalle = `Pago de pedido ${form.inCode} - ${controlIngresoRow.METODO_DE_PAGO}`;
 
         // Escritura en INGRESOS_EGRESOS (Punto de fallo potencial)
-        sheetIngresoEgreso.getRange('A' + targetRowIngresoEgreso).setValue(now);
-        sheetIngresoEgreso.getRange('B' + targetRowIngresoEgreso).setValue("PAGO PEDIDO");
-        sheetIngresoEgreso.getRange('C' + targetRowIngresoEgreso).setValue(inOutSeq.NEXT);
-        sheetIngresoEgreso.getRange('D' + targetRowIngresoEgreso).setValue(inOutNewCode);
-        sheetIngresoEgreso.getRange('E' + targetRowIngresoEgreso).setValue(detalle);
-        sheetIngresoEgreso.getRange('G' + targetRowIngresoEgreso).setValue(payValue);
-        sheetIngresoEgreso.getRange('H' + targetRowIngresoEgreso).setValue(form.metodoPago);
+        sheetIngresoEgreso.getRange(INGRESOS_EGRESOS.FECHA + targetRowIngresoEgreso).setValue(now); //FECHA
+        sheetIngresoEgreso.getRange(INGRESOS_EGRESOS.REFERENCIA + targetRowIngresoEgreso).setValue("PAGO PEDIDO"); //REFERENCIA
+        sheetIngresoEgreso.getRange(INGRESOS_EGRESOS.NUM + targetRowIngresoEgreso).setValue(inOutSeq.NEXT); //NUM
+        sheetIngresoEgreso.getRange(INGRESOS_EGRESOS.CODIGO + targetRowIngresoEgreso).setValue(inOutNewCode); //CODIGO
+        sheetIngresoEgreso.getRange(INGRESOS_EGRESOS.DETALLE + targetRowIngresoEgreso).setValue(detalle); //DETALLE
+        sheetIngresoEgreso.getRange(INGRESOS_EGRESOS.ENTRADA + targetRowIngresoEgreso).setValue(payValue); //ENTRADA
+        sheetIngresoEgreso.getRange(INGRESOS_EGRESOS.M_PAGO + targetRowIngresoEgreso).setValue(form.metodoPago); //M PAGO
 
         // Escribir datos en tabla Pagos_Pedidos (Punto de fallo potencial)
-        sheetPagos.getRange('A' + targetRowPagos).setValue(now);
-        sheetPagos.getRange('B' + targetRowPagos).setValue(pagoNewCode);
-        sheetPagos.getRange('C' + targetRowPagos).setValue(inOutNewCode);
-        sheetPagos.getRange('D' + targetRowPagos).setValue(form.inCode);
-        sheetPagos.getRange('E' + targetRowPagos).setValue(formulaProductName);
-        sheetPagos.getRange('F' + targetRowPagos).setValue(controlIngresoRow.METODO_DE_PAGO);
-        sheetPagos.getRange('G' + targetRowPagos).setValue(payValue);
+        sheetPagos.getRange(PAGO_PEDIDOS.FECHA + targetRowPagos).setValue(now);
+        sheetPagos.getRange(PAGO_PEDIDOS.CODIGO + targetRowPagos).setValue(pagoNewCode);
+        sheetPagos.getRange(PAGO_PEDIDOS.COD_IN_OUT + targetRowPagos).setValue(inOutNewCode);
+        sheetPagos.getRange(PAGO_PEDIDOS.COD_IN + targetRowPagos).setValue(form.inCode);
+        sheetPagos.getRange(PAGO_PEDIDOS.PRODUCTO + targetRowPagos).setValue(formulaProductName);
+        sheetPagos.getRange(PAGO_PEDIDOS.METODO_DE_COMPRA + targetRowPagos).setValue(controlIngresoRow.METODO_DE_PAGO);
+        sheetPagos.getRange(PAGO_PEDIDOS.VALOR + targetRowPagos).setValue(payValue);
 
         // 5. Actualizar Secuencia (Punto de fallo potencial)
         setSequences(inOutSeq.NUMBER, inOutSeq.NEXT);

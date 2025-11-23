@@ -27,12 +27,15 @@ function getInventory() {
 
 function getActiveSuppliers() {
   // PROVEEDORES: A hasta H. Filtramos por ACTVIO (Col D)
-  return getRowDataAsObjects("PROVEEDORES", 2, 1, 7);
+  const suppliers = getRowDataAsObjects("PROVEEDORES", 2, 1, 7);
+  return suppliers.filter(supplier => supplier.ACTVIO === true);
 }
 
 function getActivePaymentMethods() {
   // METODO_DE_PAGO: A hasta D. Filtramos por ACTIVO (Col D)
-  return getRowDataAsObjects("METODO_DE_PAGO", 3, 1, 4);
+  const paymentMethods = getRowDataAsObjects("METODO_DE_PAGO", 3, 1, 4);
+  console.log('paymentMethodsL: ', paymentMethods);
+  return paymentMethods.filter(method => method.ACTIVO === true);
 }
 
 function getClients(){
@@ -165,4 +168,3 @@ function getRowDataAsObjectByNameColumn(sheetName, dataStartRow, startColumn, en
         throw new Error(e.message); 
     }
 }
-

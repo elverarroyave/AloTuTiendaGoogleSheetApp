@@ -23,45 +23,58 @@ function createControlIngreso(form) {
   const nextNum = ingresoSequence.NEXT; 
   const fullCode = ingresoSequence.PREFIX + nextNum; // Ej: IN186
 
-  // 2. Insertar Fila
-  sheet.insertRowBefore(targetRow);
+  try {
+    // 2. Insertar Fila
+    sheet.insertRowBefore(targetRow);
 
-  // 3. Preparar Datos Calculados
-  let now = new Date();
-  let timeZone = ss.getSpreadsheetTimeZone();
-  let formattedDate = getCurrentDateTime();
-  
-  // Parsear números para asegurar cálculos correctos
-  const cantidad = Number(form.cantidad);
-  const precioUnitario = Number(form.precioUnitario);
-  const total = cantidad * precioUnitario;
+    // 3. Preparar Datos Calculados
+    let now = getCurrentDateTime();
+    
+    // Parsear números para asegurar cálculos correctos
+    const cantidad = Number(form.cantidad);
+    const precioUnitario = Number(form.precioUnitario);
+    const total = cantidad * precioUnitario;
 
-  const formulaSaldoRestante = '=SUMIF(PAGOS_PEDIDOS[COD_IN],CONTROL_INGRESO[CODIGO],PAGOS_PEDIDOS[VALOR])';
+    const formulaSaldoRestante = '=SUMIF(PAGOS_PEDIDOS[COD_IN],CONTROL_INGRESO[CODIGO],PAGOS_PEDIDOS[VALOR])';
 
-  // 4. Escribir Datos (Mapeo exacto a columnas A-N)
-  sheet.getRange('A' + targetRow).setValue(formattedDate);          // FECHA
-  sheet.getRange('B' + targetRow).setValue(nextNum);                // NUM_IN
-  sheet.getRange('C' + targetRow).setValue(fullCode);               // COD_INGRESO
-  sheet.getRange('D' + targetRow).setValue(form.empleado);          // EMPLEADO QUE RECIBE
-  sheet.getRange('E' + targetRow).setValue(form.codProv);           // COD_PROV
-  sheet.getRange('F' + targetRow).setValue(form.nombreProv);        // PROVEEDOR
-  sheet.getRange('G' + targetRow).setValue(form.codPrdt);           // COD_PRDT
-  sheet.getRange('H' + targetRow).setValue(form.nombrePrdt);        // PRODUCTO
-  sheet.getRange('I' + targetRow).setValue(cantidad);               // CANTIDAD
-  sheet.getRange('J' + targetRow).setValue(precioUnitario);         // PRECIO UNITARIO
-  sheet.getRange('K' + targetRow).setValue(form.metodoPago);        // MÉTODO DE PAGO
-  sheet.getRange('L' + targetRow).setValue(formulaSaldoRestante);   // formula saldo restante
-  sheet.getRange('M' + targetRow).setValue(total);                  // TOTAL
-  sheet.getRange('N' + targetRow).setValue('FALSE');                  // PAGADO
-  sheet.getRange('O' + targetRow).setValue(form.estado);            // ESTADO
-  sheet.getRange('P' + targetRow).setValue(form.enlaceFactura);     // ENLACE DE FACTURA
+    // 4. Escribir Datos (Mapeo exacto a columnas A-N)
+    sheet.getRange(CONTROL_INGRESO.FECHA + targetRow).setValue(now);          // FECHA
+    sheet.getRange(CONTROL_INGRESO.NUM_IN + targetRow).setValue(nextNum);                // NUM_IN
+    sheet.getRange(CONTROL_INGRESO.COD_INGRESO + targetRow).setValue(fullCode);               // COD_INGRESO
+    sheet.getRange(CONTROL_INGRESO.QUIEN_RECIBE + targetRow).setValue(form.empleado);          // EMPLEADO QUE RECIBE
+    sheet.getRange(CONTROL_INGRESO.COD_PROV + targetRow).setValue(form.codProv);           // COD_PROV
+    sheet.getRange(CONTROL_INGRESO.PROVEEDOR + targetRow).setValue(form.nombreProv);        // PROVEEDOR
+    sheet.getRange(CONTROL_INGRESO.COD_PRDT + targetRow).setValue(form.codPrdt);           // COD_PRDT
+    sheet.getRange(CONTROL_INGRESO.PRODUCTO + targetRow).setValue(form.nombrePrdt);        // PRODUCTO
+    sheet.getRange(CONTROL_INGRESO.CANTIDAD + targetRow).setValue(cantidad);               // CANTIDAD
+    sheet.getRange(CONTROL_INGRESO.PRECIO_UNITARIO + targetRow).setValue(precioUnitario);         // PRECIO UNITARIO
+    sheet.getRange(CONTROL_INGRESO.METODO_DE_PAGO + targetRow).setValue(form.metodoPago);        // MÉTODO DE PAGO
+    sheet.getRange(CONTROL_INGRESO.SALDO_PAGADO + targetRow).setValue(formulaSaldoRestante);   // formula saldo restante
+    sheet.getRange(CONTROL_INGRESO.TOTAL + targetRow).setValue(total);                  // TOTAL
+    sheet.getRange(CONTROL_INGRESO.PAGADO + targetRow).setValue('FALSE');                // PAGADO
+    sheet.getRange(CONTROL_INGRESO.ESTADO + targetRow).setValue(form.estado);            // ESTADO
+    sheet.getRange(CONTROL_INGRESO.ENLACE_FACTURA + targetRow).setValue(form.enlaceFactura);     // ENLACE DE FACTURA
 
-  // 5. Actualizar Secuencia
-  setSequences(ingresoSequence.NUMBER, nextNum);
+    // 5. Actualizar Secuencia
+    setSequences(ingresoSequence.NUMBER, nextNum);
 
-  return {
-    success: true,
-    code: fullCode,
-    total: total
-  };
+    return {
+      success: true,
+      code: fullCode,
+      total: total
+    };
+
+  } catch (error) {
+    console.error("Error al crear el ingreso. Realizando rollback:", error);
+    
+    // --- ROLLBACK: ELIMINAR FILA INSERTADA ---
+    try {
+        sheet.deleteRow(targetRow);
+        console.log(`Rollback exitoso: Fila ${targetRow} eliminada de CONTROL_INGRESO.`);
+    } catch (e) {
+        console.error("Error en rollback de CONTROL_INGRESO:", e);
+    }
+    
+    throw new Error(`Error en la transacción. Se realizó un rollback. Detalle: ${error.message}`);
+  }
 }

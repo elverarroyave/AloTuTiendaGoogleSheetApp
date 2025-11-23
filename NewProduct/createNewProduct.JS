@@ -36,23 +36,39 @@ function createNewProduct(form) {
   // 1. Insertar fila vacía y empujar las demás hacia abajo
   sheet.insertRowBefore(targetRow);
 
-  // 2. Escribir datos en INVENTARIO
-  // Estructura: | NOMBRE (A) | NUM (B) | CODIGO (C) | CATEGORIA (D) | UNO/PRECIO (E) |
-  
-  sheet.getRange('A' + targetRow).setValue(form.productName.toUpperCase()); // Nombre
-  sheet.getRange('B' + targetRow).setValue(nextNum);          // Num
-  sheet.getRange('C' + targetRow).setValue(fullCode);         // Código Completo
-  sheet.getRange('D' + targetRow).setValue(form.category);    // Categoría
-  sheet.getRange('E' + targetRow).setValue(form.salePrice);   // Precio (Columna UNO)
+  try{
+    
+      // 2. Escribir datos en INVENTARIO
+      // Estructura: | NOMBRE (A) | NUM (B) | CODIGO (C) | CATEGORIA (D) | UNO/PRECIO (E) |
+      
+      sheet.getRange(INVENTARIO.NOMBRE + targetRow).setValue(form.productName.toUpperCase()); // Nombre
+      sheet.getRange(INVENTARIO.NUM + targetRow).setValue(nextNum);          // Num
+      sheet.getRange(INVENTARIO.CODIGO + targetRow).setValue(fullCode);         // Código Completo
+      sheet.getRange(INVENTARIO.CATEGORIA + targetRow).setValue(form.category);    // Categoría
+      sheet.getRange(INVENTARIO.UNO + targetRow).setValue(form.salePrice);   // Precio (Columna UNO)
+    
+      // 3. Actualizar la tabla SEQUENCES
+      // Lógica solicitada: Remplazar CURRENT con el valor de NEXT recuperado.
+      // La fórmula en la hoja (=CURRENT + 1) actualizará el nuevo NEXT automáticamente.
+      setSequences(productSequence.NUMBER, nextNum);
+    
+      return {
+        success: true,
+        code: fullCode,
+        name: form.productName
+      };
 
-  // 3. Actualizar la tabla SEQUENCES
-  // Lógica solicitada: Remplazar CURRENT con el valor de NEXT recuperado.
-  // La fórmula en la hoja (=CURRENT + 1) actualizará el nuevo NEXT automáticamente.
-  setSequences(productSequence.NUMBER, nextNum);
-
-  return {
-    success: true,
-    code: fullCode,
-    name: form.productName
-  };
+  }catch(error){
+    console.error("Error al crear el producto. Realizando rollback:", error);
+    
+    // --- ROLLBACK: ELIMINAR FILA INSERTADA ---
+    try {
+        sheet.deleteRow(targetRow);
+        console.log(`Rollback exitoso: Fila ${targetRow} eliminada de INVENTARIO.`);
+    } catch (e) {
+        console.error("Error en rollback de INVENTARIO:", e);
+    }
+    
+    throw new Error(`Error en la transacción. Se realizó un rollback. Detalle: ${error.message}`);
+  }
 }

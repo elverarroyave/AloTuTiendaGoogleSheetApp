@@ -25,40 +25,55 @@ function createAbono(form, inOutSeq) {
   sheetIngresoEgreso.insertRowBefore(targetRowIngresoEgreso);
   sheetAbonos.insertRowBefore(targetRowAbonos);
 
-  // 3. Preparar Datos
-  const now = getCurrentDateTime();
-  const formulaClientName = '=XLOOKUP(ABONOS[COD_VENTA],CONTROL_VENTAS[CODIGO],CONTROL_VENTAS[CLIENTE],"CLIENTE NO ENCONTRADO")';
-  const formulaProductName = '=XLOOKUP(ABONOS[COD_VENTA],CONTROL_VENTAS[CODIGO],CONTROL_VENTAS[PRODUCTO],"PRODUCTO NO ENCONTRADO")';
-  const valorAbono = Number(form.abonoValue);
-  const detalle = `Abono para venta ${form.ventaCode}`;
+  try{
+      // 3. Preparar Datos
+    const now = getCurrentDateTime();
+    const formulaClientName = '=XLOOKUP(ABONOS[COD_VENTA],CONTROL_VENTAS[CODIGO],CONTROL_VENTAS[CLIENTE],"CLIENTE NO ENCONTRADO")';
+    const formulaProductName = '=XLOOKUP(ABONOS[COD_VENTA],CONTROL_VENTAS[CODIGO],CONTROL_VENTAS[PRODUCTO],"PRODUCTO NO ENCONTRADO")';
+    const valorAbono = Number(form.abonoValue);
+    const detalle = `Abono para venta ${form.ventaCode}`;
 
-  // 4. Escribir Datos (Estructura asumida: A: FECHA | B: NUM_ABONO | C: COD_ABONO | F: VALOR | H: METODO_PAGO)
-  sheetIngresoEgreso.getRange('A' + targetRowIngresoEgreso).setValue(now);
-  sheetIngresoEgreso.getRange('B' + targetRowIngresoEgreso).setValue('ABONO');
-  sheetIngresoEgreso.getRange('C' + targetRowIngresoEgreso).setValue(inOutSeq.NEXT);                       
-  sheetIngresoEgreso.getRange('D' + targetRowIngresoEgreso).setValue(inOutNewCode);
-  sheetIngresoEgreso.getRange('E' + targetRowIngresoEgreso).setValue(detalle);
-  sheetIngresoEgreso.getRange('F' + targetRowIngresoEgreso).setValue(valorAbono);       
-  sheetIngresoEgreso.getRange('H' + targetRowIngresoEgreso).setValue(form.metodoPago);
+    // 4. Escribir Datos (Estructura asumida: A: FECHA | B: NUM_ABONO | C: COD_ABONO | F: VALOR | H: METODO_PAGO)
+    sheetIngresoEgreso.getRange(INGRESOS_EGRESOS.FECHA + targetRowIngresoEgreso).setValue(now);
+    sheetIngresoEgreso.getRange(INGRESOS_EGRESOS.REFERENCIA + targetRowIngresoEgreso).setValue('ABONO');
+    sheetIngresoEgreso.getRange(INGRESOS_EGRESOS.NUM + targetRowIngresoEgreso).setValue(inOutSeq.NEXT);                       
+    sheetIngresoEgreso.getRange(INGRESOS_EGRESOS.CODIGO + targetRowIngresoEgreso).setValue(inOutNewCode);
+    sheetIngresoEgreso.getRange(INGRESOS_EGRESOS.DETALLE + targetRowIngresoEgreso).setValue(detalle);
+    sheetIngresoEgreso.getRange(INGRESOS_EGRESOS.ENTRADA + targetRowIngresoEgreso).setValue(valorAbono);       
+    sheetIngresoEgreso.getRange(INGRESOS_EGRESOS.M_PAGO + targetRowIngresoEgreso).setValue(form.metodoPago);
 
-  // Escribir datos en tabla Abono
-  sheetAbonos.getRange('A' + targetRowAbonos).setValue(now);
-  sheetAbonos.getRange('B' + targetRowAbonos).setValue(abonoNewCode);
-  sheetAbonos.getRange('C' + targetRowAbonos).setValue(inOutNewCode);
-  sheetAbonos.getRange('D' + targetRowAbonos).setValue(form.ventaCode);
-  sheetAbonos.getRange('E' + targetRowAbonos).setValue(formulaClientName);
-  sheetAbonos.getRange('F' + targetRowAbonos).setValue(formulaProductName);
-  sheetAbonos.getRange('G' + targetRowAbonos).setValue(valorAbono);
-  
-  // 5. Actualizar Secuencia
-  setSequences(inOutSeq.NUMBER, inOutSeq.NEXT);
-  setSequences(abonoSeq.NUMBER, abonoSeq.NEXT);
-               
-  return {
-    success: true,
-    code: inOutNewCode,
-    value: Number(form.abonoValue)
-  };
+    // Escribir datos en tabla Abono
+    sheetAbonos.getRange(ABONOS.FECHA + targetRowAbonos).setValue(now);
+    sheetAbonos.getRange(ABONOS.CODIGO + targetRowAbonos).setValue(abonoNewCode);
+    sheetAbonos.getRange(ABONOS.COD_IN_OUT + targetRowAbonos).setValue(inOutNewCode);
+    sheetAbonos.getRange(ABONOS.COD_VENTA + targetRowAbonos).setValue(form.ventaCode);
+    sheetAbonos.getRange(ABONOS.CLIENTE + targetRowAbonos).setValue(formulaClientName);
+    sheetAbonos.getRange(ABONOS.PRODUCTO + targetRowAbonos).setValue(formulaProductName);
+    sheetAbonos.getRange(ABONOS.VALOR + targetRowAbonos).setValue(valorAbono);
+    
+    // 5. Actualizar Secuencia
+    setSequences(inOutSeq.NUMBER, inOutSeq.NEXT);
+    setSequences(abonoSeq.NUMBER, abonoSeq.NEXT);
+                
+    return {
+      success: true,
+      code: inOutNewCode,
+      value: Number(form.abonoValue)
+    }; 
+  } catch (error) {
+    console.error("Error al crear el abono. Realizando rollback:", error);
+    
+    // --- ROLLBACK: ELIMINAR FILA INSERTADA ---
+    try {
+        sheetIngresoEgreso.deleteRow(targetRowIngresoEgreso);
+        sheetAbonos.deleteRow(targetRowAbonos);
+        console.log(`Rollback exitoso: Filas ${targetRowIngresoEgreso} y ${targetRowAbonos} eliminadas de INGRESOS_EGRESOS y ABONOS respectivamente.`);
+    } catch (e) {
+        console.error("Error en rollback de INGRESOS_EGRESOS y ABONOS:", e);
+    }
+    
+    throw new Error(`Error en la transacción. Se realizó un rollback. Detalle: ${error.message}`);
+  }
 }
 
 function getSequencesAbono(){

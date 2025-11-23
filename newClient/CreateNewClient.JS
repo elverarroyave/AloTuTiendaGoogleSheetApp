@@ -21,10 +21,6 @@ function createNewClient(form) {
   }
 
   const nextNum = clientSequence.NEXT; 
-  // Formato código: PREFIX (CLN) + NEXT (ej: 236) -> CLN236
-  // Si prefieres ceros a la izquierda como en tu ejemplo (CLNT001), usa: 
-  // const fullCode = "CLNT" + nextNum.toString().padStart(3, '0'); 
-  // Pero basándome en tu tabla SEQUENCE usaremos el prefijo configurado:
   const fullCode = clientSequence.PREFIX + nextNum;
 
   const targetRow = 3; // Insertar siempre en fila 3 (debajo de encabezados)
@@ -32,25 +28,39 @@ function createNewClient(form) {
   // 2. Insertar Fila
   sheet.insertRowBefore(targetRow);
 
-  // 3. Escribir Datos
-  // Estructura Tabla: 
-  // A: NOMBRE | B: NUM | C: CODIGO | D: DOCUMENTO | E: TELEFONO | F: CORREO | G: DIRECCION | H: SOCIO
-  
-  sheet.getRange('A' + targetRow).setValue(form.clientName.toUpperCase()); 
-  sheet.getRange('B' + targetRow).setValue(nextNum);
-  sheet.getRange('C' + targetRow).setValue(fullCode);
-  sheet.getRange('D' + targetRow).setValue(form.clientDoc || ""); // Campo Documento (para mantener orden columna)
-  sheet.getRange('E' + targetRow).setValue(form.clientPhone);
-  sheet.getRange('F' + targetRow).setValue(form.clientEmail);
-  sheet.getRange('G' + targetRow).setValue(form.clientAddress);
-  sheet.getRange('H' + targetRow).setValue(form.socio);
-
-  // 4. Actualizar Secuencia
-  setSequences(clientSequence.NUMBER, nextNum);
-
-  return {
-    success: true,
-    code: fullCode,
-    name: form.clientName
-  };
+  try{
+      // 3. Escribir Datos
+      // Estructura Tabla: 
+      // A: NOMBRE | B: NUM | C: CODIGO | D: DOCUMENTO | E: TELEFONO | F: CORREO | G: DIRECCION | H: SOCIO
+      
+      sheet.getRange(CLIENTES.NOMBRE + targetRow).setValue(form.clientName.toUpperCase()); 
+      sheet.getRange(CLIENTES.NUM + targetRow).setValue(nextNum);
+      sheet.getRange(CLIENTES.CODIGO + targetRow).setValue(fullCode);
+      sheet.getRange(CLIENTES.DOCUMENTO + targetRow).setValue(form.clientDoc || ""); // Campo Documento (para mantener orden columna)
+      sheet.getRange(CLIENTES.TELEFONO + targetRow).setValue(form.clientPhone);
+      sheet.getRange(CLIENTES.CORREO + targetRow).setValue(form.clientEmail);
+      sheet.getRange(CLIENTES.DIRECCION + targetRow).setValue(form.clientAddress);
+      sheet.getRange(CLIENTES.SOCIO + targetRow).setValue(form.socio);
+    
+      // 4. Actualizar Secuencia
+      setSequences(clientSequence.NUMBER, nextNum);
+    
+      return {
+        success: true,
+        code: fullCode,
+        name: form.clientName
+      };
+  }catch(error){
+    console.error("Error al crear el cliente. Realizando rollback:", error);
+    
+    // --- ROLLBACK: ELIMINAR FILA INSERTADA ---
+    try {
+        sheet.deleteRow(targetRow);
+        console.log(`Rollback exitoso: Fila ${targetRow} eliminada de CLIENTES.`);
+    } catch (e) {
+        console.error("Error en rollback de CLIENTES:", e);
+    }
+    
+    throw new Error(`Error en la transacción. Se realizó un rollback. Detalle: ${error.message}`);
+  }
 }
