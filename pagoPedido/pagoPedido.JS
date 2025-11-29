@@ -44,7 +44,7 @@ function crearPago(form, inOutSeq) {
         sheetIngresoEgreso.getRange(INGRESOS_EGRESOS.NUM + targetRowIngresoEgreso).setValue(inOutSeq.NEXT); //NUM
         sheetIngresoEgreso.getRange(INGRESOS_EGRESOS.CODIGO + targetRowIngresoEgreso).setValue(inOutNewCode); //CODIGO
         sheetIngresoEgreso.getRange(INGRESOS_EGRESOS.DETALLE + targetRowIngresoEgreso).setValue(detalle); //DETALLE
-        sheetIngresoEgreso.getRange(INGRESOS_EGRESOS.ENTRADA + targetRowIngresoEgreso).setValue(payValue); //ENTRADA
+        sheetIngresoEgreso.getRange(INGRESOS_EGRESOS.SALIDA + targetRowIngresoEgreso).setValue(payValue); //SALIDA
         sheetIngresoEgreso.getRange(INGRESOS_EGRESOS.M_PAGO + targetRowIngresoEgreso).setValue(form.metodoPago); //M PAGO
 
         // Escribir datos en tabla Pagos_Pedidos (Punto de fallo potencial)

@@ -1,3 +1,5 @@
+const SPREADSHEET_ID = "1nSnjsGYA3WmC-JeZB-Miv8Tz1Mg1vFJIDZyXKsnGVnY";
+
 function onOpen() {
   const ui = SpreadsheetApp.getUi();
   
@@ -26,9 +28,9 @@ function getInventory() {
 }
 
 function getActiveSuppliers() {
-  // PROVEEDORES: A hasta H. Filtramos por ACTVIO (Col D)
+  // PROVEEDORES: A hasta H. Filtramos por ACTIVO (Col D)
   const suppliers = getRowDataAsObjects("PROVEEDORES", 2, 1, 7);
-  return suppliers.filter(supplier => supplier.ACTVIO === true);
+  return suppliers.filter(supplier => supplier.ACTIVO === true);
 }
 
 function getActivePaymentMethods() {

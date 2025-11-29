@@ -4,7 +4,8 @@ INGRESOS_EGRESOS={
     NUM:'C',
     CODIGO:'D',
     DETALLE:'E',
-    ENTRADA:'G',
+    ENTRADA: 'F',
+    SALIDA:'G',
     M_PAGO:'H',
 }
 
