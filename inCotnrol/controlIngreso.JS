@@ -10,7 +10,7 @@ function openControlIngresoModal(){
 // ==========================================
 
 function createControlIngreso(form) {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   const sheet = ss.getSheetByName("CONTROL_INGRESO");
   const targetRow = 3; // Insertar en fila 3
 

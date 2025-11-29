@@ -650,7 +650,7 @@ function openCurstomerModal(){
 }
 
 function createNewSale(form, saleSequence) {
-  let sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("CONTROL_VENTAS");
+  let sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName("CONTROL_VENTAS");
   let targetRow = 3;
 
   // --- 1. INSERTAR FILA VACÍA ---
@@ -749,7 +749,7 @@ function getSequences(){
 
 // Función ajustada para escribir en la columna CURRENT (Columna D)
 function setSequences(sequenceNumber, newCurrentValue){
-  let sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("SEQUENCES");
+  let sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName("SEQUENCES");
   
   // sequenceNumber viene de la columna A (NUMBER). 
   // Asumimos que NUMBER corresponde a la fila relativa + 1 o buscamos la fila.
@@ -767,7 +767,7 @@ function getRowDataAsObjects(sheetName, rowIndex, startColumn, endColumn) {
     // ... (Usa la misma función que proporcionaste en tu prompt)
     // Si no la copiaste aquí, asegúrate de que esté en tu archivo Code.gs original
     try {
-    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(sheetName);
     if (!sheet) throw new Error(`Hoja no encontrada: ${sheetName}`);
     const lastRow = sheet.getLastRow();
     if (lastRow < rowIndex) return [];

@@ -9,7 +9,7 @@ function openClientModal(){
 // ==========================================
 
 function createNewClient(form) {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   const sheet = ss.getSheetByName("CLIENTES");
   
   // 1. Obtener Secuencia

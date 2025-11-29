@@ -13,7 +13,7 @@ function openProductModal() {
 // ==========================================
 
 function createNewProduct(form) {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   const sheet = ss.getSheetByName("INVENTARIO");
   
   // Obtenemos la secuencia actual para PRODUCTO para asegurar consistencia en el servidor

@@ -9,7 +9,7 @@ function openAbonoSidebar(){
 // ==========================================
 
 function createAbono(form, inOutSeq) {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   const sheetIngresoEgreso = ss.getSheetByName("INGRESOS_EGRESOS"); 
   const targetRowIngresoEgreso = 4;
   const sheetAbonos = ss.getSheetByName("ABONOS"); 

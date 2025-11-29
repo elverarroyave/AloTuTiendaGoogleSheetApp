@@ -23,35 +23,56 @@ function openMainInterface() {
 }
 
 function doGet(e) {
-  const page = e.parameter.page;
-  
-  if (!page || page === 'home') {
-    const template = HtmlService.createTemplateFromFile('mainInterface');
-    template.webAppUrl = ScriptApp.getService().getUrl();
-    return template.evaluate()
-      .setTitle('AloTuTienda - Panel Principal')
-      .addMetaTag('viewport', 'width=device-width, initial-scale=1')
-      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+  try {
+    const page = e.parameter.page;
+    
+    if (!page || page === 'home') {
+      // Try with folder first, then without
+      let template;
+      try {
+        template = HtmlService.createTemplateFromFile('main/mainInterface');
+      } catch (e) {
+        template = HtmlService.createTemplateFromFile('mainInterface');
+      }
+      template.webAppUrl = ScriptApp.getService().getUrl();
+      return template.evaluate()
+        .setTitle('AloTuTienda - Panel Principal')
+        .addMetaTag('viewport', 'width=device-width, initial-scale=1')
+        .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+    }
+    
+    // Map pages to files with CORRECT PATHS (Folder/File)
+    const pageMap = {
+      'createNewSale': 'newSale/createNewSaleForm',
+      'createNewProduct': 'newProduct/createNewProductForm',
+      'createNewClient': 'newClient/createNewClientForm', 
+      'controlIngreso': 'inCotnrol/createControlIngresoForm',
+      'addAbono': 'abono/addAbonoForm',
+      'pagoPedido': 'pagoPedido/pagoPedidoForm'
+    };
+    
+    if (pageMap[page]) {
+      let template;
+      try {
+        template = HtmlService.createTemplateFromFile(pageMap[page]);
+      } catch (e) {
+        // Fallback: try flat name if folder path fails
+        const flatName = pageMap[page].split('/').pop();
+        template = HtmlService.createTemplateFromFile(flatName);
+      }
+      
+      return template.evaluate()
+        .addMetaTag('viewport', 'width=device-width, initial-scale=1')
+        .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+    }
+    
+    return HtmlService.createHtmlOutput('<h2>Página no encontrada</h2><p>La sección solicitada no existe.</p>')
+        .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+
+  } catch (error) {
+    return HtmlService.createHtmlOutput(`<h2>Error</h2><p>${error.message}</p>`)
+        .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
   }
-  
-  // Map pages to files
-  const pageMap = {
-    'createNewSale': 'createNewSaleForm',
-    'createNewProduct': 'createNewProductForm',
-    'createNewClient': 'createNewClientForm',
-    'controlIngreso': 'createControlIngresoForm',
-    'addAbono': 'addAbonoForm',
-    'pagoPedido': 'pagoPedidoForm'
-  };
-  
-  if (pageMap[page]) {
-    return HtmlService.createTemplateFromFile(pageMap[page])
-      .evaluate()
-      .addMetaTag('viewport', 'width=device-width, initial-scale=1')
-      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
-  }
-  
-  return HtmlService.createHtmlOutput('<h2>Página no encontrada</h2><p>La sección solicitada no existe.</p>');
 }
 
 function getUrl() {

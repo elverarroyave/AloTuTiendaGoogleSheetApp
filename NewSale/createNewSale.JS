@@ -9,7 +9,7 @@ function openCurstomerModal(){
 }
 
 function createNewSale(form, saleSequence) {
-  let sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("CONTROL_VENTAS");
+  let sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName("CONTROL_VENTAS");
   let targetRow = 3;
 
   // --- 1. INSERTAR FILA VACÍA ---
@@ -25,42 +25,31 @@ function createNewSale(form, saleSequence) {
 
   // --- 4. ESCRITURA DE DATOS EN LA FILA targetRow (Fila 3) ---
   try{
-    // Columna A: Fecha y Hora
     sheet.getRange(CONTROL_VENTAS.FECHA + targetRow).setValue(formattedDate);
     
-    // Columna B: Número de Venta (Valor calculado)
     sheet.getRange(CONTROL_VENTAS.NUM + targetRow).setValue(newSaleNumber); 
 
-    // Columna C: Código de venta
     sheet.getRange(CONTROL_VENTAS.CODIGO + targetRow).setValue(saleCode); 
     
     //UPDATE SALE SEQUENCE
     setSequences(saleSequence.NUMBER, newSaleNumber)
 
-    // Columna d: Socio
     sheet.getRange(CONTROL_VENTAS.SOCIO + targetRow).setValue(form.socio); 
     
-    // Columna E: Plazo meses
     sheet.getRange(CONTROL_VENTAS.C_PAGOS + targetRow).setValue(form.plazo); 
     
-    // Columna F: Código Producto
     sheet.getRange(CONTROL_VENTAS.COD_PRDT + targetRow).setValue(form.productCode); 
     
-    // Columna H: Cantidad
     sheet.getRange(CONTROL_VENTAS.CANTIDAD + targetRow).setValue(form.amount); 
     
-    // Columna I: Código Cliente
     sheet.getRange(CONTROL_VENTAS.COD_CLNT + targetRow).setValue(form.clientCode); 
 
-    // Columna L: Precio
     sheet.getRange(CONTROL_VENTAS.PRECIO + targetRow).setValue(form.priceProduct); 
 
     if(form.checkIsCredict){
-      // Columna N: Pago
       sheet.getRange(CONTROL_VENTAS.PAGO + targetRow).setValue(form.firstPayment);
       sheet.getRange(CONTROL_VENTAS.ESTADO + targetRow).setValue(SALE_STATUS.AL_DIA);
     }else{
-      // Columna N: Pago
       sheet.getRange(CONTROL_VENTAS.PAGO + targetRow).setValue(form.priceProduct); 
       sheet.getRange(CONTROL_VENTAS.ESTADO + targetRow).setValue(SALE_STATUS.PAGADO);
     }

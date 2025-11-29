@@ -651,7 +651,7 @@ function openCurstomerSidebar(){
 }
 
 function createNewSale(form, saleSequence) {
-  let sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("CONTROL_VENTAS");
+  let sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName("CONTROL_VENTAS");
   let targetRow = 3;
 
   // --- 1. INSERTAR FILA VACÍA ---
@@ -724,7 +724,7 @@ function createNewSale(form, saleSequence) {
  */
 function getRowDataAsObjects(sheetName,rowIndex, startColumn, endColumn) {
   try {
-    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(sheetName);
     if (!sheet) {
       throw new Error(`Hoja no encontrada: ${sheetName}`);
     }
@@ -803,7 +803,7 @@ function getSequences(){
 }
 
 function setSequences(targetRow, nextValue){
-  let sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("SEQUENCES");
+  let sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName("SEQUENCES");
     // Columna D: CurrenValue, targetRow + 1, porque la secuencia inicia desde la fila 2
   sheet.getRange('D' + (targetRow + 1)).setValue(nextValue);
 }

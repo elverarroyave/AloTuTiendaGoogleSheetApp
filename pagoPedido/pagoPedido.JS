@@ -8,7 +8,7 @@ function openPagoSidebar(){
 // ==========================================
 
 function crearPago(form, inOutSeq) {
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
     const sheetIngresoEgreso = ss.getSheetByName("INGRESOS_EGRESOS");
     const targetRowIngresoEgreso = 4;
     const sheetPagos = ss.getSheetByName("PAGOS_PEDIDOS");

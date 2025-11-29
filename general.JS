@@ -1,4 +1,4 @@
-const SPREADSHEET_ID = "1nSnjsGYA3WmC-JeZB-Miv8Tz1Mg1vFJIDZyXKsnGVnY";
+const SPREADSHEET_ID = "17kHi1Cvk-p3c-mzK8jMoY8d2Ser38nm5GyPkUdHhwDI";
 
 function onOpen() {
   const ui = SpreadsheetApp.getUi();
@@ -74,7 +74,7 @@ function getSequences(){
 
 // Función ajustada para escribir en la columna CURRENT (Columna D)
 function setSequences(sequenceNumber, newCurrentValue){
-  let sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("SEQUENCES");
+  let sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName("SEQUENCES");
   const rowToUpdate = parseInt(sequenceNumber) + 1;
   // Actualizamos la columna D (CURRENT)
   sheet.getRange('D' + rowToUpdate).setValue(newCurrentValue);
@@ -83,7 +83,7 @@ function setSequences(sequenceNumber, newCurrentValue){
 // Función auxiliar necesaria (ya la tenías, pero asegúrate de que esté en el archivo)
 function getRowDataAsObjects(sheetName, rowIndex, startColumn, endColumn) {
     try {
-    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(sheetName);
     if (!sheet) throw new Error(`Hoja no encontrada: ${sheetName}`);
     const lastRow = sheet.getLastRow();
     if (lastRow < rowIndex) return [];
@@ -121,7 +121,7 @@ function getRowDataAsObjects(sheetName, rowIndex, startColumn, endColumn) {
  */
 function getRowDataAsObjectByNameColumn(sheetName, dataStartRow, startColumn, endColumn, nameColumnCode, code) {
     try {
-        const ss = SpreadsheetApp.getActiveSpreadsheet();
+        const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
         const sheet = ss.getSheetByName(sheetName);
 
         if (!sheet) {
