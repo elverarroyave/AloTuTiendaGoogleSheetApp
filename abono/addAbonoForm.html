@@ -118,9 +118,6 @@
           
           // NOTA: La carga de Métodos de Pago se eliminó porque las opciones están manuales en el HTML.
       }
-
-      // Usaremos una variable local para la secuencia para hacerla más robusta.
-      var abonoSeq = null; 
       
       function displaySequence(sequences) {
           // Buscamos la secuencia por nombre 'ABONO'
@@ -205,7 +202,7 @@
                   DOM.btnSubmit.innerText = "Registrar Abono (Abonar)";
               })
               // Se envía el form data, la secuencia la busca el backend.
-              .createAbono(formData, abonoSeq); 
+              .createAbono(formData); 
       }
 
       function onSuccess(res) {

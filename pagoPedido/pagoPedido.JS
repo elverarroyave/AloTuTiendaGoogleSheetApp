@@ -7,27 +7,23 @@ function openPagoSidebar(){
 // 2. LÓGICA DE PAGOS (NUEVO)
 // ==========================================
 
-function crearPago(form, inOutSeq) {
+function crearPago(form) {
     const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-    const sheetIngresoEgreso = ss.getSheetByName("INGRESOS_EGRESOS");
-    const targetRowIngresoEgreso = 4;
+    const sheetIngresoEgreso = ss.getSheetByName(INGRESOS_EGRESOS.NAME_TABLE);
+    const targetRowIngresoEgreso = INGRESOS_EGRESOS.TARGET_ROW;
     const sheetPagos = ss.getSheetByName("PAGOS_PEDIDOS");
     const targetRowPagos = 2;
 
     // Las filas insertadas se encuentran en estas posiciones
-    const rowIngresoEgresoToDelete = targetRowIngresoEgreso;
     const rowPagosToDelete = targetRowPagos;
 
     try {
-        const inOutNewCode = inOutSeq.PREFIX + inOutSeq.NEXT; // Ej: ABO101
-
         // Obtener secuencia para pagoSeq
         const pagoSeq = getSequencesPago();
         const pagoNewCode = pagoSeq.PREFIX + pagoSeq.NEXT;
 
         // 2. Insertar Fila
         // ESTOS SON LOS PUNTOS DE FALLO CRÍTICOS A REVERTIR
-        sheetIngresoEgreso.insertRowBefore(targetRowIngresoEgreso);
         sheetPagos.insertRowBefore(targetRowPagos);
 
         // 3. Preparar Datos
@@ -39,13 +35,7 @@ function crearPago(form, inOutSeq) {
         const detalle = `Pago de pedido ${form.inCode} - ${controlIngresoRow.METODO_DE_PAGO}`;
 
         // Escritura en INGRESOS_EGRESOS (Punto de fallo potencial)
-        sheetIngresoEgreso.getRange(INGRESOS_EGRESOS.FECHA + targetRowIngresoEgreso).setValue(now); //FECHA
-        sheetIngresoEgreso.getRange(INGRESOS_EGRESOS.REFERENCIA + targetRowIngresoEgreso).setValue("PAGO PEDIDO"); //REFERENCIA
-        sheetIngresoEgreso.getRange(INGRESOS_EGRESOS.NUM + targetRowIngresoEgreso).setValue(inOutSeq.NEXT); //NUM
-        sheetIngresoEgreso.getRange(INGRESOS_EGRESOS.CODIGO + targetRowIngresoEgreso).setValue(inOutNewCode); //CODIGO
-        sheetIngresoEgreso.getRange(INGRESOS_EGRESOS.DETALLE + targetRowIngresoEgreso).setValue(detalle); //DETALLE
-        sheetIngresoEgreso.getRange(INGRESOS_EGRESOS.SALIDA + targetRowIngresoEgreso).setValue(payValue); //SALIDA
-        sheetIngresoEgreso.getRange(INGRESOS_EGRESOS.M_PAGO + targetRowIngresoEgreso).setValue(form.metodoPago); //M PAGO
+        let inOutNewCode = subControlIngreso("PAGO PEDIDO", detalle, payValue, form.metodoPago);
 
         // Escribir datos en tabla Pagos_Pedidos (Punto de fallo potencial)
         sheetPagos.getRange(PAGO_PEDIDOS.FECHA + targetRowPagos).setValue(now);
@@ -57,7 +47,6 @@ function crearPago(form, inOutSeq) {
         sheetPagos.getRange(PAGO_PEDIDOS.VALOR + targetRowPagos).setValue(payValue);
 
         // 5. Actualizar Secuencia (Punto de fallo potencial)
-        setSequences(inOutSeq.NUMBER, inOutSeq.NEXT);
         setSequences(pagoSeq.NUMBER, pagoSeq.NEXT);
 
         return {
@@ -85,8 +74,8 @@ function crearPago(form, inOutSeq) {
 
         // 2. Eliminar la fila de INGRESOS_EGRESOS
         try {
-            sheetIngresoEgreso.deleteRow(rowIngresoEgresoToDelete);
-            console.log(`Rollback exitoso: Fila ${rowIngresoEgresoToDelete} eliminada de INGRESOS_EGRESOS.`);
+            sheetIngresoEgreso.deleteRow(targetRowIngresoEgreso);
+            console.log(`Rollback exitoso: Fila ${targetRowIngresoEgreso} eliminada de INGRESOS_EGRESOS.`);
         } catch (e) {
             console.error("Error en rollback de INGRESOS_EGRESOS:", e);
         }

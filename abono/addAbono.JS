@@ -8,21 +8,18 @@ function openAbonoSidebar(){
 // 2. LÓGICA DE ABONOS (NUEVO)
 // ==========================================
 
-function createAbono(form, inOutSeq) {
+function createAbono(form) {
   const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-  const sheetIngresoEgreso = ss.getSheetByName("INGRESOS_EGRESOS"); 
-  const targetRowIngresoEgreso = 4;
+  const sheetIngresoEgreso = ss.getSheetByName(INGRESOS_EGRESOS.NAME_TABLE); 
+  const targetRowIngresoEgreso = INGRESOS_EGRESOS.TARGET_ROW;
   const sheetAbonos = ss.getSheetByName("ABONOS"); 
   const targetRowAbonos = 2;
-  
-  const inOutNewCode = inOutSeq.PREFIX + inOutSeq.NEXT; // Ej: ABO101
 
   //Obtener secuencia para abonoSeq
   const abonoSeq = getSequencesAbono();
   const abonoNewCode = abonoSeq.PREFIX + abonoSeq.NEXT;
 
   // 2. Insertar Fila
-  sheetIngresoEgreso.insertRowBefore(targetRowIngresoEgreso);
   sheetAbonos.insertRowBefore(targetRowAbonos);
 
   try{
@@ -33,14 +30,8 @@ function createAbono(form, inOutSeq) {
     const valorAbono = Number(form.abonoValue);
     const detalle = `Abono para venta ${form.ventaCode}`;
 
-    // 4. Escribir Datos (Estructura asumida: A: FECHA | B: NUM_ABONO | C: COD_ABONO | F: VALOR | H: METODO_PAGO)
-    sheetIngresoEgreso.getRange(INGRESOS_EGRESOS.FECHA + targetRowIngresoEgreso).setValue(now);
-    sheetIngresoEgreso.getRange(INGRESOS_EGRESOS.REFERENCIA + targetRowIngresoEgreso).setValue('ABONO');
-    sheetIngresoEgreso.getRange(INGRESOS_EGRESOS.NUM + targetRowIngresoEgreso).setValue(inOutSeq.NEXT);                       
-    sheetIngresoEgreso.getRange(INGRESOS_EGRESOS.CODIGO + targetRowIngresoEgreso).setValue(inOutNewCode);
-    sheetIngresoEgreso.getRange(INGRESOS_EGRESOS.DETALLE + targetRowIngresoEgreso).setValue(detalle);
-    sheetIngresoEgreso.getRange(INGRESOS_EGRESOS.ENTRADA + targetRowIngresoEgreso).setValue(valorAbono);       
-    sheetIngresoEgreso.getRange(INGRESOS_EGRESOS.M_PAGO + targetRowIngresoEgreso).setValue(form.metodoPago);
+    // Registrar en control de ingresos
+    let inOutNewCode = addControlIngreso('ABONO', detalle, valorAbono, form.metodoPago);
 
     // Escribir datos en tabla Abono
     sheetAbonos.getRange(ABONOS.FECHA + targetRowAbonos).setValue(now);
@@ -52,7 +43,6 @@ function createAbono(form, inOutSeq) {
     sheetAbonos.getRange(ABONOS.VALOR + targetRowAbonos).setValue(valorAbono);
     
     // 5. Actualizar Secuencia
-    setSequences(inOutSeq.NUMBER, inOutSeq.NEXT);
     setSequences(abonoSeq.NUMBER, abonoSeq.NEXT);
                 
     return {

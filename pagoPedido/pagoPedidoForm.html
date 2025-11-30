@@ -115,9 +115,6 @@
           
           // NOTA: La carga de Métodos de Pago se eliminó porque las opciones están manuales en el HTML.
       }
-
-      // Usaremos una variable local para la secuencia para hacerla más robusta.
-      var pagoSeq = null; 
       
       function displaySequence(sequences) {
           // Buscamos la secuencia por nombre 'INOUT'
@@ -202,7 +199,7 @@
                   DOM.btnSubmit.innerText = "Registrar Pago (Pagar)";
               })
               // Se envía el form data, la secuencia la busca el backend.
-              .crearPago(formData, pagoSeq); 
+              .crearPago(formData); 
       }
 
       function onSuccess(res) {
