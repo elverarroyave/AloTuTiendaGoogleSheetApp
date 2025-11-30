@@ -16,6 +16,8 @@ function createNewSale(form, saleSequence) {
   // Esta es la clave. Crea una nueva fila en targetRow (Fila 3) y empuja todas las filas existentes hacia abajo.
   sheet.insertRowBefore(targetRow);
 
+  console.log('Formulario recibido:', form);
+
   let formattedDate = getCurrentDateTime();
 
   //Set sale number;
@@ -34,7 +36,7 @@ function createNewSale(form, saleSequence) {
     //UPDATE SALE SEQUENCE
     setSequences(saleSequence.NUMBER, newSaleNumber)
 
-    sheet.getRange(CONTROL_VENTAS.SOCIO + targetRow).setValue(form.socio); 
+    sheet.getRange(CONTROL_VENTAS.COD_SOCIO + targetRow).setValue(form.socioCode); 
     
     sheet.getRange(CONTROL_VENTAS.C_PAGOS + targetRow).setValue(form.plazo); 
     

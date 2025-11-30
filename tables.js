@@ -33,15 +33,16 @@ CONTROL_VENTAS={
     FECHA:'A',
     NUM:'B',
     CODIGO:'C',
-    SOCIO:'D',
-    C_PAGOS:'E',
-    COD_PRDT: 'F',
-    CANTIDAD: 'H',
-    COD_CLNT: 'I',
-    PRECIO: 'L',
-    M_PAGO: 'M',
-    PAGO: 'N',
-    ESTADO: 'R',
+    COD_SOCIO:'D',
+    SOCIO:'E',
+    C_PAGOS:'F',
+    COD_PRDT: 'G',
+    CANTIDAD: 'I',
+    COD_CLNT: 'J',
+    PRECIO: 'M',
+    M_PAGO: 'N',
+    PAGO: 'O',
+    ESTADO: 'S',
 }
 
 INVENTARIO={
@@ -81,4 +82,3 @@ CONTROL_INGRESO={
     ESTADO:'O',
     ENLACE_FACTURA:'P'
 }
-

@@ -142,6 +142,7 @@
                         <div class="accordion-body">
                             <label for="socio" class="form-label fw-bold">Socio responsable<span class="required-asterisk">*</span></label>
                             <select class="form-select" id="socio" name="socio" aria-label="Seleccione socio..."></select>
+                            <input type="hidden" id="socioCode" name="socioCode" readonly>
                         </div>
                     </div>
                 </div>
@@ -203,6 +204,7 @@
             resCodigoVenta: document.getElementById('resCodigoVenta'),
             clientName: document.getElementById('clientName'),
             clientCode: document.getElementById('clientCode'),
+            socioCode: document.getElementById('socioCode'),
             plazo: document.getElementById('plazo'),
             amount: document.getElementById('amount'),
             checkIsCredict: document.getElementById('checkIsCredict'),
@@ -435,6 +437,9 @@
                 placeholder: "Buscar socio...",
                 sortField: { field: 'text', direction: 'asc' },
                 onChange: function() {
+                    const selectedOption = DOM.socio.options[DOM.socio.selectedIndex];
+                    const codigoSocio = selectedOption.dataset.code;
+                    DOM.socioCode.value = codigoSocio;
                     updateSummary();
                     validateForm(); 
                 }
@@ -513,6 +518,7 @@
             const data = Object.fromEntries(formData);
             data.priceProduct = DOM.priceProductWithOutFormat; // Enviar precio sin formatear
 
+
             console.log('Enviando datos de venta:', data);
             console.log('SaleSequence: ', saleSequence);
             google.script.run
@@ -588,6 +594,7 @@
             DOM.stockProduct.value = '—';
             DOM.productCode.value = '';
             DOM.clientCode.value = '';
+            DOM.socioCode.value = '';
 
             toggleFirstPayment();
             updateSummary();
