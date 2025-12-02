@@ -1,7 +1,12 @@
+const SPREADSHEET_ID = "17kHi1Cvk-p3c-mzK8jMoY8d2Ser38nm5GyPkUdHhwDI";
+
+function getVersionApp() {
+  return "1.1.3";
+}
+
 function onOpen() {
   const ui = SpreadsheetApp.getUi();
   ui.createMenu("AloTuTienda")
-    .addItem("Panel Principal", "openMainInterface")
     .addItem("Nueva venta", "openCurstomerModal")
     .addItem("Nuevo producto", "openProductModal")
     .addItem("Nuevo Cliente", "openClientModal")

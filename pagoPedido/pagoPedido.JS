@@ -8,6 +8,8 @@ function openPagoSidebar(){
 // ==========================================
 
 function crearPago(form) {
+    console.log("Formulario recibido pago pedido:", form);
+
     const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
     const sheetIngresoEgreso = ss.getSheetByName(INGRESOS_EGRESOS.NAME_TABLE);
     const targetRowIngresoEgreso = INGRESOS_EGRESOS.TARGET_ROW;
@@ -32,7 +34,7 @@ function crearPago(form) {
         const payValue = Number(form.payValue);
         const controlIngresoRow = getRowDataAsObjectByNameColumn("CONTROL_INGRESO", 3, 1, 15, "CODIGO", form.inCode);
         console.log("controlIngresoRow:", controlIngresoRow);
-        const detalle = `Pago de pedido ${form.inCode} - ${controlIngresoRow.METODO_DE_PAGO}`;
+        const detalle = `Pago de pedido ${form.inCode} - ${controlIngresoRow.METODO_PAGO}`;
 
         // Escritura en INGRESOS_EGRESOS (Punto de fallo potencial)
         let inOutNewCode = subControlIngreso("PAGO PEDIDO", detalle, payValue, form.metodoPago);
@@ -43,7 +45,7 @@ function crearPago(form) {
         sheetPagos.getRange(PAGO_PEDIDOS.COD_IN_OUT + targetRowPagos).setValue(inOutNewCode);
         sheetPagos.getRange(PAGO_PEDIDOS.COD_IN + targetRowPagos).setValue(form.inCode);
         sheetPagos.getRange(PAGO_PEDIDOS.PRODUCTO + targetRowPagos).setValue(formulaProductName);
-        sheetPagos.getRange(PAGO_PEDIDOS.METODO_DE_COMPRA + targetRowPagos).setValue(controlIngresoRow.METODO_DE_PAGO);
+        sheetPagos.getRange(PAGO_PEDIDOS.METODO_DE_COMPRA + targetRowPagos).setValue(controlIngresoRow.METODO_PAGO);
         sheetPagos.getRange(PAGO_PEDIDOS.VALOR + targetRowPagos).setValue(payValue);
 
         // 5. Actualizar Secuencia (Punto de fallo potencial)

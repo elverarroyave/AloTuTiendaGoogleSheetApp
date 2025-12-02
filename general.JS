@@ -1,21 +1,5 @@
-const SPREADSHEET_ID = "17kHi1Cvk-p3c-mzK8jMoY8d2Ser38nm5GyPkUdHhwDI";
-
-function onOpen() {
-  const ui = SpreadsheetApp.getUi();
-  
-  //Menú Venta
-  ui.createMenu("AloTuTienda")
-    .addItem("Nueva venta", "openCurstomerModal")
-    .addItem("Nuevo producto", "openProductModal")
-    .addItem("Nuevo Cliente", "openClientModal")
-    .addItem("Ingresar pedido", "openControlIngresoModal")
-    .addItem("Agregar Abono", "openAbonoSidebar")
-    .addItem("Pagar Pedido", "openPagoSidebar")
-    .addToUi();
-}
-
 // ==========================================
-// 2. UTILIDADES Obtener secuencias
+// 1. UTILIDADES Obtener secuencias
 // ==========================================
 
 

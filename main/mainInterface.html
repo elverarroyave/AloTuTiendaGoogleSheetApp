@@ -68,7 +68,7 @@
         </li>
       </ul>
       <div class="sidebar-footer">
-        <p>© 2025 AloTuTienda v1.1.1</p>
+        <p id="version"> ---- </p>
       </div>
     </nav>
 
@@ -152,10 +152,16 @@
     let currentTab = 'dashboard';
 
     function initializeApp() {
+      console.log('Init Main App AloTuTienda')
       // Check if on mobile
       if (window.innerWidth <= 768) {
         document.getElementById('sidebar').classList.remove('active');
       }
+      google.script.run.withSuccessHandler(getVersion).getVersionApp();
+    }
+
+    function getVersion(version) {
+      document.getElementById('version').textContent = '© 2025 AloTuTienda v' + version;
     }
 
     function toggleSidebar() {
