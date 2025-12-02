@@ -2,54 +2,51 @@
 <html lang="es">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title>Nuevo Cliente</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body { background-color: #f8f9fa; }
-        .required-asterisk { color: red; margin-left: 3px; font-weight: bold; }
-        .card-form { border: none; box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); }
-        .preview-code { font-family: monospace; color: #0d6efd; font-weight: bold; background-color: #e9ecef; }
-    </style>
+    <?!= includes("componentCss.html"); ?>
 </head>
 
 <body>
-    <div class="container mt-4 mb-5">
-        <div class="text-center mb-4">
-            <h3>Nuevo Cliente</h3>
-            <p class="text-muted small">Complete la información para registrar un nuevo cliente.</p>
+    <div class="container mt-3">
+        <div class="d-flex align-items-center mb-4 px-2">
+            <div>
+                <h3>Nuevo Cliente</h3>
+                <p class="text-muted small mb-0">Complete la información para registrar un nuevo cliente.</p>
+            </div>
         </div>
 
-        <form id="clientForm" class="card card-form p-4" onsubmit="handleSubmit(event)">
+        <form id="clientForm" class="card-form mb-5" onsubmit="handleSubmit(event)">
             
-            <h5 class="text-primary mb-3">Información Principal</h5>
+            <h5 class="section-title">Información Principal</h5>
             
-            <div class="row mb-3">
+            <div class="row mb-3 g-3">
                 <div class="col-md-8">
-                    <label for="clientName" class="form-label fw-bold">Nombre del cliente<span class="required-asterisk">*</span></label>
+                    <label for="clientName" class="form-label">Nombre del cliente<span class="required-asterisk">*</span></label>
                     <input type="text" class="form-control" id="clientName" name="clientName" placeholder="Nombre completo" required>
                 </div>
                 <div class="col-md-4">
-                    <label for="clientCodeDisplay" class="form-label fw-bold">Código<span class="required-asterisk">*</span></label>
-                    <input type="text" class="form-control preview-code" id="clientCodeDisplay" readonly value="Cargando...">
-                    <div class="form-text small">Asignado automáticamente</div>
+                    <label for="clientCodeDisplay" class="form-label">Código<span class="required-asterisk">*</span></label>
+                    <input type="text" class="form-control" id="clientCodeDisplay" readonly value="Cargando...">
+                    <div class="form-text small text-muted">Asignado automáticamente</div>
                 </div>
             </div>
 
-            <div class="row mb-3">
+            <div class="row mb-3 g-3">
                 <div class="col-md-6">
-                    <label for="clientPhone" class="form-label fw-bold">Teléfono<span class="required-asterisk">*</span></label>
+                    <label for="clientPhone" class="form-label">Teléfono<span class="required-asterisk">*</span></label>
                     <input type="tel" class="form-control" id="clientPhone" name="clientPhone" placeholder="300 123 4567" required>
                 </div>
                 <div class="col-md-6">
-                    <label for="clientEmail" class="form-label fw-bold">Correo<span class="required-asterisk">*</span></label>
+                    <label for="clientEmail" class="form-label">Correo<span class="required-asterisk">*</span></label>
                     <input type="email" class="form-control" id="clientEmail" name="clientEmail" placeholder="correo@ejemplo.com" required>
                 </div>
             </div>
 
-            <hr class="my-4">
+            <div class="separator-line"></div>
 
-            <h5 class="text-secondary mb-3">Información Adicional</h5>
+            <h5 class="section-title" style="color: var(--text-dark);">Información Adicional</h5>
 
             <div class="mb-3">
                 <label for="clientDoc" class="form-label">Documento / Identificación</label>
@@ -74,23 +71,37 @@
                     <option value="VANESSA ARROYAVE">Vanessa Arroyave</option>
                 </select>
             </div>
+            
+            </form>
 
-            <div class="d-grid gap-2 mt-4">
-                <button type="submit" id="btnSubmit" class="btn btn-primary btn-lg" disabled>
-                    Registrar Cliente
-                </button>
-            </div>
-        </form>
-
-        <div id="successAlert" class="alert alert-success mt-3 d-none shadow-sm" role="alert">
-            <h4 class="alert-heading"><i class="bi bi-check-circle-fill"></i> ¡Cliente creado!</h4>
-            <p>Se ha registrado a <strong id="resName"></strong> con el código <strong id="resCode"></strong>.</p>
-            <hr>
-            <div class="d-flex justify-content-end">
-                <button type="button" class="btn btn-success btn-sm" onclick="resetForm()">Registrar otro</button>
-            </div>
+        <div class="sticky-footer">
+            <button type="submit" id="btnSubmit" class="btn-primary-custom" form="clientForm" disabled>
+                Registrar Cliente
+            </button>
         </div>
 
+    </div>
+
+    <div class="modal-overlay" id="genericModalOverlay">
+        <div class="custom-modal">
+            <div class="modal-header-custom">
+                <div class="modal-icon" id="modalIcon">
+                    <span id="modalIconSign">✓</span>
+                </div>
+                <div class="modal-title-custom">
+                    <h3 id="modalTitle">Título</h3>
+                </div>
+            </div>
+            
+            <div class="modal-body-custom">
+                <p id="modalMessage"></p>
+                <div id="modalContentList"></div>
+            </div>
+            
+            <div class="modal-footer-custom">
+                <button class="modal-btn" id="modalActionBtn" onclick="closeGenericModal()">Entendido</button>
+            </div>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
@@ -102,27 +113,79 @@
             clientCodeDisplay: document.getElementById('clientCodeDisplay'),
             clientPhone: document.getElementById('clientPhone'),
             clientEmail: document.getElementById('clientEmail'),
+            clientDoc: document.getElementById('clientDoc'),
+            clientAddress: document.getElementById('clientAddress'),
+            socio: document.getElementById('socio'),
             btnSubmit: document.getElementById('btnSubmit'),
-            successAlert: document.getElementById('successAlert'),
-            resCode: document.getElementById('resCode'),
-            resName: document.getElementById('resName')
         };
+        
+        let lastModalType = ''; 
 
-        // --- 1. Inicialización ---
+        // --- 1. Utilidades y Modales (Uniformidad) ---
+        function showModal(type, title, message, htmlDetails = '') {
+            const overlay = document.getElementById('genericModalOverlay');
+            const iconContainer = document.getElementById('modalIcon');
+            const iconSign = document.getElementById('modalIconSign');
+            const titleEl = document.getElementById('modalTitle');
+            const msgEl = document.getElementById('modalMessage');
+            const listEl = document.getElementById('modalContentList');
+            const btn = document.getElementById('modalActionBtn');
+
+            iconContainer.className = 'modal-icon';
+            lastModalType = type;
+
+            switch(type) {
+                case 'success':
+                    iconContainer.classList.add('success');
+                    iconSign.textContent = '✓';
+                    btn.textContent = 'Registrar otro cliente';
+                    btn.style.borderColor = 'var(--success)';
+                    break;
+                case 'error':
+                    iconContainer.classList.add('error');
+                    iconSign.textContent = '✕';
+                    btn.textContent = 'Intentar de nuevo';
+                    btn.style.borderColor = 'var(--error)';
+                    break;
+                case 'warning':
+                    iconContainer.classList.add('warning');
+                    iconSign.textContent = '⚠';
+                    btn.textContent = 'Corregir datos';
+                    btn.style.borderColor = 'var(--warning)';
+                    break;
+                default:
+                    btn.textContent = 'Entendido';
+            }
+
+            titleEl.textContent = title;
+            msgEl.textContent = message; 
+            listEl.innerHTML = htmlDetails; 
+            overlay.classList.add('active');
+        }
+
+        function closeGenericModal() {
+            document.getElementById('genericModalOverlay').classList.remove('active');
+            if (lastModalType === 'success') { resetForm(); }
+            // Si es error/warning, simplemente cierra el modal y permite editar el formulario
+        }
+
+        // --- 2. Inicialización y Carga de Secuencia ---
         document.addEventListener('DOMContentLoaded', () => {
             loadSequencePreview();
-            // Listeners para validación
-            DOM.clientName.addEventListener('input', validateForm);
-            DOM.clientPhone.addEventListener('input', validateForm);
-            DOM.clientEmail.addEventListener('input', validateForm);
+            
+            // Listeners para validación en tiempo real
+            [DOM.clientName, DOM.clientPhone, DOM.clientEmail].forEach(el => 
+                el.addEventListener('input', validateForm)
+            );
         });
 
         function loadSequencePreview() {
+            DOM.clientCodeDisplay.value = "Cargando...";
             google.script.run
                 .withSuccessHandler(displaySequence)
                 .withFailureHandler(err => {
                     DOM.clientCodeDisplay.value = "Error";
-                    console.error(err);
+                    console.error("Error al cargar secuencia:", err);
                 })
                 .getSequences();
         }
@@ -130,41 +193,62 @@
         function displaySequence(sequences) {
             const clientSeq = sequences.find(s => s.NAME === 'CLIENTE');
             if (clientSeq) {
-                // Muestra una previsualización (El backend tiene la verdad final)
+                // Muestra una previsualización
                 DOM.clientCodeDisplay.value = `${clientSeq.PREFIX}${clientSeq.NEXT}`;
             } else {
                 DOM.clientCodeDisplay.value = "N/A";
+                showModal('error', 'Error de Configuración', 'No se pudo cargar la secuencia de código de cliente. Contacte soporte.');
             }
         }
 
-        // --- 2. Validación ---
+        // --- 3. Validación ---
         function validateForm() {
-            const nameValid = DOM.clientName.value.trim() !== "";
-            const phoneValid = DOM.clientPhone.value.trim() !== "";
-            const emailValid = DOM.clientEmail.value.trim() !== ""; // Puedes agregar regex de email si gustas
+            const name = DOM.clientName.value.trim();
+            const phone = DOM.clientPhone.value.trim();
+            const email = DOM.clientEmail.value.trim(); 
 
-            if (nameValid && phoneValid && emailValid) {
-                DOM.btnSubmit.disabled = false;
-            } else {
-                DOM.btnSubmit.disabled = true;
-            }
+            // Validación simple de campos requeridos (el backend validará la estructura de email)
+            const nameValid = name.length > 2;
+            const phoneValid = phone.length > 5;
+            const emailValid = email.length > 5;
+
+            const isValid = nameValid && phoneValid && emailValid;
+            DOM.btnSubmit.disabled = !isValid;
+            
+            // Retornar información de validación para handleSubmit
+            return {
+                isValid: isValid,
+                nameValid,
+                phoneValid,
+                emailValid
+            };
         }
 
-        // --- 3. Envío ---
+        // --- 4. Envío ---
         function handleSubmit(e) {
             e.preventDefault();
             
+            const validation = validateForm();
+            if (!validation.isValid) {
+                let errorMsg = 'Por favor, complete los siguientes campos obligatorios: ';
+                if (!validation.nameValid) errorMsg += 'Nombre, ';
+                if (!validation.phoneValid) errorMsg += 'Teléfono, ';
+                if (!validation.emailValid) errorMsg += 'Correo, ';
+                
+                showModal('warning', 'Datos Incompletos', errorMsg.replace(/, $/, '.'));
+                return;
+            }
+            
             DOM.btnSubmit.disabled = true;
             DOM.btnSubmit.innerText = "Guardando...";
-            DOM.successAlert.classList.add('d-none');
 
             const formData = {
-                clientName: DOM.clientName.value,
-                clientDoc: document.getElementById('clientDoc').value,
-                clientPhone: DOM.clientPhone.value,
-                clientEmail: DOM.clientEmail.value,
-                clientAddress: document.getElementById('clientAddress').value,
-                socio: document.getElementById('socio').value
+                clientName: DOM.clientName.value.trim(),
+                clientDoc: DOM.clientDoc.value.trim(),
+                clientPhone: DOM.clientPhone.value.trim(),
+                clientEmail: DOM.clientEmail.value.trim(),
+                clientAddress: DOM.clientAddress.value.trim(),
+                socio: DOM.socio.value
             };
 
             google.script.run
@@ -175,28 +259,31 @@
 
         function onSuccess(response) {
             DOM.btnSubmit.innerText = "Registrar Cliente";
-            DOM.form.classList.add('d-none'); // Ocultar formulario
             
-            DOM.resCode.innerText = response.code;
-            DOM.resName.innerText = response.name;
-            DOM.successAlert.classList.remove('d-none');
+            // Construir HTML de resumen para el modal de éxito
+            const detailsHtml = `
+                <div class="modal-list-item"><span>Código</span> <strong>${response.code || 'N/A'}</strong></div>
+                <div class="modal-list-item"><span>Teléfono</span> <strong>${DOM.clientPhone.value}</strong></div>
+                <div class="modal-list-item"><span>Correo</span> <strong>${DOM.clientEmail.value}</strong></div>
+            `;
+
+            showModal('success', '¡Cliente Creado!', `Se ha registrado exitosamente a ${response.name} con su nuevo código.`, detailsHtml);
         }
 
         function onFailure(error) {
             DOM.btnSubmit.disabled = false;
             DOM.btnSubmit.innerText = "Registrar Cliente";
-            alert("Error al registrar: " + error.message);
+            showModal('error', 'Error de Registro', 'No se pudo crear el cliente: ' + error.message);
         }
 
         function resetForm() {
             DOM.form.reset();
-            DOM.form.classList.remove('d-none');
-            DOM.successAlert.classList.add('d-none');
             
+            // Limpiar código de display y recargar secuencia
             DOM.clientCodeDisplay.value = "Actualizando...";
-            DOM.btnSubmit.disabled = true; 
-
             loadSequencePreview();
+            
+            validateForm(); // Deshabilita el botón
         }
     </script>
 </body>

@@ -2,45 +2,245 @@
 <html lang="es">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title>Control de Ingreso</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.bootstrap5.css" rel="stylesheet">
+    
     <style>
-        body { background-color: #f8f9fa; }
-        .required-asterisk { color: red; margin-left: 3px; font-weight: bold; }
-        .card-form { border: none; box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); }
-        .preview-total { font-size: 1.5rem; font-weight: bold; color: #198754; }
+        /* --- 1. Variables de Diseño (Idénticas a Interfaz Principal) --- */
+        :root {
+            --primary: #2E86AB;
+            --primary-dark: #1C5F7B;
+            --primary-light: #5DADE2;
+            --accent: #E8F4F8;
+            --background: #FAFBFC;
+            --white: #ffffff;
+            --text-dark: #2c3e50;
+            --text-muted: #6c757d;
+            --border: #e9ecef;
+            --success: #28a745;
+            --warning: #ffc107;
+            --error: #dc3545;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.06);
+            --shadow-lg: 0 8px 15px rgba(0,0,0,0.1);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* --- 2. Estilos Generales y Contenedores --- */
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--background);
+            color: var(--text-dark);
+            padding-bottom: 90px; /* Espacio para botón flotante */
+        }
+
+        h3 { color: var(--primary); font-weight: 700; margin-bottom: 0; }
+        .text-muted { color: var(--text-muted) !important; }
+
+        .card-form {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: var(--shadow-md);
+            padding: 25px;
+            transition: var(--transition);
+        }
+
+        /* Mobile Fixes: Sin borde ni sombra en móvil */
+        @media (max-width: 768px) {
+            .card-form { padding: 15px; box-shadow: none; border: none; background: transparent; }
+            body { background: var(--white); }
+            .container { padding-left: 0; padding-right: 0; }
+        }
+
+        /* --- 3. Inputs y Formularios --- */
+        .form-label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-dark);
+            margin-bottom: 6px;
+        }
+        .required-asterisk { color: var(--error); margin-left: 3px; }
+
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            padding: 12px 15px; 
+            font-size: 1rem;
+            transition: var(--transition);
+            background-color: var(--accent);
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(46, 134, 171, 0.15);
+            background-color: var(--white);
+        }
+
+        /* Estilos TomSelect */
+        .ts-control {
+            border-radius: 10px !important;
+            border: 1px solid var(--border) !important;
+            background-color: var(--accent) !important;
+            padding: 12px 15px !important;
+        }
+        .ts-control.focus {
+            border-color: var(--primary-light) !important;
+            box-shadow: 0 0 0 3px rgba(46, 134, 171, 0.15) !important;
+            background-color: var(--white) !important;
+        }
+
+        /* Display del Total */
+        .summary-box {
+            background: var(--accent);
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 20px;
+            text-align: center;
+            border-left: 5px solid var(--success);
+        }
+        .preview-total { 
+            font-size: 1.5rem; 
+            font-weight: 700; 
+            color: var(--primary-dark); 
+            margin: 0;
+        }
+
+        /* --- 4. Botón Principal (Sticky Footer) --- */
+        .sticky-footer {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: white; padding: 15px 20px;
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
+            z-index: 100;
+            border-top: 1px solid var(--border);
+        }
+
+        .btn-primary-custom {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            border: none;
+            color: white;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            width: 100%;
+            box-shadow: 0 4px 16px rgba(46, 134, 171, 0.3);
+            transition: var(--transition);
+        }
+
+        .btn-primary-custom:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(46, 134, 171, 0.4);
+        }
+        
+        .btn-primary-custom:disabled {
+            background: var(--text-muted);
+            box-shadow: none;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        /* --- 5. MODALES --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.75);
+            display: none; align-items: center; justify-content: center;
+            z-index: 2000; padding: 20px;
+            backdrop-filter: blur(8px);
+            animation: fadeIn 0.2s ease;
+        }
+        .modal-overlay.active { display: flex; }
+        
+        .custom-modal {
+            background: white; border-radius: 20px;
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.4);
+            max-width: 440px; width: 100%; overflow: hidden;
+            animation: modalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes modalSlideUp { 
+            from { opacity: 0; transform: translateY(40px) scale(0.95); } 
+            to { opacity: 1; transform: translateY(0) scale(1); } 
+        }
+
+        .modal-header-custom { padding: 32px 28px 20px; text-align: center; }
+        .modal-icon {
+            width: 64px; height: 64px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2rem; margin: 0 auto 20px; position: relative;
+        }
+        
+        /* Variantes de Iconos */
+        .modal-icon.success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white;
+            box-shadow: 0 8px 24px rgba(40, 167, 69, 0.3);
+        }
+        .modal-icon.error {
+            background: linear-gradient(135deg, #dc3545 0%, #e63946 100%); color: white;
+            box-shadow: 0 8px 24px rgba(220, 53, 69, 0.3);
+        }
+        .modal-icon.warning {
+            background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%); color: white;
+            box-shadow: 0 8px 24px rgba(255, 193, 7, 0.3);
+        }
+
+        .modal-title-custom h3 { font-size: 1.5rem; color: var(--text-dark); margin: 0; }
+        
+        .modal-body-custom { padding: 0 28px 28px; }
+        .modal-body-custom p { color: var(--text-muted); text-align: center; font-size: 1rem; line-height: 1.5; margin-bottom: 15px; }
+
+        /* Lista de detalles dentro del modal */
+        .modal-list-item {
+            display: flex; justify-content: space-between;
+            padding: 10px 0; border-bottom: 1px solid var(--border);
+            font-size: 0.95rem; color: var(--text-muted);
+        }
+        .modal-list-item strong { color: var(--text-dark); }
+        .modal-list-item:last-child { border-bottom: none; }
+
+        .modal-footer-custom { padding: 20px 28px 28px; display: flex; justify-content: center; gap: 10px; }
+        .modal-btn {
+            padding: 12px 24px; border-radius: 10px; border: 2px solid var(--border);
+            background: var(--background); color: var(--text-dark);
+            font-weight: 600; cursor: pointer; width: 100%;
+            transition: all 0.2s;
+        }
+        .modal-btn:hover { transform: translateY(-1px); border-color: var(--primary); }
     </style>
 </head>
 
 <body>
-    <div class="container mt-4 mb-5">
-        <div class="text-center mb-4">
-            <h3>Ingresar Pedido</h3>
-            <p class="text-muted small">Control de ingreso de mercancía al inventario.</p>
+    <div class="container mt-3">
+        <div class="d-flex align-items-center mb-4 px-2">
+            <div>
+                <h3>Ingresar Pedido</h3>
+                <p class="text-muted small mb-0">Control de ingreso de mercancía al inventario.</p>
+            </div>
         </div>
 
-        <form id="ingresoForm" class="card card-form p-4" onsubmit="handleSubmit(event)">
+        <form id="ingresoForm" class="card-form mb-5" onsubmit="handleSubmit(event)">
             
             <div class="row g-3">
                 
                 <div class="col-md-12">
-                    <label for="productName" class="form-label fw-bold">Producto<span class="required-asterisk">*</span></label>
+                    <label for="productName" class="form-label">Producto<span class="required-asterisk">*</span></label>
                     <select id="productName" name="productName" placeholder="Buscar producto por nombre o código..."></select>
                     <input type="hidden" id="codPrdt" name="codPrdt">
                     <input type="hidden" id="nombrePrdt" name="nombrePrdt">
                 </div>
 
                 <div class="col-md-6">
-                    <label for="proveedor" class="form-label fw-bold">Proveedor<span class="required-asterisk">*</span></label>
+                    <label for="proveedor" class="form-label">Proveedor<span class="required-asterisk">*</span></label>
                     <select id="proveedor" name="proveedor" placeholder="Buscar proveedor..."></select>
                     <input type="hidden" id="codProv" name="codProv">
                     <input type="hidden" id="nombreProv" name="nombreProv">
                 </div>
 
                 <div class="col-md-6">
-                    <label for="empleado" class="form-label fw-bold">Quien recibe<span class="required-asterisk">*</span></label>
+                    <label for="empleado" class="form-label">Quien recibe<span class="required-asterisk">*</span></label>
                     <select class="form-select" id="empleado" name="empleado">
                         <option value="" selected disabled>Seleccione...</option>
                         <option value="ELVER ARROYAVE">Elver Arroyave</option>
@@ -49,27 +249,27 @@
                 </div>
 
                 <div class="col-md-6">
-                    <label for="cantidad" class="form-label fw-bold">Cantidad<span class="required-asterisk">*</span></label>
+                    <label for="cantidad" class="form-label">Cantidad<span class="required-asterisk">*</span></label>
                     <input type="number" class="form-control" id="cantidad" name="cantidad" min="1" placeholder="0" required>
                 </div>
 
                 <div class="col-md-6">
-                    <label for="precioUnitario" class="form-label fw-bold">Precio Unitario<span class="required-asterisk">*</span></label>
+                    <label for="precioUnitario" class="form-label">Precio Unitario (Costo)<span class="required-asterisk">*</span></label>
                     <div class="input-group">
-                        <span class="input-group-text">$</span>
-                        <input type="number" class="form-control" id="precioUnitario" name="precioUnitario" min="0" placeholder="0" required>
+                        <span class="input-group-text bg-white border-end-0 text-muted">$</span>
+                        <input type="number" class="form-control border-start-0 ps-0" id="precioUnitario" name="precioUnitario" min="0" placeholder="0" required>
                     </div>
                 </div>
 
                 <div class="col-md-6">
-                    <label for="metodoPago" class="form-label fw-bold">Método de Pago<span class="required-asterisk">*</span></label>
+                    <label for="metodoPago" class="form-label">Método de Pago<span class="required-asterisk">*</span></label>
                     <select id="metodoPago" name="metodoPago" placeholder="Seleccione método..."></select>
                 </div>
 
                 <div class="col-md-6">
-                    <label for="estado" class="form-label fw-bold">Estado<span class="required-asterisk">*</span></label>
+                    <label for="estado" class="form-label">Estado<span class="required-asterisk">*</span></label>
                     <select class="form-select" id="estado" name="estado">
-                        <option value="EN ESPERA"selected>EN ESPERA</option>
+                        <option value="EN ESPERA" selected>EN ESPERA</option>
                         <option value="RECIBIDO">RECIBIDO</option>
                         <option value="DEVOLUCION">DEVOLUCION</option>
                         <option value="RECLAMO">RECLAMO</option>
@@ -83,27 +283,41 @@
 
             </div>
 
-            <div class="mt-4 p-3 bg-light rounded border text-center">
-                <span class="text-muted text-uppercase small">Total Estimado</span>
-                <div id="displayTotal" class="preview-total">$ 0</div>
+            <div class="summary-box">
+                <span class="text-muted text-uppercase small">Total Estimado del Pedido</span>
+                <p id="displayTotal" class="preview-total">$ 0</p>
             </div>
 
-            <div class="d-grid gap-2 mt-4">
-                <button type="submit" id="btnSubmit" class="btn btn-primary btn-lg" disabled>
-                    Registrar Ingreso
-                </button>
-            </div>
-        </form>
+            </form>
 
-        <div id="successAlert" class="alert alert-success mt-3 d-none shadow-sm" role="alert">
-            <h4 class="alert-heading"><i class="bi bi-check-circle-fill"></i> ¡Ingreso registrado!</h4>
-            <p>Se ha generado el ingreso <strong id="resCode"></strong> por valor de <strong id="resTotal"></strong>.</p>
-            <hr>
-            <div class="d-flex justify-content-end">
-                <button type="button" class="btn btn-success btn-sm" onclick="resetForm()">Nuevo Ingreso</button>
-            </div>
+        <div class="sticky-footer">
+            <button type="submit" id="btnSubmit" class="btn-primary-custom" form="ingresoForm" disabled>
+                Registrar Ingreso
+            </button>
         </div>
 
+    </div>
+
+    <div class="modal-overlay" id="genericModalOverlay">
+        <div class="custom-modal">
+            <div class="modal-header-custom">
+                <div class="modal-icon" id="modalIcon">
+                    <span id="modalIconSign">✓</span>
+                </div>
+                <div class="modal-title-custom">
+                    <h3 id="modalTitle">Título</h3>
+                </div>
+            </div>
+            
+            <div class="modal-body-custom">
+                <p id="modalMessage"></p>
+                <div id="modalContentList"></div>
+            </div>
+            
+            <div class="modal-footer-custom">
+                <button class="modal-btn" id="modalActionBtn" onclick="closeGenericModal()">Entendido</button>
+            </div>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
@@ -122,69 +336,121 @@
             precioUnitario: document.getElementById('precioUnitario'),
             metodoPago: document.getElementById('metodoPago'),
             empleado: document.getElementById('empleado'),
+            estado: document.getElementById('estado'),
+            enlaceFactura: document.getElementById('enlaceFactura'),
             displayTotal: document.getElementById('displayTotal'),
             btnSubmit: document.getElementById('btnSubmit'),
-            successAlert: document.getElementById('successAlert'),
-            resCode: document.getElementById('resCode'),
-            resTotal: document.getElementById('resTotal')
         };
 
         const TS = {};
+        let lastModalType = ''; 
 
-        // --- 1. Inicialización ---
-        document.addEventListener('DOMContentLoaded', () => {
-            initializeTomSelects();
-            loadData();
-            addEventListeners();
-        });
+        // --- 1. Utilidades y Modales ---
+        function formatCurrency(value) {
+            if (typeof value !== 'number' || Number.isNaN(value)) return '—';
+            return new Intl.NumberFormat('es-CO', {
+                style: 'currency',
+                currency: 'COP', 
+                minimumFractionDigits: 0
+            }).format(value);
+        }
 
+        function showModal(type, title, message, htmlDetails = '') {
+            const overlay = document.getElementById('genericModalOverlay');
+            const iconContainer = document.getElementById('modalIcon');
+            const iconSign = document.getElementById('modalIconSign');
+            const titleEl = document.getElementById('modalTitle');
+            const msgEl = document.getElementById('modalMessage');
+            const listEl = document.getElementById('modalContentList');
+            const btn = document.getElementById('modalActionBtn');
+
+            iconContainer.className = 'modal-icon';
+            lastModalType = type;
+
+            switch(type) {
+                case 'success':
+                    iconContainer.classList.add('success');
+                    iconSign.textContent = '✓';
+                    btn.textContent = 'Nuevo Ingreso';
+                    btn.style.borderColor = 'var(--success)';
+                    break;
+                case 'error':
+                    iconContainer.classList.add('error');
+                    iconSign.textContent = '✕';
+                    btn.textContent = 'Intentar de nuevo';
+                    btn.style.borderColor = 'var(--error)';
+                    break;
+                case 'warning':
+                    iconContainer.classList.add('warning');
+                    iconSign.textContent = '⚠';
+                    btn.textContent = 'Corregir';
+                    btn.style.borderColor = 'var(--warning)';
+                    break;
+                default:
+                    btn.textContent = 'Entendido';
+            }
+
+            titleEl.textContent = title;
+            msgEl.textContent = message; 
+            listEl.innerHTML = htmlDetails; 
+            overlay.classList.add('active');
+        }
+
+        function closeGenericModal() {
+            document.getElementById('genericModalOverlay').classList.remove('active');
+            if (lastModalType === 'success') { resetForm(); }
+        }
+
+        // --- 2. Inicialización de TomSelects ---
         function initializeTomSelects() {
+            const commonConfig = {
+                create: false, maxItems: 1, valueField: 'value', labelField: 'text', searchField: 'text',
+                sortField: { field: 'text', direction: 'asc' },
+            };
+
             // Producto
             TS.product = new TomSelect(DOM.productSelect, {
-                create: false, maxItems: 1, valueField: 'value', labelField: 'text', searchField: 'text',
+                ...commonConfig,
+                placeholder: "Buscar producto...",
                 onChange: (value) => {
-                    if(value) {
-                        const option = TS.product.options[value];
-                        DOM.codPrdt.value = option.code;
-                        DOM.nombrePrdt.value = option.nameOnly;
-                    } else {
-                        DOM.codPrdt.value = "";
-                        DOM.nombrePrdt.value = "";
-                    }
+                    const option = value ? TS.product.options[value] : null;
+                    DOM.codPrdt.value = option ? option.code : "";
+                    DOM.nombrePrdt.value = option ? option.nameOnly : "";
                     validateForm();
                 }
             });
 
             // Proveedor
             TS.provider = new TomSelect(DOM.provSelect, {
-                create: false, maxItems: 1, valueField: 'value', labelField: 'text', searchField: 'text',
+                ...commonConfig,
+                placeholder: "Buscar proveedor...",
                 onChange: (value) => {
-                    if(value) {
-                        const option = TS.provider.options[value];
-                        DOM.codProv.value = option.code;
-                        DOM.nombreProv.value = option.nameOnly;
-                    } else {
-                        DOM.codProv.value = "";
-                        DOM.nombreProv.value = "";
-                    }
+                    const option = value ? TS.provider.options[value] : null;
+                    DOM.codProv.value = option ? option.code : "";
+                    DOM.nombreProv.value = option ? option.nameOnly : "";
                     validateForm();
                 }
             });
 
             // Método de Pago
             TS.payment = new TomSelect(DOM.metodoPago, {
-                create: false, maxItems: 1, valueField: 'value', labelField: 'text', searchField: 'text',
+                ...commonConfig,
+                placeholder: "Seleccione método...",
                 onChange: validateForm
             });
+            
+            // Empleado y Estado (Bootstrap Selects)
+            document.getElementById('empleado').addEventListener('change', validateForm);
+            document.getElementById('estado').addEventListener('change', validateForm);
         }
 
-        // --- 2. Carga de Datos ---
+        // --- 3. Carga de Datos ---
         function loadData() {
             // Cargar Productos
             google.script.run.withSuccessHandler(products => {
                 const options = products.map(p => ({
                     value: p.CODIGO,
-                    text: `${p.NOMBRE} (${p.CODIGO})`, // Formato solicitado
+                    text: `${p.NOMBRE} (${p.CODIGO})`, 
                     code: p.CODIGO,
                     nameOnly: p.NOMBRE
                 }));
@@ -193,7 +459,6 @@
 
             // Cargar Proveedores
             google.script.run.withSuccessHandler(providers => {
-                console.log("providers-->", providers)
                 const options = providers.map(p => ({
                     value: p.CODIGO,
                     text: p.NOMBRE, 
@@ -205,18 +470,17 @@
 
             // Cargar Métodos de Pago
             google.script.run.withSuccessHandler(methods => {
-                console.log("methods-->", methods);
                 const options = methods.map(m => ({
-                    value: m.NOMBRE, // Guardamos el NOMBRE en la BD según tu ejemplo
+                    value: m.NOMBRE, 
                     text: m.NOMBRE
                 }));
                 TS.payment.addOptions(options);
             }).getActivePaymentMethods();
         }
 
-        // --- 3. Lógica y Validación ---
+        // --- 4. Lógica y Validación ---
         function addEventListeners() {
-            ['cantidad', 'precioUnitario', 'empleado'].forEach(id => {
+            ['cantidad', 'precioUnitario'].forEach(id => {
                 document.getElementById(id).addEventListener('input', () => {
                     calculateTotal();
                     validateForm();
@@ -229,39 +493,44 @@
             const price = parseFloat(DOM.precioUnitario.value) || 0;
             const total = qty * price;
             
-            // Formato moneda Colombia
-            DOM.displayTotal.innerText = new Intl.NumberFormat('es-CO', { 
-                style: 'currency', currency: 'COP', minimumFractionDigits: 0 
-            }).format(total);
+            DOM.displayTotal.innerText = formatCurrency(total);
         }
 
         function validateForm() {
             let isValid = true;
+            let errorMsg = '';
 
-            // Validar Producto
-            if (!DOM.productSelect.value) isValid = false;
-            // Validar Proveedor
-            if (!DOM.provSelect.value) isValid = false;
-            // Validar Cantidad (> 0)
-            const qty = parseFloat(DOM.cantidad.value);
-            if (isNaN(qty) || qty <= 0) isValid = false;
-            // Validar Precio (> 0)
-            const price = parseFloat(DOM.precioUnitario.value);
-            if (isNaN(price) || price <= 0) isValid = false; // Asumimos precio positivo
-            // Validar Método Pago
-            if (!DOM.metodoPago.value) isValid = false;
-            // Validar Empleado
-            if (!DOM.empleado.value) isValid = false;
+            // 1. Producto
+            if (!DOM.productSelect.value) { isValid = false; errorMsg = "Debes seleccionar un producto."; }
+            // 2. Proveedor
+            else if (!DOM.provSelect.value) { isValid = false; errorMsg = "Debes seleccionar un proveedor."; }
+            // 3. Empleado
+            else if (!DOM.empleado.value) { isValid = false; errorMsg = "Debes seleccionar quién recibe la mercancía."; }
+            // 4. Cantidad (> 0)
+            else if (isNaN(parseFloat(DOM.cantidad.value)) || parseFloat(DOM.cantidad.value) <= 0) { isValid = false; errorMsg = "La cantidad debe ser mayor a 0."; }
+            // 5. Precio (> 0)
+            else if (isNaN(parseFloat(DOM.precioUnitario.value)) || parseFloat(DOM.precioUnitario.value) <= 0) { isValid = false; errorMsg = "El precio unitario (costo) debe ser mayor a 0."; }
+            // 6. Método Pago
+            else if (!DOM.metodoPago.value) { isValid = false; errorMsg = "Debes seleccionar el método de pago."; }
+            // 7. Estado
+            else if (!DOM.estado.value) { isValid = false; errorMsg = "Debes seleccionar el estado del ingreso."; }
 
             DOM.btnSubmit.disabled = !isValid;
+            return { isValid, errorMsg };
         }
 
-        // --- 4. Envío ---
+        // --- 5. Envío ---
         function handleSubmit(e) {
             e.preventDefault();
+            
+            const validation = validateForm();
+            if (!validation.isValid) {
+                showModal('warning', 'Faltan Datos', validation.errorMsg);
+                return;
+            }
+
             DOM.btnSubmit.disabled = true;
             DOM.btnSubmit.innerText = "Guardando...";
-            DOM.successAlert.classList.add('d-none');
 
             const formData = {
                 codPrdt: DOM.codPrdt.value,
@@ -269,44 +538,66 @@
                 codProv: DOM.codProv.value,
                 nombreProv: DOM.nombreProv.value,
                 empleado: DOM.empleado.value,
-                cantidad: DOM.cantidad.value,
-                precioUnitario: DOM.precioUnitario.value,
+                cantidad: parseFloat(DOM.cantidad.value),
+                precioUnitario: parseFloat(DOM.precioUnitario.value),
                 metodoPago: DOM.metodoPago.value,
-                estado: document.getElementById('estado').value,
-                enlaceFactura: document.getElementById('enlaceFactura').value
+                estado: DOM.estado.value,
+                enlaceFactura: DOM.enlaceFactura.value,
+                total: parseFloat(DOM.cantidad.value) * parseFloat(DOM.precioUnitario.value)
             };
 
             google.script.run
                 .withSuccessHandler(onSuccess)
                 .withFailureHandler(err => {
-                    alert("Error: " + err.message);
                     DOM.btnSubmit.disabled = false;
                     DOM.btnSubmit.innerText = "Registrar Ingreso";
+                    showModal('error', 'Error de Conexión', 'Ocurrió un error inesperado: ' + err.message);
                 })
                 .createControlIngreso(formData);
         }
 
         function onSuccess(res) {
-            DOM.form.classList.add('d-none');
-            DOM.resCode.innerText = res.code;
-            DOM.resTotal.innerText = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(res.total);
-            DOM.successAlert.classList.remove('d-none');
             DOM.btnSubmit.innerText = "Registrar Ingreso";
+
+            // Construir HTML de resumen para el éxito
+            const detailsHtml = `
+                <div class="modal-list-item"><span>Código</span> <strong>${res.code || 'N/A'}</strong></div>
+                <div class="modal-list-item"><span>Producto</span> <strong>${DOM.nombrePrdt.value}</strong></div>
+                <div class="modal-list-item"><span>Proveedor</span> <strong>${DOM.nombreProv.value}</strong></div>
+                <div class="modal-list-item"><span>Total Compra</span> <strong style="color:var(--primary-dark)">${formatCurrency(res.total)}</strong></div>
+            `;
+            
+            showModal('success', '¡Ingreso Registrado!', `Se ha registrado ${res.cantidad} unidades al inventario.`, detailsHtml);
         }
 
         function resetForm() {
             DOM.form.reset();
-            DOM.form.classList.remove('d-none');
-            DOM.successAlert.classList.add('d-none');
             
             // Limpiar TomSelects
-            TS.product.clear();
-            TS.provider.clear();
-            TS.payment.clear();
+            try {
+                TS.product.clear();
+                TS.provider.clear();
+                TS.payment.clear();
+            } catch (e) { console.warn("Error al limpiar TomSelects:", e); }
             
-            DOM.displayTotal.innerText = "$ 0";
-            DOM.btnSubmit.disabled = true;
+            // Limpiar campos ocultos y totales
+            DOM.codPrdt.value = "";
+            DOM.nombrePrdt.value = "";
+            DOM.codProv.value = "";
+            DOM.nombreProv.value = "";
+            
+            calculateTotal(); // Vuelve el total a $ 0
+            validateForm(); // Deshabilita el botón
         }
+
+        // --- 6. Inicialización Global ---
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTomSelects();
+            loadData();
+            addEventListeners();
+            calculateTotal(); 
+            validateForm();
+        });
     </script>
 </body>
 </html>

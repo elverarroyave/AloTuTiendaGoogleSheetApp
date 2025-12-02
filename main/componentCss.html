@@ -1,0 +1,200 @@
+<style>
+        /* --- 1. Variables de Diseño (Idénticas a Interfaz Principal y Nueva Venta) --- */
+        :root {
+            --primary: #2E86AB;
+            --primary-dark: #1C5F7B;
+            --primary-light: #5DADE2;
+            --accent: #E8F4F8;
+            --background: #FAFBFC;
+            --white: #ffffff;
+            --text-dark: #2c3e50;
+            --text-muted: #6c757d;
+            --border: #e9ecef;
+            --success: #28a745;
+            --warning: #ffc107;
+            --error: #dc3545;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.06);
+            --shadow-lg: 0 8px 15px rgba(0,0,0,0.1);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* --- 2. Estilos Generales y Contenedores --- */
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--background);
+            color: var(--text-dark);
+            padding-bottom: 90px; /* Espacio para botón flotante */
+        }
+
+        h3 { color: var(--primary); font-weight: 700; margin-bottom: 0; }
+        .text-muted { color: var(--text-muted) !important; }
+
+        .card-form {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: var(--shadow-md);
+            padding: 25px;
+            transition: var(--transition);
+        }
+
+        /* Mobile Fixes: Sin borde ni sombra en móvil */
+        @media (max-width: 768px) {
+            .card-form { padding: 15px; box-shadow: none; border: none; background: transparent; }
+            body { background: var(--white); }
+            .container { padding-left: 0; padding-right: 0; }
+        }
+
+        /* --- 3. Inputs y Formularios --- */
+        .form-label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-dark);
+            margin-bottom: 6px;
+        }
+        .required-asterisk { color: var(--error); margin-left: 3px; }
+
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            padding: 12px 15px; /* Más padding para touch */
+            font-size: 1rem;
+            transition: var(--transition);
+            background-color: var(--accent);
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(46, 134, 171, 0.15);
+            background-color: var(--white);
+        }
+
+        /* Display del Código de Abono */
+        .preview-code { 
+            font-family: monospace; 
+            color: var(--primary-dark) !important; 
+            font-weight: bold; 
+            background-color: var(--accent) !important;
+            border: 2px dashed var(--border);
+            padding-left: 10px !important;
+        }
+
+        /* Display del Valor del Abono */
+        .summary-box {
+            background: var(--accent);
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 10px;
+            text-align: right;
+            border-left: 5px solid var(--primary);
+        }
+        .abono-value { 
+            font-size: 1.5rem; 
+            font-weight: 700; 
+            color: var(--success); /* Éxito, ya que es dinero que entra */
+            margin: 0;
+        }
+
+        /* --- 4. Botón Principal (Sticky Footer) --- */
+        .sticky-footer {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: white; padding: 15px 20px;
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
+            z-index: 100;
+            border-top: 1px solid var(--border);
+        }
+
+        .btn-primary-custom {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            border: none;
+            color: white;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            width: 100%;
+            box-shadow: 0 4px 16px rgba(46, 134, 171, 0.3);
+            transition: var(--transition);
+        }
+
+        .btn-primary-custom:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(46, 134, 171, 0.4);
+        }
+        
+        .btn-primary-custom:disabled {
+            background: var(--text-muted);
+            box-shadow: none;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        /* --- 5. MODALES (Copiados de Nueva Venta) --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.75);
+            display: none; align-items: center; justify-content: center;
+            z-index: 2000; padding: 20px;
+            backdrop-filter: blur(8px);
+            animation: fadeIn 0.2s ease;
+        }
+        .modal-overlay.active { display: flex; }
+        
+        .custom-modal {
+            background: white; border-radius: 20px;
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.4);
+            max-width: 440px; width: 100%; overflow: hidden;
+            animation: modalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes modalSlideUp { 
+            from { opacity: 0; transform: translateY(40px) scale(0.95); } 
+            to { opacity: 1; transform: translateY(0) scale(1); } 
+        }
+
+        .modal-header-custom { padding: 32px 28px 20px; text-align: center; }
+        .modal-icon {
+            width: 64px; height: 64px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2rem; margin: 0 auto 20px; position: relative;
+        }
+        
+        /* Variantes de Iconos */
+        .modal-icon.success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white;
+            box-shadow: 0 8px 24px rgba(40, 167, 69, 0.3);
+        }
+        .modal-icon.error {
+            background: linear-gradient(135deg, #dc3545 0%, #e63946 100%); color: white;
+            box-shadow: 0 8px 24px rgba(220, 53, 69, 0.3);
+        }
+        .modal-icon.warning {
+            background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%); color: white;
+            box-shadow: 0 8px 24px rgba(255, 193, 7, 0.3);
+        }
+
+        .modal-title-custom h3 { font-size: 1.5rem; color: var(--text-dark); margin: 0; }
+        
+        .modal-body-custom { padding: 0 28px 28px; }
+        .modal-body-custom p { color: var(--text-muted); text-align: center; font-size: 1rem; line-height: 1.5; margin-bottom: 15px; }
+
+        /* Lista de detalles dentro del modal */
+        .modal-list-item {
+            display: flex; justify-content: space-between;
+            padding: 10px 0; border-bottom: 1px solid var(--border);
+            font-size: 0.95rem; color: var(--text-muted);
+        }
+        .modal-list-item strong { color: var(--text-dark); }
+        .modal-list-item:last-child { border-bottom: none; }
+
+        .modal-footer-custom { padding: 20px 28px 28px; display: flex; justify-content: center; gap: 10px; }
+        .modal-btn {
+            padding: 12px 24px; border-radius: 10px; border: 2px solid var(--border);
+            background: var(--background); color: var(--text-dark);
+            font-weight: 600; cursor: pointer; width: 100%;
+            transition: all 0.2s;
+        }
+        .modal-btn:hover { transform: translateY(-1px); border-color: var(--primary); }
+    </style>

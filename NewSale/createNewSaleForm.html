@@ -2,94 +2,302 @@
 <html lang="es">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title>Nueva Venta</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.bootstrap5.css" rel="stylesheet">
+    
     <style>
-        body { background-color: #f8f9fa; } /* Fondo gris suave unificado */
-        
-        /* Estilo para los campos de solo lectura (form-control-plaintext) */
-        .form-control-plaintext {
-            padding-left: 0.75rem; 
-            color: #212529;
+        /* --- 1. Variables de Diseño (Idénticas a Interfaz Principal) --- */
+        :root {
+            --primary: #2E86AB;
+            --primary-dark: #1C5F7B;
+            --primary-light: #5DADE2;
+            --accent: #E8F4F8;
+            --background: #FAFBFC;
+            --white: #ffffff;
+            --text-dark: #2c3e50;
+            --text-muted: #6c757d;
+            --border: #e9ecef;
+            --success: #28a745;
+            --warning: #ffc107;
+            --error: #dc3545;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.06);
+            --shadow-lg: 0 8px 15px rgba(0,0,0,0.1);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* Estilo para asteriscos de campos obligatorios */
-        .required-asterisk {
-            color: red;
-            margin-left: 3px;
-            font-weight: bold;
+        /* --- 2. Estilos Generales --- */
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--background);
+            color: var(--text-dark);
+            padding-bottom: 90px; /* Espacio para botón flotante en móvil */
         }
 
-        /* Ajuste para que la tarjeta se vea bien */
+        h3 { color: var(--primary); font-weight: 700; margin-bottom: 0; }
+        .text-muted { color: var(--text-muted) !important; }
+
+        /* --- 3. Tarjetas y Inputs --- */
         .card-form {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: var(--shadow-md);
+            padding: 25px;
+            transition: var(--transition);
+        }
+
+        .form-label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-dark);
+            margin-bottom: 6px;
+        }
+
+        .required-asterisk { color: var(--error); margin-left: 3px; }
+
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            padding: 12px 15px; /* Más padding para touch */
+            font-size: 1rem;
+            transition: var(--transition);
+            background-color: var(--accent);
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(46, 134, 171, 0.15);
+            background-color: var(--white);
+        }
+
+        /* Ajustes TomSelect */
+        .ts-control {
+            border-radius: 10px !important;
+            border: 1px solid var(--border) !important;
+            background-color: var(--accent) !important;
+            padding: 12px 15px !important;
+        }
+        .ts-control.focus {
+            border-color: var(--primary-light) !important;
+            box-shadow: 0 0 0 3px rgba(46, 134, 171, 0.15) !important;
+            background-color: var(--white) !important;
+        }
+
+        /* --- 4. Acordeón Estilizado --- */
+        .accordion-item {
             border: none;
-            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            border-radius: 12px !important;
+            margin-bottom: 15px;
+            background: transparent;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .accordion-button {
+            border-radius: 12px !important;
+            background: var(--white);
+            color: var(--primary);
+            font-weight: 600;
+            padding: 18px 20px;
+            box-shadow: none;
+        }
+
+        .accordion-button:not(.collapsed) {
+            background: var(--accent);
+            color: var(--primary-dark);
+            box-shadow: none;
+        }
+
+        .accordion-body {
+            background: var(--white);
+            border-radius: 0 0 12px 12px;
+            padding-top: 5px;
+        }
+
+        /* --- 5. Resumen y Botón Principal --- */
+        .summary-card {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid var(--border);
+            margin-top: 20px;
+        }
+
+        .sticky-footer {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: white; padding: 15px 20px;
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
+            z-index: 100;
+            border-top: 1px solid var(--border);
+        }
+
+        .btn-primary-custom {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            border: none;
+            color: white;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            width: 100%;
+            box-shadow: 0 4px 16px rgba(46, 134, 171, 0.3);
+            transition: var(--transition);
+        }
+
+        .btn-primary-custom:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(46, 134, 171, 0.4);
+        }
+        
+        .btn-primary-custom:disabled {
+            background: var(--text-muted);
+            box-shadow: none;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        /* --- 6. MODALES (Success, Error, Warning) --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.75);
+            display: none; align-items: center; justify-content: center;
+            z-index: 2000; padding: 20px;
+            backdrop-filter: blur(8px);
+            animation: fadeIn 0.2s ease;
+        }
+        .modal-overlay.active { display: flex; }
+        
+        .custom-modal {
+            background: white; border-radius: 20px;
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.4);
+            max-width: 440px; width: 100%; overflow: hidden;
+            animation: modalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes modalSlideUp { 
+            from { opacity: 0; transform: translateY(40px) scale(0.95); } 
+            to { opacity: 1; transform: translateY(0) scale(1); } 
+        }
+
+        .modal-header-custom { padding: 32px 28px 20px; text-align: center; }
+        
+        .modal-icon {
+            width: 64px; height: 64px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2rem; margin: 0 auto 20px; position: relative;
+        }
+        
+        /* Variantes de Iconos */
+        .modal-icon.success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white;
+            box-shadow: 0 8px 24px rgba(40, 167, 69, 0.3);
+        }
+        .modal-icon.error {
+            background: linear-gradient(135deg, #dc3545 0%, #e63946 100%); color: white;
+            box-shadow: 0 8px 24px rgba(220, 53, 69, 0.3);
+        }
+        .modal-icon.warning {
+            background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%); color: white;
+            box-shadow: 0 8px 24px rgba(255, 193, 7, 0.3);
+        }
+
+        .modal-title-custom h3 { font-size: 1.5rem; color: var(--text-dark); margin: 0; }
+        
+        .modal-body-custom { padding: 0 28px 28px; }
+        .modal-body-custom p { color: var(--text-muted); text-align: center; font-size: 1rem; line-height: 1.5; margin-bottom: 15px; }
+
+        /* Lista de detalles dentro del modal */
+        .modal-list-item {
+            display: flex; justify-content: space-between;
+            padding: 10px 0; border-bottom: 1px solid var(--border);
+            font-size: 0.95rem; color: var(--text-muted);
+        }
+        .modal-list-item strong { color: var(--text-dark); }
+        .modal-list-item:last-child { border-bottom: none; }
+
+        .modal-footer-custom { padding: 20px 28px 28px; display: flex; justify-content: center; gap: 10px; }
+        .modal-btn {
+            padding: 12px 24px; border-radius: 10px; border: none;
+            background: var(--background); color: var(--text-dark);
+            font-weight: 600; cursor: pointer; width: 100%;
+            border: 2px solid var(--border); transition: all 0.2s;
+        }
+        .modal-btn:hover { transform: translateY(-1px); }
+        .modal-btn.primary { background: var(--primary); color: white; border: none; }
+
+        /* Mobile Fixes */
+        @media (max-width: 768px) {
+            .card-form { padding: 15px; box-shadow: none; border: none; background: transparent; }
+            body { background: var(--white); }
         }
     </style>
 </head>
 
 <body>
-    <div class="container mt-3 mb-5">
-        <div class="text-center mb-4">
-            <h3>Nueva Venta</h3>
-            <p class="text-muted small">Registre los detalles de la transacción.</p>
+    <div class="container mt-3">
+        <div class="d-flex align-items-center mb-4 px-2">
+            <div>
+                <h3>Nueva Venta</h3>
+                <p class="text-muted small mb-0">Registre los detalles de la transacción.</p>
+            </div>
         </div>
 
-        <form class="card card-form p-4" onsubmit="sendInformationSale(event, this)">
+        <form onsubmit="sendInformationSale(event, this)">
             
             <div class="accordion" id="accordionVenta">
 
                 <div class="accordion-item">
                     <h2 class="accordion-header">
-                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCliente" aria-expanded="true" aria-controls="collapseCliente">
-                            <strong>1. Datos del Cliente y Pago</strong>
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCliente">
+                            1. Cliente y Pago
                         </button>
                     </h2>
                     <div id="collapseCliente" class="accordion-collapse collapse show" data-bs-parent="#accordionVenta">
                         <div class="accordion-body">
                             <div class="mb-3">
-                                <label for="clientName" class="form-label fw-bold">Cliente<span class="required-asterisk">*</span></label>
-                                <select class="form-select" id="clientName" name="clientName" aria-label="Lista de cliente"></select>
+                                <label for="clientName" class="form-label">Cliente<span class="required-asterisk">*</span></label>
+                                <select id="clientName" name="clientName"></select>
                                 <input type="hidden" id="clientCode" name="clientCode">
                             </div>
 
                             <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <label for="plazo" class="form-label fw-bold">Plazo de pago<span class="required-asterisk">*</span></label>
-                                    <select class="form-select" id="plazo" name="plazo">
+                                <div class="col-6">
+                                    <label for="plazo" class="form-label">Plazo<span class="required-asterisk">*</span></label>
+                                    <select id="plazo" name="plazo">
                                         <option value="UNO">Contado</option>
                                         <option value="DOS">1 mes</option>
                                         <option value="TRES">2 meses</option>
                                         <option value="CUATRO">3 meses</option>
                                     </select>
                                 </div>
-                                <div class="col-md-6">
-                                    <label for="amount" class="form-label fw-bold">Cantidad<span class="required-asterisk">*</span></label>
+                                <div class="col-6">
+                                    <label for="amount" class="form-label">Cant.<span class="required-asterisk">*</span></label>
                                     <input type="number" id="amount" name="amount" class="form-control" value="1" min="1">
                                 </div>
                             </div>
 
                             <div class="mb-3">
-                                <div class="form-check form-switch">
+                                <div class="form-check form-switch py-2">
                                     <input class="form-check-input" type="checkbox" id="checkIsCredict" name="checkIsCredict">
-                                    <label class="form-check-label" for="checkIsCredict">¿Es una venta a crédito?</label>
+                                    <label class="form-check-label" for="checkIsCredict">¿Venta a crédito?</label>
                                 </div>
                             </div>
 
                             <div class="mb-3" id="firstPaymentContainer" style="display: none;">
-                                <label for="firstPayment" class="form-label fw-bold">Primer abono<span class="required-asterisk">*</span></label>
+                                <label for="firstPayment" class="form-label">Primer abono<span class="required-asterisk">*</span></label>
                                 <div class="input-group">
-                                    <span class="input-group-text">$</span>
-                                    <input type="text" id="firstPayment" class="form-control" name="firstPayment" placeholder="0">
+                                    <span class="input-group-text bg-white border-end-0 text-muted">$</span>
+                                    <input type="text" id="firstPayment" class="form-control border-start-0 ps-0" name="firstPayment" placeholder="0">
                                 </div>
                             </div>
 
                             <div class="mb-3">
-                                <label for="paymentMethod" class="form-label fw-bold">Método de pago<span class="required-asterisk">*</span></label>
-                                <select id="paymentMethod" class="form-select" name="paymentMethod">
-                                    <option value="" selected>Seleccione método...</option>
+                                <label for="paymentMethod" class="form-label">Método de pago<span class="required-asterisk">*</span></label>
+                                <select id="paymentMethod" name="paymentMethod">
+                                    <option value="" selected>Seleccione...</option>
                                     <option value="Efectivo">Efectivo</option>
                                     <option value="B/bia K">Bancolombia Katy</option>
                                     <option value="B/bia E">Bancolombia Elver</option>
@@ -106,26 +314,26 @@
 
                 <div class="accordion-item">
                     <h2 class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseProducto" aria-expanded="false" aria-controls="collapseProducto">
-                            <strong>2. Selección de Producto</strong>
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseProducto">
+                            2. Producto
                         </button>
                     </h2>
                     <div id="collapseProducto" class="accordion-collapse collapse" data-bs-parent="#accordionVenta">
                         <div class="accordion-body">
                             <div class="mb-3">
-                                <label for="productName" class="form-label fw-bold">Producto<span class="required-asterisk">*</span></label>
-                                <select class="form-select" id="productName" name="productName"></select>
+                                <label for="productName" class="form-label">Producto<span class="required-asterisk">*</span></label>
+                                <select id="productName" name="productName"></select>
                                 <input type="hidden" id="productCode" name="productCode" readonly>
                             </div>
 
-                            <div class="row">
-                                <div class="col-6 mb-3">
-                                    <label class="form-label text-muted small mb-0">Precio Total</label>
-                                    <input type="text" class="form-control-plaintext fw-bold fs-5 text-primary" id="priceProduct" name="priceProduct" readonly value="—"> 
+                            <div class="d-flex justify-content-between align-items-center bg-light p-3 rounded-3">
+                                <div>
+                                    <span class="d-block text-muted small">Precio Total</span>
+                                    <input type="text" class="form-control-plaintext fw-bold fs-4 text-primary p-0" id="priceProduct" name="priceProduct" readonly value="—">
                                 </div>
-                                <div class="col-6 mb-3">
-                                    <label class="form-label text-muted small mb-0">Stock</label>
-                                    <input type="text" class="form-control-plaintext fw-bold" id="stockProduct" readonly value="—">
+                                <div class="text-end">
+                                    <span class="d-block text-muted small">Stock</span>
+                                    <input type="text" class="form-control-plaintext fw-bold p-0 text-end" id="stockProduct" readonly value="—">
                                 </div>
                             </div>
                         </div>
@@ -134,51 +342,57 @@
 
                 <div class="accordion-item">
                     <h2 class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSocio" aria-expanded="false" aria-controls="collapseSocio">
-                            <strong>3. Vendedor / Socio</strong>
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSocio">
+                            3. Vendedor
                         </button>
                     </h2>
                     <div id="collapseSocio" class="accordion-collapse collapse" data-bs-parent="#accordionVenta">
                         <div class="accordion-body">
-                            <label for="socio" class="form-label fw-bold">Socio responsable<span class="required-asterisk">*</span></label>
-                            <select class="form-select" id="socio" name="socio" aria-label="Seleccione socio..."></select>
+                            <label for="socio" class="form-label">Responsable<span class="required-asterisk">*</span></label>
+                            <select id="socio" name="socio"></select>
                             <input type="hidden" id="socioCode" name="socioCode" readonly>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="mt-4 p-3 bg-light rounded border">
-                <h5 class="mb-3 text-secondary">Resumen preliminar</h5>
+            <div class="summary-card mb-4">
                 <div class="row g-2 small">
-                    <div class="col-6"><strong>Código Venta:</strong> <span id="resCodigoVenta" class="text-primary">...</span></div>
-                    <div class="col-6"><strong>Cliente:</strong> <span id="resCliente">—</span></div>
-                    <div class="col-6"><strong>Producto:</strong> <span id="resProducto">—</span></div>
-                    <div class="col-6"><strong>Total a pagar:</strong> <span id="resPrecio" class="fw-bold text-success">—</span></div>
+                    <div class="col-6">Ref: <span id="resCodigoVenta" class="text-primary fw-bold">...</span></div>
+                    <div class="col-6 text-end"><span id="resCliente" class="text-muted">Cliente</span></div>
+                    <div class="col-12 border-top pt-2 mt-2 d-flex justify-content-between align-items-center">
+                        <span class="text-muted">Total a pagar:</span>
+                        <span id="resPrecio" class="fw-bold text-success fs-5">—</span>
+                    </div>
                 </div>
             </div>
 
-            <div class="d-grid gap-2 mt-4">
-                <button type="submit" id="btnSubmit" class="btn btn-primary btn-lg" disabled>
+            <div class="sticky-footer">
+                <button type="submit" id="btnSubmit" class="btn-primary-custom" disabled>
                     Registrar Venta
                 </button>
             </div>
         </form>
+    </div>
 
-        <div class="modal fade" id="saleSummaryModal" tabindex="-1" aria-labelledby="saleSummaryModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header bg-success text-white">
-                        <h5 class="modal-title" id="saleSummaryModalLabel">¡Venta Exitosa!</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div id="saleSummaryContent"></div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar y Nueva Venta</button>
-                    </div>
+    <div class="modal-overlay" id="genericModalOverlay">
+        <div class="custom-modal">
+            <div class="modal-header-custom">
+                <div class="modal-icon" id="modalIcon">
+                    <span id="modalIconSign">✓</span>
                 </div>
+                <div class="modal-title-custom">
+                    <h3 id="modalTitle">Título</h3>
+                </div>
+            </div>
+            
+            <div class="modal-body-custom">
+                <p id="modalMessage"></p>
+                <div id="modalContentList"></div>
+            </div>
+            
+            <div class="modal-footer-custom">
+                <button class="modal-btn" id="modalActionBtn" onclick="closeGenericModal()">Entendido</button>
             </div>
         </div>
     </div>
@@ -190,9 +404,7 @@
         // --- 1. Utilidades y Constantes ---
 
         function formatCurrency(value) {
-            if (typeof value !== 'number' || Number.isNaN(value)) {
-                return ''; 
-            }
+            if (typeof value !== 'number' || Number.isNaN(value)) return '';
             return new Intl.NumberFormat('es-CO', {
                 style: 'currency',
                 currency: 'COP', 
@@ -219,62 +431,49 @@
             socio: document.getElementById('socio'),
             btnSubmit: document.getElementById('btnSubmit') 
         };
-
         const TS = {};
 
-        // --- 2. Funciones de Inicialización ---
+        // --- 2. Inicialización de Componentes UI ---
 
         function initializeTomSelect() {
+            const commonConfig = {
+                create: false,
+                maxItems: 1,
+                sortField: { field: 'text', direction: 'asc' },
+                render: {
+                    option: function(data, escape) { return '<div>' + escape(data.text) + '</div>'; },
+                    item: function(data, escape) { return '<div>' + escape(data.text) + '</div>'; }
+                }
+            };
+
             try {
                 TS.paymentMethodSelect = new TomSelect(DOM.paymentMethod, {
-                    create: false,
-                    maxItems: 1,
+                    ...commonConfig,
                     allowEmptyOption: true,
-                    sortField: { field: 'text', direction: 'asc' },
-                    onChange: function() {
-                        updateProductValues();
-                    }
+                    placeholder: "Seleccione...",
+                    onChange: updateProductValues
                 });
 
                 TS.plazoSelect = new TomSelect(DOM.plazo, {
-                    create: false,
-                    maxItems: 1,
+                    ...commonConfig,
                     allowEmptyOption: false,
-                    placeholder: "Seleccione plazo...",
-                    sortField: { field: 'text', direction: 'asc' },
-                    onChange: function() {
-                        updateProductValues();
-                    }
+                    placeholder: "Plazo",
+                    onChange: updateProductValues
                 });
 
-                TS.amount = DOM.amount;
-                TS.amount.addEventListener('input', function() {
-                    updateProductValues();
-                });
+                DOM.amount.addEventListener('input', updateProductValues);
 
-
-            } catch (e) {
-                console.warn('TomSelect no pudo inicializarse:', e);
-            }
+            } catch (e) { console.warn('TomSelect init error:', e); }
         }
 
-        function loadInventoryData() {
-            google.script.run.withSuccessHandler(populateProductSelect).getInventory();
-        }
+        // --- 3. Carga de Datos (Google Apps Script) ---
 
-        function loadClientsData() {
-            google.script.run.withSuccessHandler(populateClientsSelect).getClients();
-        }
+        function loadInventoryData() { google.script.run.withSuccessHandler(populateProductSelect).getInventory(); }
+        function loadClientsData() { google.script.run.withSuccessHandler(populateClientsSelect).getClients(); }
+        function loadSequencesData() { google.script.run.withSuccessHandler(getSequences).getSequences(); }
+        function loadSociosData() { google.script.run.withSuccessHandler(populateSociosSelect).getSocios(); }
 
-        function loadSequencesData() {
-            google.script.run.withSuccessHandler(getSequences).getSequences();
-        }
-
-        function loadSociosData() {
-            google.script.run.withSuccessHandler(populateSociosSelect).getSocios();
-        }
-
-        // --- 3. Funciones de Lógica ---
+        // --- 4. Lógica de Negocio ---
 
         function calculatePriceByPlazo(product) {
             const plazo = DOM.plazo.value || 'UNO';
@@ -294,7 +493,7 @@
 
         function updateProductValues() {
             const selectedOption = DOM.productName.options[DOM.productName.selectedIndex];
-
+            
             if (!selectedOption || selectedOption.value === "") {
                 DOM.priceProduct.value = '—';
                 DOM.stockProduct.value = '—';
@@ -311,14 +510,12 @@
                 CUATRO: selectedOption.dataset.priceCuatro,
                 CINCO: selectedOption.dataset.priceCinco
             };
-
             const totalPrice = calculatePriceByPlazo(productPrices);
             const stock = selectedOption.dataset.stock;
             const code = selectedOption.dataset.code;
 
-            DOM.priceProductWithOutFormat = totalPrice; // Precio sin formatear
-            DOM.priceProduct.value = formatCurrency(totalPrice); // Formateado visualmente
-            
+            DOM.priceProductWithOutFormat = totalPrice;
+            DOM.priceProduct.value = formatCurrency(totalPrice);
             DOM.stockProduct.value = stock;
             DOM.productCode.value = code;
 
@@ -329,6 +526,7 @@
         function toggleFirstPayment() {
             if (DOM.checkIsCredict.checked) {
                 DOM.firstPaymentContainer.style.display = "block";
+                setTimeout(() => DOM.firstPayment.focus(), 100);
             } else {
                 DOM.firstPaymentContainer.style.display = "none";
                 DOM.firstPayment.value = ""; 
@@ -337,13 +535,11 @@
             validateForm();
         }
 
-        function populateProductSelect(optionsArray) {
-            if (optionsArray.error) {
-                DOM.productName.innerHTML = `<option value="">Error: ${optionsArray.error}</option>`;
-                return;
-            }
-            DOM.productName.innerHTML = '<option value="" disabled selected>Seleccione producto...</option>';
+        // --- 5. Poblado de Selects ---
 
+        function populateProductSelect(optionsArray) {
+            if (optionsArray.error) return;
+            DOM.productName.innerHTML = '<option value="" disabled selected>Buscar producto...</option>';
             for (const product of optionsArray) {
                 const option = document.createElement('option');
                 option.value = product.CODIGO || ''; 
@@ -354,94 +550,53 @@
                 option.dataset.priceCuatro = product.CUATRO;
                 option.dataset.priceCinco = product.CINCO;
                 option.dataset.stock = product.STOCK;
-                option.dataset.code = product.CODIGO || 'No Code';
+                option.dataset.code = product.CODIGO || '';
                 DOM.productName.appendChild(option);
             }
-
-            if (TS.productNameSelect) {
-                TS.productNameSelect.destroy();
-            }
-
+            if (TS.productNameSelect) TS.productNameSelect.destroy();
             TS.productNameSelect = new TomSelect(DOM.productName, {
-                create: false,
-                maxItems: 1,
-                allowEmptyOption: false ,
-                placeholder: "Buscar producto...",
-                sortField: { field: 'text', direction: 'asc' },
-                onChange: function() {
-                    updateProductValues(); 
-                }
+                create: false, maxItems: 1, allowEmptyOption: false,
+                placeholder: "Buscar producto...", sortField: { field: 'text', direction: 'asc' },
+                onChange: updateProductValues
             });
         }
 
         function populateClientsSelect(optionsArray) {
-            if (optionsArray.error) {
-                DOM.clientName.innerHTML = `<option value="">Error: ${optionsArray.error}</option>`;
-                return;
-            }
-            DOM.clientName.innerHTML = '<option value="" disabled selected>Seleccione cliente...</option>';
-
+            if (optionsArray.error) return;
+            DOM.clientName.innerHTML = '<option value="" disabled selected>Buscar cliente...</option>';
             for (const client of optionsArray) {
                 const option = document.createElement('option');
-                option.value = client.NOMBRE || ''; 
-                option.textContent = `${client.NOMBRE || 'Sin nombre'} (${client.CODIGO || ''})`;
-                option.dataset.code = client.CODIGO || '';
+                option.value = client.NOMBRE || ''; option.textContent = `${client.NOMBRE}`; option.dataset.code = client.CODIGO || '';
                 DOM.clientName.appendChild(option);
             }
-
-            if (TS.clientNameSelect) {
-                TS.clientNameSelect.destroy();
-            }
-
+            if (TS.clientNameSelect) TS.clientNameSelect.destroy();
             TS.clientNameSelect = new TomSelect(DOM.clientName, {
-                create: false,
-                maxItems: 1,
-                allowEmptyOption: true,
-                placeholder: "Buscar cliente...",
-                sortField: { field: 'text', direction: 'asc' },
+                create: false, maxItems: 1, allowEmptyOption: true,
+                placeholder: "Buscar cliente...", sortField: { field: 'text', direction: 'asc' },
                 onChange: function() {
                     const selected = DOM.clientName.options[DOM.clientName.selectedIndex];
-                    const code = selected && selected.dataset ? selected.dataset.code : '';
-                    DOM.clientCode.value = code || '';
-                    updateSummary();
-                    validateForm(); 
+                    DOM.clientCode.value = selected?.dataset?.code || '';
+                    updateSummary(); validateForm(); 
                 }
             });
         }
 
         function populateSociosSelect(optionsArray) {
-            console.log('optionsArray: ', optionsArray); //<--Sii esta imprimiendo la lista
-
-            if (optionsArray.error) {
-                DOM.socio.innerHTML = `<option value="">Error: ${optionsArray.error}</option>`;
-                return;
-            }
-            DOM.socio.innerHTML = '<option value="" disabled selected>Seleccione socio...</option>';
-
+            if (optionsArray.error) return;
+            DOM.socio.innerHTML = '<option value="" disabled selected>Buscar socio...</option>';
             for (const socio of optionsArray) {
                 const option = document.createElement('option');
-                option.value = socio.NOMBRE || ''; 
-                option.textContent = `${socio.NOMBRE || 'Sin nombre'}`;
-                option.dataset.code = socio.CODIGO || '';
+                option.value = socio.NOMBRE || ''; option.textContent = socio.NOMBRE; option.dataset.code = socio.CODIGO || '';
                 DOM.socio.appendChild(option);
             }
-
-            if (TS.socioSelect) {
-                TS.socioSelect.destroy();
-            }
-
+            if (TS.socioSelect) TS.socioSelect.destroy();
             TS.socioSelect = new TomSelect(DOM.socio, {
-                create: false,
-                maxItems: 1,
-                allowEmptyOption: true,
-                placeholder: "Buscar socio...",
-                sortField: { field: 'text', direction: 'asc' },
+                create: false, maxItems: 1, allowEmptyOption: true,
+                placeholder: "Buscar socio...", sortField: { field: 'text', direction: 'asc' },
                 onChange: function() {
                     const selectedOption = DOM.socio.options[DOM.socio.selectedIndex];
-                    const codigoSocio = selectedOption.dataset.code;
-                    DOM.socioCode.value = codigoSocio;
-                    updateSummary();
-                    validateForm(); 
+                    DOM.socioCode.value = selectedOption?.dataset?.code || '';
+                    updateSummary(); validateForm(); 
                 }
             });
         }
@@ -450,165 +605,161 @@
         function getSequences(sequencesArray) {
             saleSequence = sequencesArray.find(seq => seq.NAME === 'VENTA');
             if (saleSequence) {
-                // Asumiendo lógica de prefijo + numero
                 let newSaleNumber = saleSequence.PREFIX + saleSequence.NEXT || 'N/A';
                 DOM.resCodigoVenta.innerText = newSaleNumber;
-            } else {
-                DOM.resCodigoVenta.innerText = 'N/A';
-            }
+            } else { DOM.resCodigoVenta.innerText = 'N/A'; }
         }
 
-        // --- 4. Validaciones y Envío ---
+        // --- 6. Sistema de Modales Unificado ---
+        
+        let lastModalType = ''; 
+
+        function showModal(type, title, message, htmlDetails = '') {
+            const overlay = document.getElementById('genericModalOverlay');
+            const iconContainer = document.getElementById('modalIcon');
+            const iconSign = document.getElementById('modalIconSign');
+            const titleEl = document.getElementById('modalTitle');
+            const msgEl = document.getElementById('modalMessage');
+            const listEl = document.getElementById('modalContentList');
+            const btn = document.getElementById('modalActionBtn');
+
+            // Resetear clases previas
+            iconContainer.className = 'modal-icon';
+            lastModalType = type;
+
+            // Configurar según el tipo
+            switch(type) {
+                case 'success':
+                    iconContainer.classList.add('success');
+                    iconSign.textContent = '✓';
+                    btn.textContent = 'Cerrar y Nueva Venta';
+                    btn.style.borderColor = 'var(--success)';
+                    break;
+                case 'error':
+                    iconContainer.classList.add('error');
+                    iconSign.textContent = '✕';
+                    btn.textContent = 'Intentar de nuevo';
+                    btn.style.borderColor = 'var(--error)';
+                    break;
+                case 'warning':
+                    iconContainer.classList.add('warning');
+                    iconSign.textContent = '⚠';
+                    btn.textContent = 'Corregir';
+                    btn.style.borderColor = 'var(--warning)';
+                    break;
+            }
+
+            titleEl.textContent = title;
+            msgEl.textContent = message; 
+            listEl.innerHTML = htmlDetails; 
+            overlay.classList.add('active');
+        }
+
+        function closeGenericModal() {
+            document.getElementById('genericModalOverlay').classList.remove('active');
+            if (lastModalType === 'success') { resetForm(); }
+        }
+
+        // --- 7. Validación y Envío ---
 
         function validateForm() {
             let isValid = true;
+            let errorMsg = '';
 
-            if (!DOM.clientName.value || DOM.clientName.value === "") isValid = false;
-            if (!DOM.plazo.value || DOM.plazo.value === "") isValid = false;
+            if (!DOM.clientName.value) { isValid = false; errorMsg = "Debes seleccionar un cliente."; }
+            else if (!DOM.plazo.value) { isValid = false; errorMsg = "Selecciona un plazo de pago."; }
+            else if (!DOM.productName.value) { isValid = false; errorMsg = "Selecciona un producto."; }
+            else if (!DOM.socio.value) { isValid = false; errorMsg = "Selecciona el vendedor responsable."; }
+            else if (!DOM.paymentMethod.value) { isValid = false; errorMsg = "Selecciona un método de pago."; }
             
             const amountVal = parseFloat(DOM.amount.value);
-            if (isNaN(amountVal) || amountVal <= 0) isValid = false;
-
+            if (isNaN(amountVal) || amountVal <= 0) { isValid = false; errorMsg = "La cantidad debe ser mayor a 0."; }
+            
             if (DOM.checkIsCredict.checked) {
                 if (!DOM.firstPayment.value || DOM.firstPayment.value.trim() === "") {
-                    isValid = false;
+                    isValid = false; errorMsg = "En ventas a crédito, el primer abono es obligatorio.";
                 }
             }
 
-            if (!DOM.paymentMethod.value || DOM.paymentMethod.value === "") isValid = false;
-            if (!DOM.productName.value || DOM.productName.value === "") isValid = false;
-            if (!DOM.socio.value || DOM.socio.value === "") isValid = false;
-
             DOM.btnSubmit.disabled = !isValid;
-            return isValid;
+            return { isValid, errorMsg };
         }
 
         function updateSummary() {
-            // Actualización del resumen pequeño en el formulario principal
-            document.getElementById("resCliente").innerText = DOM.clientName.value || "—";
-            
-            const _prodSelected = DOM.productName.options[DOM.productName.selectedIndex];
-            document.getElementById("resProducto").innerText = (_prodSelected && _prodSelected.text) ? _prodSelected.text.split('-')[0] : "—";
-            
+            document.getElementById("resCliente").innerText = DOM.clientName.value || "Seleccionar Cliente";
             document.getElementById("resPrecio").innerText = DOM.priceProduct.value || "—";
         }
 
         function sendInformationSale(e, form) {
             e.preventDefault();
-
-            if (!validateForm()) {
-                alert("Por favor complete todos los campos obligatorios.");
+            
+            const validation = validateForm();
+            if (!validation.isValid) {
+                showModal('warning', 'Faltan Datos', validation.errorMsg);
                 return;
             }
 
             const stockAvailable = parseInt(DOM.stockProduct.value);
             const amountRequested = parseInt(DOM.amount.value);
             
-            // Validación básica de stock (opcional, remover si no se necesita estricta)
             if (!isNaN(stockAvailable) && stockAvailable < amountRequested) {
-                alert("Stock insuficiente para la cantidad solicitada.");
+                showModal('error', 'Stock Insuficiente', `Solo tienes ${stockAvailable} unidades disponibles y estás intentando vender ${amountRequested}.`);
                 return;
             }
 
             const submitBtn = DOM.btnSubmit;
-            submitBtn.disabled = true; 
+            submitBtn.disabled = true;
             submitBtn.innerText = "Procesando...";
 
             const formData = new FormData(form);
             const data = Object.fromEntries(formData);
-            data.priceProduct = DOM.priceProductWithOutFormat; // Enviar precio sin formatear
+            data.priceProduct = DOM.priceProductWithOutFormat;
 
-
-            console.log('Enviando datos de venta:', data);
-            console.log('SaleSequence: ', saleSequence);
             google.script.run
                 .withSuccessHandler(function(response) {
                     submitBtn.innerText = "Registrar Venta"; 
-                    showSummary(response);
+                    if (!response || !response.success) {
+                        showModal('error', 'Error en el Servidor', 'No se pudo registrar la venta. Inténtalo de nuevo.');
+                        submitBtn.disabled = false;
+                        return;
+                    }
+                    // HTML para Éxito
+                    const detailsHtml = `
+                        <div class="modal-list-item"><span>Código</span> <strong>${response.saleCode}</strong></div>
+                        <div class="modal-list-item"><span>Cliente</span> <strong>${DOM.clientName.value}</strong></div>
+                        <div class="modal-list-item"><span>Producto</span> <strong>${DOM.productName.options[DOM.productName.selectedIndex].text.split('(')[0]}</strong></div>
+                        <div class="modal-list-item"><span>Total</span> <strong style="color:var(--success)">${DOM.priceProduct.value}</strong></div>
+                    `;
+                    showModal('success', '¡Venta Exitosa!', '', detailsHtml);
                 })
                 .withFailureHandler(function(err) {
                     submitBtn.disabled = false; 
                     submitBtn.innerText = "Registrar Venta";
-                    alert('Error al crear la venta: ' + (err && err.message ? err.message : JSON.stringify(err)));
+                    showModal('error', 'Error de Conexión', 'Ocurrió un error inesperado: ' + err);
                 })
                 .createNewSale(data, saleSequence);
         }
 
-        function showSummary(response) {
-            if (!response || !response.success) {
-                alert('No se pudo registrar la venta.');
-                DOM.btnSubmit.disabled = false;
-                return;
-            }
-
-            const contentEl = document.getElementById('saleSummaryContent');
-            // Reconstrucción del HTML para el Modal de éxito
-            const html = `
-                <div class="text-center mb-4">
-                    <h2 class="text-success display-6">${response.saleCode}</h2>
-                    <p class="text-muted">${response.date}</p>
-                </div>
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item d-flex justify-content-between">
-                        <span>Cliente:</span> <strong>${DOM.clientName.value}</strong>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between">
-                        <span>Producto:</span> <strong>${DOM.productName.options[DOM.productName.selectedIndex].text}</strong>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between">
-                        <span>Cantidad:</span> <strong>${DOM.amount.value}</strong>
-                    </li>
-                     <li class="list-group-item d-flex justify-content-between">
-                        <span>Total:</span> <strong class="text-success">${DOM.priceProduct.value}</strong>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between">
-                        <span>Vendedor:</span> <span>${DOM.socio.value}</span>
-                    </li>
-                </ul>
-            `;
-
-            contentEl.innerHTML = html;
-
-            const modalEl = document.getElementById('saleSummaryModal');
-            const bsModal = new bootstrap.Modal(modalEl);
-            bsModal.show();
-        }
-
         function resetForm() {
             const form = document.querySelector('form');
-            if (!form) return;
-
-            form.reset();
+            if (form) form.reset();
             loadSequencesData();
-
             try {
                 if (TS.paymentMethodSelect) TS.paymentMethodSelect.clear();
                 if (TS.socioSelect) TS.socioSelect.clear();
                 if (TS.clientNameSelect) TS.clientNameSelect.clear();
                 if (TS.productNameSelect) TS.productNameSelect.clear();
-            } catch (e) {
-                console.warn('Clean TS error:', e);
-            }
-
-            DOM.priceProduct.value = '—';
-            DOM.stockProduct.value = '—';
-            DOM.productCode.value = '';
-            DOM.clientCode.value = '';
-            DOM.socioCode.value = '';
-
-            toggleFirstPayment();
-            updateSummary();
-            validateForm();
-            DOM.btnSubmit.disabled = true; 
+            } catch (e) { console.warn(e); }
+            DOM.priceProduct.value = '—'; DOM.stockProduct.value = '—';
+            DOM.productCode.value = ''; DOM.clientCode.value = ''; DOM.socioCode.value = '';
+            toggleFirstPayment(); updateSummary(); validateForm();
         }
 
-        // --- 5. Inicialización Global ---
+        // --- 8. Event Listeners ---
         document.addEventListener('DOMContentLoaded', function() {
             toggleFirstPayment();
-            loadClientsData();
-            loadInventoryData();
-            loadSequencesData();
-            loadSociosData();
+            loadClientsData(); loadInventoryData();
+            loadSequencesData(); loadSociosData();
             initializeTomSelect();
 
             DOM.checkIsCredict.addEventListener("change", toggleFirstPayment);
@@ -618,14 +769,6 @@
                     DOM[key].addEventListener("input", () => { updateSummary(); validateForm(); });
                     DOM[key].addEventListener("change", () => { updateSummary(); validateForm(); });
                 }
-            }
-
-            updateSummary();
-            validateForm();
-
-            const modalEl = document.getElementById('saleSummaryModal');
-            if (modalEl) {
-                modalEl.addEventListener('hidden.bs.modal', resetForm);
             }
         });
     </script>

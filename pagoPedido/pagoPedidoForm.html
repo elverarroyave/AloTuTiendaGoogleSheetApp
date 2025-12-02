@@ -2,53 +2,252 @@
 <html lang="es">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title>Registrar Pago</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.bootstrap5.css" rel="stylesheet">
     <style>
-        body { background-color: #f8f9fa; }
-        .required-asterisk { color: red; margin-left: 3px; font-weight: bold; }
-        .card-form { border: none; box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); }
-        .preview-code { font-family: monospace; color: #0d6efd; font-weight: bold; background-color: #e9ecef; }
-        .pago-value { font-size: 1.5rem; font-weight: bold; color: #dc3545; }
+        /* --- 1. Variables de Diseño (Uniformidad) --- */
+        :root {
+            --primary: #2E86AB;
+            --primary-dark: #1C5F7B;
+            --primary-light: #5DADE2;
+            --accent: #E8F4F8;
+            --background: #FAFBFC;
+            --white: #ffffff;
+            --text-dark: #2c3e50;
+            --text-muted: #6c757d;
+            --border: #e9ecef;
+            --success: #28a745;
+            --warning: #ffc107;
+            --error: #dc3545;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.06);
+            --shadow-lg: 0 8px 15px rgba(0,0,0,0.1);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* --- 2. Estilos Generales y Contenedores --- */
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--background);
+            color: var(--text-dark);
+            padding-bottom: 90px; /* Espacio para botón flotante */
+        }
+
+        h3 { color: var(--primary); font-weight: 700; margin-bottom: 0; }
+        .text-muted { color: var(--text-muted) !important; }
+
+        .card-form {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: var(--shadow-md);
+            padding: 25px;
+            transition: var(--transition);
+        }
+        
+        /* Mobile Fixes: Sin borde ni sombra en móvil */
+        @media (max-width: 768px) {
+            .card-form { padding: 15px; box-shadow: none; border: none; background: transparent; }
+            body { background: var(--white); }
+            .container { padding-left: 0; padding-right: 0; }
+        }
+
+        /* --- 3. Inputs y Formularios --- */
+        .form-label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-dark);
+            margin-bottom: 6px;
+        }
+        .required-asterisk { color: var(--error); margin-left: 3px; }
+
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            padding: 12px 15px; 
+            font-size: 1rem;
+            transition: var(--transition);
+            background-color: var(--accent);
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(46, 134, 171, 0.15);
+            background-color: var(--white);
+        }
+        
+        /* Estilo para el Código (Readonly) y el Input Group */
+        #pagoCodeDisplay {
+            font-family: monospace;
+            color: var(--primary-dark);
+            font-weight: 700;
+            background-color: var(--background) !important;
+        }
+        .input-group-text {
+            background-color: var(--accent);
+            border: 1px solid var(--border);
+            border-right: none;
+            color: var(--text-muted);
+            border-radius: 10px 0 0 10px;
+            font-weight: 600;
+        }
+        .input-group-text + .form-control {
+            border-left: none;
+            border-radius: 0 10px 10px 0;
+        }
+        
+        /* Estilo para el valor formateado del pago */
+        .value-display { 
+            font-size: 1.5rem; 
+            font-weight: 700; 
+            color: var(--error); /* Mantiene el color rojo como indicación de valor a pagar */
+            margin-top: 8px;
+        }
+
+
+        /* --- 4. Botón Principal (Sticky Footer) --- */
+        .sticky-footer {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: white; padding: 15px 20px;
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
+            z-index: 100;
+            border-top: 1px solid var(--border);
+        }
+
+        .btn-primary-custom {
+            /* Usando una variación de color para que no sea el mismo que el botón principal de 'Cliente' o 'Producto' */
+            background: linear-gradient(135deg, var(--error) 0%, #ff6b81 100%); 
+            border: none;
+            color: white;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            width: 100%;
+            box-shadow: 0 4px 16px rgba(220, 53, 69, 0.3);
+            transition: var(--transition);
+        }
+
+        .btn-primary-custom:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+        }
+        
+        .btn-primary-custom:disabled {
+            background: var(--text-muted);
+            box-shadow: none;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        /* --- 5. MODALES (Uniformidad) --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.75);
+            display: none; align-items: center; justify-content: center;
+            z-index: 2000; padding: 20px;
+            backdrop-filter: blur(8px);
+            animation: fadeIn 0.2s ease;
+        }
+        .modal-overlay.active { display: flex; }
+        
+        .custom-modal {
+            background: var(--white); border-radius: 20px;
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.4);
+            max-width: 440px; width: 100%; overflow: hidden;
+            animation: modalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes modalSlideUp { 
+            from { opacity: 0; transform: translateY(40px) scale(0.95); } 
+            to { opacity: 1; transform: translateY(0) scale(1); } 
+        }
+
+        .modal-header-custom { padding: 32px 28px 20px; text-align: center; }
+        .modal-icon {
+            width: 64px; height: 64px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2rem; margin: 0 auto 20px; position: relative;
+        }
+        
+        /* Variantes de Iconos */
+        .modal-icon.success {
+            background: linear-gradient(135deg, var(--success) 0%, #20c997 100%); color: white;
+            box-shadow: 0 8px 24px rgba(40, 167, 69, 0.3);
+        }
+        .modal-icon.error {
+            background: linear-gradient(135deg, var(--error) 0%, #e63946 100%); color: white;
+            box-shadow: 0 8px 24px rgba(220, 53, 69, 0.3);
+        }
+        .modal-icon.warning {
+            background: linear-gradient(135deg, var(--warning) 0%, #ff9800 100%); color: white;
+            box-shadow: 0 8px 24px rgba(255, 193, 7, 0.3);
+        }
+
+        .modal-title-custom h3 { font-size: 1.5rem; color: var(--text-dark); margin: 0; }
+        
+        .modal-body-custom { padding: 0 28px 28px; }
+        .modal-body-custom p { color: var(--text-muted); text-align: center; font-size: 1rem; line-height: 1.5; margin-bottom: 15px; }
+
+        /* Lista de detalles dentro del modal */
+        .modal-list-item {
+            display: flex; justify-content: space-between;
+            padding: 10px 0; border-bottom: 1px solid var(--border);
+            font-size: 0.95rem; color: var(--text-muted);
+        }
+        .modal-list-item strong { color: var(--text-dark); font-weight: 600; }
+        .modal-list-item:last-child { border-bottom: none; }
+
+        .modal-footer-custom { padding: 20px 28px 28px; display: flex; justify-content: center; gap: 10px; }
+        .modal-btn {
+            padding: 12px 24px; border-radius: 10px; border: 2px solid var(--border);
+            background: var(--background); color: var(--text-dark);
+            font-weight: 600; cursor: pointer; width: 100%;
+            transition: all 0.2s;
+        }
+        .modal-btn:hover { transform: translateY(-1px); border-color: var(--primary); }
     </style>
 </head>
 
 <body>
-    <div class="container mt-4 mb-5">
-        <div class="text-center mb-4">
-            <h3>Registrar Pago Pedido</h3>
-            <p class="text-muted small">Registra el pago de un pedido.</p>
+    <div class="container mt-3">
+        <div class="d-flex align-items-center mb-4 px-2">
+            <div>
+                <h3>Registrar Pago Pedido</h3>
+                <p class="text-muted small mb-0">Registra el pago de un pedido.</p>
+            </div>
         </div>
 
-        <form id="pagoForm" class="card card-form p-4" onsubmit="handleSubmit(event)">
+        <form id="pagoForm" class="card-form mb-5" onsubmit="handleSubmit(event)">
             
             <div class="row mb-3">
                 <div class="col-md-6">
-                    <label for="pagoCodeDisplay" class="form-label fw-bold">Código de ingreso</label>
-                    <input type="text" class="form-control preview-code" id="pagoCodeDisplay" readonly value="Cargando...">
+                    <label for="pagoCodeDisplay" class="form-label">Código de ingreso</label>
+                    <input type="text" class="form-control" id="pagoCodeDisplay" readonly value="Cargando...">
                 </div>
             </div>
 
-            <hr>
+            <hr class="mb-4 mt-2">
 
             <div class="mb-3">
-                <label for="inCode" class="form-label fw-bold">Código de Pedido<span class="required-asterisk">*</span></label>
-                <input id="inCode" class="form-control" name="inCode" placeholder="IN000" required>
+                <label for="inCode" class="form-label">Código de Pedido<span class="required-asterisk">*</span></label>
+                <input id="inCode" class="form-control" name="inCode" placeholder="Ej: VENTA001" required>
+                <div class="form-text text-muted">Asegúrese de ingresar el código exacto del pedido (Ej: VENTA001).</div>
             </div>
 
             <div class="mb-3">
-                <label for="payValue" class="form-label fw-bold">Valor del Pago<span class="required-asterisk">*</span></label>
+                <label for="payValue" class="form-label">Valor del Pago<span class="required-asterisk">*</span></label>
                 <div class="input-group">
                     <span class="input-group-text">$</span>
                     <input type="number" class="form-control" id="payValue" name="payValue" min="1" placeholder="0" required>
                 </div>
-                <div class="pago-value mt-2 text-end" id="payValueDisplay"></div>
+                <div class="value-display text-end" id="payValueDisplay"></div>
             </div>
             
             <div class="mb-3">
-                <label for="metodoPago" class="form-label fw-bold">Método de pago<span class="required-asterisk">*</span></label>
+                <label for="metodoPago" class="form-label">Método de pago<span class="required-asterisk">*</span></label>
                 <select id="metodoPago" class="form-select" name="metodoPago">
                     <option value="" selected>Seleccione método...</option>
                     <option value="Efectivo">Efectivo</option>
@@ -59,22 +258,35 @@
                 </select>
             </div>
 
-            <div class="d-grid gap-2 mt-4">
-                <button type="submit" id="btnSubmit" class="btn btn-info btn-lg" disabled>
-                    Registrar Pago (Pagar)
-                </button>
-            </div>
-        </form>
+            </form>
 
-        <div id="successAlert" class="alert alert-success mt-3 d-none shadow-sm" role="alert">
-            <h4 class="alert-heading"><i class="bi bi-check-circle-fill"></i> Pago registrado!</h4>
-            <p>Se ha registrado el pago <strong id="resCode"></strong> por un valor de <strong id="resValue"></strong>.</p>
-            <hr>
-            <div class="d-flex justify-content-end">
-                <button type="button" class="btn btn-primary btn-sm" onclick="resetForm()">Registrar otro Pago</button>
+        <div class="sticky-footer">
+            <button type="submit" id="btnSubmit" class="btn-primary-custom" form="pagoForm" disabled>
+                Registrar Pago (Pagar)
+            </button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="genericModalOverlay">
+        <div class="custom-modal">
+            <div class="modal-header-custom">
+                <div class="modal-icon" id="modalIcon">
+                    <span id="modalIconSign">✓</span>
+                </div>
+                <div class="modal-title-custom">
+                    <h3 id="modalTitle">Título</h3>
+                </div>
+            </div>
+            
+            <div class="modal-body-custom">
+                <p id="modalMessage"></p>
+                <div id="modalContentList"></div>
+            </div>
+            
+            <div class="modal-footer-custom">
+                <button class="modal-btn" id="modalActionBtn" onclick="closeGenericModal()">Entendido</button>
             </div>
         </div>
-
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
@@ -89,56 +301,100 @@
           payValueDisplay: document.getElementById('payValueDisplay'),
           metodoPago: document.getElementById('metodoPago'),
           btnSubmit: document.getElementById('btnSubmit'),
-          successAlert: document.getElementById('successAlert'),
-          resCode: document.getElementById('resCode'),
-          resValue: document.getElementById('resValue')
       };
 
-      // La variable TS ya no es necesaria, se remueve.
+      let lastModalType = ''; 
 
-      // --- 1. Inicialización ---
+      // --- 1. Utilidades y Modales (Uniformidad) ---
+      function showModal(type, title, message, htmlDetails = '') {
+          const overlay = document.getElementById('genericModalOverlay');
+          const iconContainer = document.getElementById('modalIcon');
+          const iconSign = document.getElementById('modalIconSign');
+          const titleEl = document.getElementById('modalTitle');
+          const msgEl = document.getElementById('modalMessage');
+          const listEl = document.getElementById('modalContentList');
+          const btn = document.getElementById('modalActionBtn');
+
+          iconContainer.className = 'modal-icon';
+          lastModalType = type;
+
+          switch(type) {
+              case 'success':
+                  iconContainer.classList.add('success');
+                  iconSign.textContent = '✓';
+                  btn.textContent = 'Registrar otro Pago';
+                  btn.style.borderColor = 'var(--success)';
+                  break;
+              case 'error':
+                  iconContainer.classList.add('error');
+                  iconSign.textContent = '✕';
+                  btn.textContent = 'Intentar de nuevo';
+                  btn.style.borderColor = 'var(--error)';
+                  break;
+              case 'warning':
+                  iconContainer.classList.add('warning');
+                  iconSign.textContent = '⚠';
+                  btn.textContent = 'Corregir datos';
+                  btn.style.borderColor = 'var(--warning)';
+                  break;
+              default:
+                  btn.textContent = 'Entendido';
+          }
+
+          titleEl.textContent = title;
+          msgEl.textContent = message; 
+          listEl.innerHTML = htmlDetails; 
+          overlay.classList.add('active');
+      }
+
+      function closeGenericModal() {
+          document.getElementById('genericModalOverlay').classList.remove('active');
+          if (lastModalType === 'success') { resetForm(); }
+      }
+
+      // --- 2. Inicialización y Carga de Secuencia ---
       document.addEventListener('DOMContentLoaded', () => {
           loadData();
-          addEventListeners();
+          addEventListener();
       });
 
-      // --- 2. Carga de Datos ---
       function loadData() {
-          // Cargar preview del código del pago
+          DOM.pagoCodeDisplay.value = "Cargando...";
+          
+          if (typeof google === 'undefined' || !google.script) {
+               // Simulación fuera de Apps Script
+               setTimeout(() => DOM.pagoCodeDisplay.value = "INOUT045", 500);
+               return;
+          }
+          
           google.script.run
               .withSuccessHandler(displaySequence)
               .withFailureHandler(err => {
                   DOM.pagoCodeDisplay.value = "Error";
-                  console.error("Error al cargar secuencia:", err);
+                  showModal('error', 'Error de Carga', 'No se pudo cargar la secuencia de código de pago. Contacte soporte.');
               })
               .getSequences();
-          
-          // NOTA: La carga de Métodos de Pago se eliminó porque las opciones están manuales en el HTML.
       }
       
       function displaySequence(sequences) {
-          // Buscamos la secuencia por nombre 'INOUT'
-          pagoSeq = sequences.find(s => s.PREFIX === 'INOUT'); 
+          // Buscamos la secuencia por nombre o prefijo
+          const pagoSeq = sequences.find(s => s.PREFIX === 'INOUT'); 
           
           if (pagoSeq) {
-              DOM.pagoCodeDisplay.value = `${pagoSeq.PREFIX}${pagoSeq.NEXT}`;
+              // Formato: PREFIX + NEXT (Ej: INOUT045)
+              DOM.pagoCodeDisplay.value = `${pagoSeq.PREFIX}${String(pagoSeq.NEXT).padStart(3, '0')}`;
           } else {
-              DOM.pagoCodeDisplay.value = "ERROR: Secuencia 'INOUT' no encontrada.";
+              DOM.pagoCodeDisplay.value = "N/A";
           }
       }
 
-      // --- 3. Lógica y Validación (AÑADIMOS LISTENERS FALTANTES) ---
-      function addEventListeners() {
-          // 1. Valor del Pago (Para formato y validación)
+      // --- 3. Lógica y Validación ---
+      function addEventListener() {
           DOM.payValue.addEventListener('input', () => {
               formatValueDisplay();
               validateForm();
           });
-
-          // 2. Código de Venta (NUEVO: Llama a la validación al escribir)
           DOM.inCode.addEventListener('input', validateForm);
-          
-          // 3. Método de Pago (NUEVO: Llama a la validación al seleccionar)
           DOM.metodoPago.addEventListener('change', validateForm);
       }
 
@@ -152,80 +408,91 @@
 
       function validateForm() {
           let isValid = true;
+          let errors = [];
 
           // Validar Código de Venta
-          if (!DOM.inCode.value) isValid = false;
+          if (DOM.inCode.value.trim().length < 5) {
+              isValid = false;
+              errors.push('Código de Pedido (mín. 5 caracteres)');
+          }
           
           // Validar Valor del Pago (> 0)
           const value = parseFloat(DOM.payValue.value);
-          if (isNaN(value) || value <= 0) isValid = false;
+          if (isNaN(value) || value <= 0) {
+              isValid = false;
+              errors.push('Valor del Pago (debe ser mayor a $0)');
+          }
           
           // Validar Método Pago
-          // Si el valor es "", la validación falla (lo que queremos si no elige nada)
-          if (!DOM.metodoPago.value) isValid = false; 
+          if (!DOM.metodoPago.value) {
+              isValid = false;
+              errors.push('Método de Pago');
+          }
 
-          // 1. Establece el estado del botón
           DOM.btnSubmit.disabled = !isValid;
-
-          // 2. RETORNA el valor booleano para que handleSubmit lo pueda usar
-          return isValid; 
+          return { isValid, errors };
       }
 
       // --- 4. Envío ---
       function handleSubmit(e) {
           e.preventDefault();
           
-          // Revisión final de validación antes de enviar
-          if (!validateForm()) {
-              alert("Por favor, complete todos los campos obligatorios.");
+          const validation = validateForm();
+
+          if (!validation.isValid) {
+              const errorList = validation.errors.map(err => `<div>• ${err}</div>`).join('');
+              showModal('warning', 'Datos Incompletos', 'Debe completar y validar los siguientes campos:', errorList);
               return;
           }
 
           DOM.btnSubmit.disabled = true;
           DOM.btnSubmit.innerText = "Registrando Pago...";
-          DOM.successAlert.classList.add('d-none');
 
           const formData = {
-              inCode: DOM.inCode.value,
+              inCode: DOM.inCode.value.trim(),
               payValue: DOM.payValue.value,
               metodoPago: DOM.metodoPago.value
           };
-
+          
           google.script.run
               .withSuccessHandler(onSuccess)
-              .withFailureHandler(err => {
-                  alert("Error al registrar Pago: " + err.message);
-                  DOM.btnSubmit.disabled = false;
-                  DOM.btnSubmit.innerText = "Registrar Pago (Pagar)";
-              })
-              // Se envía el form data, la secuencia la busca el backend.
+              .withFailureHandler(onFailure)
               .crearPago(formData); 
       }
 
       function onSuccess(res) {
-          DOM.form.classList.add('d-none');
-          DOM.resCode.innerText = res.code;
-          
-          DOM.resValue.innerText = new Intl.NumberFormat('es-CO', { 
-              style: 'currency', currency: 'COP', minimumFractionDigits: 0 
-          }).format(res.value);
-
-          DOM.successAlert.classList.remove('d-none');
           DOM.btnSubmit.innerText = "Registrar Pago (Pagar)";
+          DOM.form.classList.add('d-none'); // Ocultar formulario
+
+          const formattedValue = new Intl.NumberFormat('es-CO', { 
+              style: 'currency', currency: 'COP', minimumFractionDigits: 0 
+          }).format(res.value || DOM.payValue.value);
+
+          // Construir HTML de resumen para el modal de éxito
+          const detailsHtml = `
+              <div class="modal-list-item"><span>Pedido Asociado</span> <strong>${DOM.inCode.value}</strong></div>
+              <div class="modal-list-item"><span>Valor</span> <strong style="color: var(--success);">${formattedValue}</strong></div>
+              <div class="modal-list-item"><span>Método</span> <strong>${DOM.metodoPago.options[DOM.metodoPago.selectedIndex].text}</strong></div>
+          `;
+
+          showModal('success', '¡Pago Registrado!', `Se ha registrado el pago con el código ${res.code || DOM.pagoCodeDisplay.value}.`, detailsHtml);
+      }
+
+      function onFailure(error) {
+          DOM.btnSubmit.disabled = false;
+          DOM.btnSubmit.innerText = "Registrar Pago (Pagar)";
+          showModal('error', 'Error de Registro', 'No se pudo crear el pago: ' + error.message);
       }
 
       function resetForm() {
           DOM.form.reset();
           DOM.form.classList.remove('d-none');
-          DOM.successAlert.classList.add('d-none');
-          
-          // No hay TomSelects que limpiar, solo reset del form
           
           DOM.pagoCodeDisplay.value = "Actualizando...";
           DOM.payValueDisplay.innerText = "";
-          DOM.btnSubmit.disabled = true;
-
+          
           loadData(); // Recargar secuencia
+          validateForm(); // Deshabilita el botón
       }
     </script>
 </body>

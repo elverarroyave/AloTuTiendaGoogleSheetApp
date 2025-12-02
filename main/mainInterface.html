@@ -3,239 +3,25 @@
 <head>
   <base target="_top">
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <title>AloTuTienda - Sistema de Gestión</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
-    body { 
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-      background: #E8F4F8;
-      height: 100vh;
-      overflow: hidden;
-    }
-    
-    .app-container {
-      display: flex;
-      height: 100vh;
-    }
-    
-    /* Sidebar Styles */
-    .sidebar {
-      width: 250px;
-      background: #2E86AB;
-      color: white;
-      flex-shrink: 0;
-      overflow-y: auto;
-      box-shadow: 2px 0 10px rgba(0,0,0,0.1);
-      display: flex;
-      flex-direction: column;
-    }
-    
-    .sidebar-header {
-      padding: 20px;
-      background: #1C5F7B;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
-    
-    .sidebar-header h1 {
-      font-size: 1.2rem;
-      font-weight: 600;
-      text-align: center;
-      margin: 0;
-    }
-    
-    .nav-menu {
-      list-style: none;
-      padding: 20px 0;
-      flex: 1;
-    }
-    
-    .nav-item {
-      margin: 5px 15px;
-    }
-    
-    .nav-link {
-      display: flex;
-      align-items: center;
-      padding: 12px 15px;
-      color: rgba(255,255,255,0.8);
-      text-decoration: none;
-      border-radius: 8px;
-      transition: all 0.3s ease;
-      cursor: pointer;
-      font-size: 0.9rem;
-    }
-    
-    .nav-link:hover {
-      background: rgba(255,255,255,0.15);
-      color: white;
-      transform: translateX(5px);
-    }
-    
-    .nav-link.active {
-      background: #5DADE2;
-      color: white;
-      font-weight: 600;
-    }
-    
-    .nav-icon {
-      margin-right: 10px;
-      font-size: 1.1rem;
-      width: 20px;
-      text-align: center;
-    }
-    
-    /* Main Content Styles */
-    .main-content {
-      flex: 1;
-      overflow: hidden; /* Prevent double scrollbars */
-      background: #FAFBFC;
-      position: relative;
-    }
-    
-    .tab-content {
-      display: none;
-      height: 100%;
-      width: 100%;
-      animation: fadeIn 0.3s ease;
-      overflow-y: auto; /* Allow scrolling within the tab */
-    }
-    
-    .tab-content.active {
-      display: block;
-    }
-    
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    
-    /* Dashboard Specific Styles */
-    .dashboard-container {
-        padding: 30px;
-    }
-
-    .content-header {
-      background: white;
-      padding: 20px 30px;
-      border-bottom: 1px solid #e9ecef;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-      margin-bottom: 20px;
-    }
-    
-    .content-header h2 {
-      color: #2E86AB;
-      font-size: 1.5rem;
-      font-weight: 600;
-    }
-
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 20px;
-      margin-bottom: 30px;
-    }
-    
-    .stat-card {
-      background: white;
-      padding: 25px;
-      border-radius: 12px;
-      text-align: center;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.06);
-      border-left: 4px solid #5DADE2;
-      border: 1px solid #E5F2F7;
-      cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-
-    .stat-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 15px rgba(0,0,0,0.1);
-    }
-    
-    .stat-icon {
-        font-size: 2.5rem;
-        margin-bottom: 15px;
-        color: #5DADE2;
-    }
-
-    .stat-value {
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: #2E86AB;
-      margin-bottom: 5px;
-    }
-    
-    .stat-label {
-      color: #6c757d;
-      font-size: 0.9rem;
-      font-weight: 500;
-    }
-
-    /* Iframe Styles */
-    iframe {
-        width: 100%;
-        height: 100%;
-        border: none;
-        display: block;
-    }
-
-    .loading-spinner {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100%;
-        color: #5DADE2;
-        font-size: 1.2rem;
-    }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-      .sidebar {
-        width: 60px;
-        overflow: visible;
-      }
-      .sidebar-header h1, .nav-link span:not(.nav-icon) {
-        display: none;
-      }
-      .nav-link {
-          justify-content: center;
-          padding: 15px 5px;
-      }
-      .nav-icon {
-          margin: 0;
-          font-size: 1.5rem;
-      }
-      .sidebar:hover {
-          width: 250px;
-          position: absolute;
-          z-index: 1000;
-          height: 100%;
-      }
-      .sidebar:hover .sidebar-header h1, .sidebar:hover .nav-link span:not(.nav-icon) {
-          display: inline;
-      }
-      .sidebar:hover .nav-link {
-          justify-content: flex-start;
-          padding: 12px 15px;
-      }
-      .sidebar:hover .nav-icon {
-          margin-right: 10px;
-          font-size: 1.1rem;
-      }
-    }
-  </style>
+  <?!= includes("mainCss.html"); ?>
 </head>
 <body onload="initializeApp()">
   <div class="app-container">
-    <nav class="sidebar">
+    <!-- Mobile Menu Toggle -->
+    <button class="menu-toggle" onclick="toggleSidebar()" aria-label="Menú">
+      <span id="menuIcon">☰</span>
+    </button>
+    
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" onclick="closeSidebar()"></div>
+    
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
       <div class="sidebar-header">
         <h1>AloTuTienda</h1>
+        <p>Sistema de Gestión</p>
       </div>
       <ul class="nav-menu">
         <li class="nav-item">
@@ -282,49 +68,51 @@
         </li>
       </ul>
       <div class="sidebar-footer">
-        <p style="padding: 15px; font-size: 0.8rem; text-align: center; color: rgba(255,255,255,0.6);">© 2025 AloTuTienda 1.0.1</p>
+        <p>© 2025 AloTuTienda v1.1.1</p>
       </div>
     </nav>
 
+    <!-- Main Content -->
     <div class="main-content">
       <!-- Dashboard Tab -->
       <div id="dashboard" class="tab-content active">
-        <div class="content-header">
-            <h2>Panel de Control</h2>
-        </div>
         <div class="dashboard-container">
-            <div class="stats-grid">
-                <div class="stat-card" onclick="showTab('createNewSale')">
-                    <div class="stat-icon">🛒</div>
-                    <div class="stat-value">Nueva Venta</div>
-                    <div class="stat-label">Registrar venta a cliente</div>
-                </div>
-                <div class="stat-card" onclick="showTab('createNewProduct')">
-                    <div class="stat-icon">📦</div>
-                    <div class="stat-value">Nuevo Producto</div>
-                    <div class="stat-label">Añadir al inventario</div>
-                </div>
-                <div class="stat-card" onclick="showTab('createNewClient')">
-                    <div class="stat-icon">👥</div>
-                    <div class="stat-value">Nuevo Cliente</div>
-                    <div class="stat-label">Registrar cliente</div>
-                </div>
-                <div class="stat-card" onclick="showTab('controlIngreso')">
-                    <div class="stat-icon">🚛</div>
-                    <div class="stat-value">Ingresar Pedido</div>
-                    <div class="stat-label">Control de mercancía</div>
-                </div>
-                <div class="stat-card" onclick="showTab('addAbono')">
-                    <div class="stat-icon">💰</div>
-                    <div class="stat-value">Agregar Abono</div>
-                    <div class="stat-label">Registrar pagos</div>
-                </div>
-                <div class="stat-card" onclick="showTab('pagoPedido')">
-                    <div class="stat-icon">🧾</div>
-                    <div class="stat-value">Pagar Pedido</div>
-                    <div class="stat-label">Gestión de pagos</div>
-                </div>
+          <div class="content-header">
+            <h2>Panel de Control</h2>
+            <p>Gestiona tu negocio de forma eficiente</p>
+          </div>
+          <div class="stats-grid">
+            <div class="stat-card" onclick="showTab('createNewSale')">
+              <div class="stat-icon">🛒</div>
+              <div class="stat-value">Nueva Venta</div>
+              <div class="stat-label">Registrar venta a cliente</div>
             </div>
+            <div class="stat-card" onclick="showTab('createNewProduct')">
+              <div class="stat-icon">📦</div>
+              <div class="stat-value">Nuevo Producto</div>
+              <div class="stat-label">Añadir al inventario</div>
+            </div>
+            <div class="stat-card" onclick="showTab('createNewClient')">
+              <div class="stat-icon">👥</div>
+              <div class="stat-value">Nuevo Cliente</div>
+              <div class="stat-label">Registrar cliente</div>
+            </div>
+            <div class="stat-card" onclick="showTab('controlIngreso')">
+              <div class="stat-icon">🚛</div>
+              <div class="stat-value">Ingresar Pedido</div>
+              <div class="stat-label">Control de mercancía</div>
+            </div>
+            <div class="stat-card" onclick="showTab('addAbono')">
+              <div class="stat-icon">💰</div>
+              <div class="stat-value">Agregar Abono</div>
+              <div class="stat-label">Registrar pagos</div>
+            </div>
+            <div class="stat-card" onclick="showTab('pagoPedido')">
+              <div class="stat-icon">🧾</div>
+              <div class="stat-value">Pagar Pedido</div>
+              <div class="stat-label">Gestión de pagos</div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -335,96 +123,246 @@
       <div id="controlIngreso" class="tab-content"></div>
       <div id="addAbono" class="tab-content"></div>
       <div id="pagoPedido" class="tab-content"></div>
+    </div>
+  </div>
 
+  <!-- Modal Template -->
+  <div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-icon" id="modalIcon">
+          <span id="modalIconText">✓</span>
+        </div>
+        <div class="modal-title">
+          <h3 id="modalTitle">Título</h3>
+        </div>
+      </div>
+      <div class="modal-body">
+        <p id="modalMessage">Mensaje</p>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-button secondary" onclick="closeModal()">Cancelar</button>
+        <button class="modal-button primary" id="modalActionBtn" onclick="closeModal()">Aceptar</button>
+      </div>
     </div>
   </div>
 
   <script>
-    // Get the Web App URL from the server-side template
     const WEB_APP_URL = "<?= webAppUrl ?>";
     let currentTab = 'dashboard';
 
     function initializeApp() {
-        // Initial setup if needed
+      // Check if on mobile
+      if (window.innerWidth <= 768) {
+        document.getElementById('sidebar').classList.remove('active');
+      }
+    }
+
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.querySelector('.sidebar-overlay');
+      const menuToggle = document.querySelector('.menu-toggle');
+      const menuIcon = document.getElementById('menuIcon');
+      
+      sidebar.classList.toggle('active');
+      overlay.classList.toggle('active');
+      menuToggle.classList.toggle('active');
+      menuIcon.textContent = sidebar.classList.contains('active') ? '✕' : '☰';
+    }
+
+    function closeSidebar() {
+      if (window.innerWidth <= 768) {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.querySelector('.sidebar-overlay');
+        const menuToggle = document.querySelector('.menu-toggle');
+        const menuIcon = document.getElementById('menuIcon');
+        
+        sidebar.classList.remove('active');
+        overlay.classList.remove('active');
+        menuToggle.classList.remove('active');
+        menuIcon.textContent = '☰';
+      }
     }
 
     function showTab(tabId) {
-        // 1. Update UI (Sidebar Active State)
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.classList.remove('active');
-            // Check if this link corresponds to the tabId
-            if (link.getAttribute('onclick').includes(`'${tabId}'`)) {
-                link.classList.add('active');
-            }
-        });
-
-        // 2. Hide all tabs
-        document.querySelectorAll('.tab-content').forEach(tab => {
-            tab.classList.remove('active');
-        });
-
-        // 3. Show selected tab
-        const selectedTab = document.getElementById(tabId);
-        if (selectedTab) {
-            selectedTab.classList.add('active');
-            
-            // 4. Lazy Load Iframe if needed (for non-dashboard tabs)
-            if (tabId !== 'dashboard') {
-                loadIframeContent(tabId);
-            }
+      // Close sidebar on mobile after selection
+      closeSidebar();
+      
+      // Update UI (Sidebar Active State)
+      document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('onclick').includes(`'${tabId}'`)) {
+          link.classList.add('active');
         }
+      });
+
+      // Hide all tabs
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+
+      // Show selected tab
+      const selectedTab = document.getElementById(tabId);
+      if (selectedTab) {
+        selectedTab.classList.add('active');
         
-        currentTab = tabId;
+        // Lazy Load Iframe if needed
+        if (tabId !== 'dashboard') {
+          loadIframeContent(tabId);
+        }
+      }
+      
+      currentTab = tabId;
     }
 
     function loadIframeContent(tabId) {
-        const container = document.getElementById(tabId);
-        
-        // If iframe already exists, do nothing (preserves state)
-        if (container.querySelector('iframe')) {
-            return;
-        }
+      const container = document.getElementById(tabId);
+      
+      // If iframe already exists, preserve state
+      if (container.querySelector('iframe')) {
+        return;
+      }
 
-        // Show loading state
-        container.innerHTML = '<div class="loading-spinner">Cargando...</div>';
+      // Show loading state
+      container.innerHTML = `
+        <div class="loading-spinner">
+          <div class="spinner"></div>
+          <span>Cargando...</span>
+        </div>
+      `;
 
-        // Construct URL
-        const timestamp = new Date().getTime();
-        let targetUrl = '';
+      const timestamp = new Date().getTime();
+      let targetUrl = '';
 
-        if (WEB_APP_URL && WEB_APP_URL.startsWith('http')) {
-            targetUrl = `${WEB_APP_URL}?page=${tabId}&t=${timestamp}`;
+      if (WEB_APP_URL && WEB_APP_URL.startsWith('http')) {
+        targetUrl = `${WEB_APP_URL}?page=${tabId}&t=${timestamp}`;
+        injectIframe(container, targetUrl);
+      } else {
+        // Fallback: Get URL from server
+        google.script.run.withSuccessHandler(url => {
+          if (url && url.startsWith('http')) {
+            targetUrl = `${url}?page=${tabId}&t=${timestamp}`;
             injectIframe(container, targetUrl);
-        } else {
-            // Fallback: Get URL from server
-            google.script.run.withSuccessHandler(url => {
-                if (url && url.startsWith('http')) {
-                    targetUrl = `${url}?page=${tabId}&t=${timestamp}`;
-                    injectIframe(container, targetUrl);
-                } else {
-                    container.innerHTML = '<div class="message error">Error obteniendo URL de la aplicación.</div>';
-                }
-            }).getUrl();
-        }
+          } else {
+            showModal('error', 'Error', 'No se pudo cargar la página solicitada.');
+            container.innerHTML = '';
+          }
+        }).withFailureHandler(err => {
+          showModal('error', 'Error', 'Error de conexión: ' + err);
+          container.innerHTML = '';
+        }).getUrl();
+      }
     }
 
     function injectIframe(container, url) {
-        // Create iframe element
-        const iframe = document.createElement('iframe');
-        iframe.src = url;
-        iframe.allow = "autoplay";
-        
-        // When loaded, remove spinner
-        iframe.onload = function() {
-            // Optional: Remove spinner if we had a separate overlay, 
-            // but here we just replace the content, so the spinner is gone when we overwrite innerHTML? 
-            // No, we need to append.
-        };
-
-        // Clear container (remove spinner) and append iframe
-        container.innerHTML = '';
-        container.appendChild(iframe);
+      const iframe = document.createElement('iframe');
+      iframe.src = url;
+      iframe.allow = "autoplay";
+      
+      container.innerHTML = '';
+      container.appendChild(iframe);
     }
+
+    // Modal Functions
+    function showModal(type, title, message, options = {}) {
+      const overlay = document.getElementById('modalOverlay');
+      const icon = document.getElementById('modalIcon');
+      const iconText = document.getElementById('modalIconText');
+      const modalTitle = document.getElementById('modalTitle');
+      const modalMessage = document.getElementById('modalMessage');
+      const actionBtn = document.getElementById('modalActionBtn');
+      const cancelBtn = overlay.querySelector('.modal-button.secondary');
+      
+      // Set icon based on type
+      icon.className = 'modal-icon ' + type;
+      switch(type) {
+        case 'success':
+          iconText.textContent = '✓';
+          break;
+        case 'error':
+          iconText.textContent = '✕';
+          break;
+        case 'warning':
+          iconText.textContent = '⚠';
+          break;
+        case 'info':
+          iconText.textContent = 'ℹ';
+          break;
+      }
+      
+      modalTitle.textContent = title;
+      modalMessage.textContent = message;
+      
+      // Handle buttons based on options
+      if (options.confirmText || options.onConfirm) {
+        actionBtn.textContent = options.confirmText || 'Aceptar';
+        actionBtn.style.display = 'block';
+        actionBtn.onclick = () => {
+          if (options.onConfirm) options.onConfirm();
+          closeModal();
+        };
+        cancelBtn.textContent = options.cancelText || 'Cancelar';
+        cancelBtn.style.display = 'block';
+      } else {
+        // Single button mode
+        actionBtn.style.display = 'none';
+        cancelBtn.textContent = 'Cerrar';
+        cancelBtn.style.display = 'block';
+      }
+      
+      overlay.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      const overlay = document.getElementById('modalOverlay');
+      overlay.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+    
+    function handleOverlayClick(event) {
+      if (event.target.id === 'modalOverlay') {
+        closeModal();
+      }
+    }
+
+    // Keyboard support for modal
+    document.addEventListener('keydown', (e) => {
+      const overlay = document.getElementById('modalOverlay');
+      if (overlay.classList.contains('active')) {
+        if (e.key === 'Escape') {
+          closeModal();
+        } else if (e.key === 'Enter') {
+          const actionBtn = document.getElementById('modalActionBtn');
+          if (actionBtn.style.display !== 'none') {
+            actionBtn.click();
+          } else {
+            closeModal();
+          }
+        }
+      }
+    });
+
+    // Handle window resize
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 768) {
+        document.getElementById('sidebar').classList.remove('active');
+        document.querySelector('.sidebar-overlay').classList.remove('active');
+        document.querySelector('.menu-toggle').classList.remove('active');
+        document.getElementById('menuIcon').textContent = '☰';
+      }
+    });
+
+    // Prevent body scroll when sidebar is open on mobile
+    const sidebar = document.getElementById('sidebar');
+    const observer = new MutationObserver(() => {
+      if (sidebar.classList.contains('active') && window.innerWidth <= 768) {
+        document.body.style.overflow = 'hidden';
+      } else {
+        document.body.style.overflow = '';
+      }
+    });
+    observer.observe(sidebar, { attributes: true, attributeFilter: ['class'] });
   </script>
 </body>
 </html>

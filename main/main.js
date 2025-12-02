@@ -22,6 +22,10 @@ function openMainInterface() {
   SpreadsheetApp.getUi().showModalDialog(html, 'Panel Principal - AloTuTienda');
 }
 
+function includes(filename) {
+  return HtmlService.createHtmlOutputFromFile(filename).getContent();
+}
+
 function doGet(e) {
   try {
     const page = e.parameter.page;
