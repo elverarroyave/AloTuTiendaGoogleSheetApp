@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>Nueva Cotización</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.bootstrap5.css" rel="stylesheet">
+    
+    <style>
+        /* --- 1. Variables de Diseño (Idénticas a Interfaz Principal) --- */
+        :root {
+            --primary: #2E86AB;
+            --primary-dark: #1C5F7B;
+            --primary-light: #5DADE2;
+            --accent: #E8F4F8;
+            --background: #FAFBFC;
+            --white: #ffffff;
+            --text-dark: #2c3e50;
+            --text-muted: #6c757d;
+            --border: #e9ecef;
+            --success: #28a745;
+            --warning: #ffc107;
+            --error: #dc3545;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.06);
+            --shadow-lg: 0 8px 15px rgba(0,0,0,0.1);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* --- 2. Estilos Generales --- */
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--background);
+            color: var(--text-dark);
+            padding-bottom: 30px; 
+        }
+
+        h3 { color: var(--primary); font-weight: 700; margin-bottom: 0; }
+        .text-muted { color: var(--text-muted) !important; }
+
+        /* --- 3. Tarjetas y Inputs --- */
+        .card-form {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: var(--shadow-md);
+            padding: 25px;
+            transition: var(--transition);
+        }
+
+        .form-label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-dark);
+            margin-bottom: 6px;
+        }
+
+        .required-asterisk { color: var(--error); margin-left: 3px; }
+
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            padding: 12px 15px; /* Más padding para touch */
+            font-size: 1rem;
+            transition: var(--transition);
+            background-color: var(--accent);
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(46, 134, 171, 0.15);
+            background-color: var(--white);
+        }
+
+        /* Ajustes TomSelect */
+        .ts-control {
+            border-radius: 10px !important;
+            border: 1px solid var(--border) !important;
+            background-color: var(--accent) !important;
+            padding: 12px 15px !important;
+        }
+        .ts-control.focus {
+            border-color: var(--primary-light) !important;
+            box-shadow: 0 0 0 3px rgba(46, 134, 171, 0.15) !important;
+            background-color: var(--white) !important;
+        }
+        
+        /* --- ESTILOS ESPECÍFICOS PARA LA COTIZACIÓN --- */
+        .quotation-result-card {
+            background: var(--primary-dark);
+            color: var(--white);
+            border-radius: 16px;
+            padding: 30px 25px;
+            box-shadow: var(--shadow-lg);
+            margin-top: 25px;
+        }
+        
+        .quotation-result-card h4 {
+            font-weight: 700;
+            color: var(--primary-light);
+            margin-bottom: 20px;
+        }
+
+        .price-display {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--success);
+            line-height: 1.1;
+            margin-bottom: 20px;
+        }
+        
+        .payment-detail {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+        
+        .payment-detail .value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--white);
+        }
+        
+        @media (max-width: 768px) {
+            .card-form { padding: 15px; box-shadow: none; border: none; background: transparent; }
+            body { background: var(--white); }
+            .quotation-result-card {
+                margin-top: 20px;
+                padding: 20px 15px;
+                border-radius: 12px;
+            }
+            .price-display {
+                font-size: 2rem;
+            }
+            .payment-detail .value {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container mt-3">
+        <div class="d-flex align-items-center mb-4 px-2">
+            <div>
+                <h3>Generar Cotización</h3>
+                <p class="text-muted small mb-0">Seleccione el producto y el plazo para obtener la cotización.</p>
+            </div>
+        </div>
+        
+        <div class="card-form mb-4">
+            <form id="quotationForm">
+                
+                <div class="mb-4">
+                    <label for="productName" class="form-label">Nombre del producto<span class="required-asterisk">*</span></label>
+                    <select id="productName" name="productName"></select>
+                    <input type="hidden" id="productCode" name="productCode" readonly>
+                </div>
+
+                <div class="mb-3">
+                    <label for="plazo" class="form-label">Plazo(meses)<span class="required-asterisk">*</span></label>
+                    <select id="plazo" name="plazo">
+                        <option value=1>Contado</option>
+                        <option value=2>1 Mes</option>
+                        <option value=3>2 Meses</option>
+                        <option value=4>3 Meses</option>
+                    </select>
+                </div>
+                
+            </form>
+        </div>
+        
+        <div class="quotation-result-card">
+            <h4>Detalle de la Cotización</h4>
+            
+            <div id="quotationResult" style="display: none;">
+                <span class="d-block text-white-50 small mb-1">PRECIO TOTAL</span>
+                <div class="price-display" id="totalPriceDisplay">
+                    —
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="payment-detail">
+                            <span class="d-block text-white-50 small">Valor de cada pago</span>
+                            <span class="d-block value" id="priceEachPaymentDisplay">—</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="payment-detail">
+                            <span class="d-block text-white-50 small">Cantidad de pagos</span>
+                            <span class="d-block value" id="paymentCountDisplay">—</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="defaultMessage">
+                <p class="lead text-white-50 text-center">Selecciona un **Producto** y un **Plazo** para ver la cotización.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
+
+    <script>
+        // --- 1. Utilidades y Constantes ---
+
+        /**
+         * Formatea un número como moneda colombiana (COP).
+         * @param {string|number} value El valor a formatear.
+         * @returns {string} El valor formateado.
+         */
+        function formatCurrency(value) {
+            // Convierte a número si es string, si no es válido retorna un guion
+            // Se asegura de limpiar cualquier caracter no numérico (excepto punto/guion)
+            const numValue = Number(String(value).replace(/[^0-9.-]+/g, "")); 
+            if (Number.isNaN(numValue)) return '—'; 
+            
+            return new Intl.NumberFormat('es-CO', {
+                style: 'currency',
+                currency: 'COP', 
+                minimumFractionDigits: 0
+            }).format(numValue);
+        }
+
+        const DOM = {
+            productName: document.getElementById('productName'),
+            productCode: document.getElementById('productCode'),
+            plazo: document.getElementById('plazo'),
+            totalPriceDisplay: document.getElementById('totalPriceDisplay'),
+            priceEachPaymentDisplay: document.getElementById('priceEachPaymentDisplay'),
+            paymentCountDisplay: document.getElementById('paymentCountDisplay'),
+            quotationResult: document.getElementById('quotationResult'),
+            defaultMessage: document.getElementById('defaultMessage'),
+        };
+
+        const TS = {};
+
+        // --- 2. Inicialización de Componentes UI ---
+
+        function initializeTomSelect() {
+            const commonConfig = {
+                create: false,
+                maxItems: 1,
+                sortField: { field: 'text', direction: 'asc' },
+                render: {
+                    option: function(data, escape) { return '<div>' + escape(data.text) + '</div>'; },
+                    item: function(data, escape) { return '<div>' + escape(data.text) + '</div>'; }
+                }
+            };
+            
+            // Inicializar TomSelect para Plazo
+            TS.plazoSelect = new TomSelect(DOM.plazo, {
+                ...commonConfig,
+                allowEmptyOption: false,
+                placeholder: "Seleccione Plazo",
+                onChange: handleQuotationChange 
+            });
+            
+        }
+
+        function loadInventoryData() { 
+            // En un proyecto real, esta es la llamada a Apps Script. 
+            // Si ya verificaste que funciona, es correcto.
+            google.script.run.withSuccessHandler(populateProductSelect).getInventory(); 
+        }
+
+        
+        function populateProductSelect(optionsArray) {
+            DOM.productName.innerHTML = '<option value="" disabled selected>Buscar producto...</option>';
+            for (const product of optionsArray) {
+                const option = document.createElement('option');
+                option.value = product.CODIGO || ''; // Usar CODIGO como value
+                option.textContent = `${product.NOMBRE || 'Sin nombre'} (${product.CODIGO || ''})`;
+                option.dataset.code = product.CODIGO || ''; // Almacenar el código
+                option.dataset.name = product.NOMBRE || ''; // Almacenar el nombre
+                option.dataset.precio = product.UNO || ''; // Almacenar el precio base
+                option.dataset.stock = product.STOCK || ''; // Almacenar el stock
+                DOM.productName.appendChild(option);
+            }
+            
+            if (TS.productNameSelect) TS.productNameSelect.destroy();
+            TS.productNameSelect = new TomSelect(DOM.productName, {
+                create: false, maxItems: 1, allowEmptyOption: false,
+                placeholder: "Buscar producto...", sortField: { field: 'text', direction: 'asc' },
+                onChange: handleQuotationChange
+            });
+        }
+
+        // --- 3. Lógica de Cotización ---
+        
+        /**
+         * Calcula el precio final de las cuotas con un interés simulado.
+         * @param {number} precioBase El precio de contado.
+         * @param {number} cuotas La cantidad de pagos (1, 2, 3, 4).
+         * @returns {number} El precio total.
+         */
+        function calcularPrecioCuotas(precioBase, cuotas) {
+            if (cuotas === 1) {
+                return precioBase; // precio de contado
+            }
+            const interesMensual = 0.05; // 5%
+            // Se aplica interés a los meses adicionales (cuotas - 1)
+            const factor = 1 + (interesMensual * (cuotas - 1));
+            return precioBase * factor;
+        }
+
+        /**
+         * Función que simula la llamada a Apps Script (ahora local y síncrona).
+         */
+        function cotizarProductoXPlazo(product, plazo) {
+            console.log(`Llamando a cotizarProductoXPlazo(${product.name}, ${plazo} cuotas)...`);
+            
+            const numPlazo = Number(plazo);
+            const numPrecioBase = Number(product.precio);
+
+            // Calcular el precio total final
+            const totalPrice = calcularPrecioCuotas(numPrecioBase, numPlazo);
+            
+            // Retornar el objeto de cotización completo
+            return {
+                totalPrice: totalPrice,
+                priceEachPayment: totalPrice / numPlazo,
+                paymentCount: numPlazo,
+                stock: product.stock,
+            }
+        }
+
+        /**
+         * Maneja el cambio en Producto o Plazo y dispara la cotización.
+         */
+        function handleQuotationChange() {
+            const selected = DOM.productName.options[DOM.productName.selectedIndex];
+            
+            // Validar que se haya seleccionado un producto (no el placeholder inicial)
+            if (!selected || !selected.value) {
+                DOM.defaultMessage.style.display = 'block';
+                DOM.quotationResult.style.display = 'none';
+                clearQuotationDisplay();
+                return;
+            }
+
+            const product = {
+                name: selected?.dataset?.name,
+                code: selected?.dataset?.code,
+                // Convertir el precio a número es crucial ya que viene de un data-attribute (string)
+                precio: selected?.dataset?.precio, 
+                stock: selected?.dataset?.stock,
+            }
+            
+            // Convertir el plazo a número para cálculos.
+            const plazo = Number(DOM.plazo.value);
+
+            // Actualizar el campo oculto de código
+            DOM.productCode.value = product.code; 
+            
+            if (product.code && plazo > 0 && product.precio) {
+                // FIX: Capturar el resultado de la función cotizarProductoXPlazo
+                const quotationData = cotizarProductoXPlazo(product, plazo);
+                
+                // FIX: Usar el resultado para actualizar la interfaz
+                updateQuotationDisplay(quotationData);
+                
+                DOM.defaultMessage.style.display = 'none';
+                DOM.quotationResult.style.display = 'block';
+            } else {
+                // Limpiar si falta algún campo obligatorio
+                DOM.defaultMessage.style.display = 'block';
+                DOM.quotationResult.style.display = 'none';
+                clearQuotationDisplay();
+            }
+        }
+        
+        /**
+         * Actualiza la vista con los resultados de la cotización.
+         * @param {Object} data Objeto con totalPrice, priceEachPayment, paymentCount.
+         */
+        function updateQuotationDisplay(data) {
+            DOM.totalPriceDisplay.textContent = formatCurrency(data.totalPrice);
+            DOM.priceEachPaymentDisplay.textContent = formatCurrency(data.priceEachPayment);
+            DOM.paymentCountDisplay.textContent = data.paymentCount;
+        }
+
+        /**
+         * Limpia los valores de la cotización.
+         */
+        function clearQuotationDisplay() {
+            DOM.totalPriceDisplay.textContent = '—';
+            DOM.priceEachPaymentDisplay.textContent = '—';
+            DOM.paymentCountDisplay.textContent = '—';
+        }
+
+        // --- 4. Inicialización al cargar el DOM ---
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTomSelect();
+            clearQuotationDisplay();
+            loadInventoryData();
+        });
+    </script>
+</body>
+</html>

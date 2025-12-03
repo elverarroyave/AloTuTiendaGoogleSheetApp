@@ -10,7 +10,7 @@
 <body onload="initializeApp()">
   <div class="app-container">
     <!-- Mobile Menu Toggle -->
-    <button class="menu-toggle" onclick="toggleSidebar()" aria-label="Menú">
+    <button class="menu-toggle" aria-label="Menú">
       <span id="menuIcon">☰</span>
     </button>
     
@@ -66,6 +66,12 @@
             <span>Pagar Pedido</span>
           </a>
         </li>
+        <li class="nav-item">
+          <a class="nav-link" onclick="showTab('cotizacion')">
+            <span class="nav-icon">💰</span>
+            <span>Cotización</span>
+          </a>
+        </li>
       </ul>
       <div class="sidebar-footer">
         <p id="version"> ---- </p>
@@ -112,6 +118,11 @@
               <div class="stat-value">Pagar Pedido</div>
               <div class="stat-label">Gestión de pagos</div>
             </div>
+            <div class="stat-card" onclick="showTab('cotizacion')">
+              <div class="stat-icon">💰</div>
+              <div class="stat-value">Cotización</div>
+              <div class="stat-label">Cotización de productos</div>
+            </div>
           </div>
         </div>
       </div>
@@ -123,6 +134,7 @@
       <div id="controlIngreso" class="tab-content"></div>
       <div id="addAbono" class="tab-content"></div>
       <div id="pagoPedido" class="tab-content"></div>
+      <div id="cotizacion" class="tab-content"></div>
     </div>
   </div>
 
@@ -191,6 +203,7 @@
     }
 
     function showTab(tabId) {
+      console.log('showTab', tabId);
       // Close sidebar on mobile after selection
       closeSidebar();
       
@@ -217,11 +230,13 @@
           loadIframeContent(tabId);
         }
       }
+      console.log('showTab end', currentTab);
       
       currentTab = tabId;
     }
 
     function loadIframeContent(tabId) {
+      console.log('loadIframeContent', tabId);
       const container = document.getElementById(tabId);
       
       // If iframe already exists, preserve state
@@ -258,15 +273,18 @@
           container.innerHTML = '';
         }).getUrl();
       }
+      console.log('loadIframeContent end', targetUrl);
     }
 
     function injectIframe(container, url) {
+      console.log('injectIframe', url);
       const iframe = document.createElement('iframe');
       iframe.src = url;
       iframe.allow = "autoplay";
       
       container.innerHTML = '';
       container.appendChild(iframe);
+      console.log('injectIframe end', url); 
     }
 
     // Modal Functions
@@ -369,6 +387,116 @@
       }
     });
     observer.observe(sidebar, { attributes: true, attributeFilter: ['class'] });
+
+    // --- Draggable Menu Toggle Button ---
+    (function() {
+      const menuToggle = document.querySelector('.menu-toggle');
+      if (!menuToggle) return;
+
+      let isDragging = false;
+      let startX, startY;
+      let initialLeft, initialTop;
+      let hasMoved = false;
+
+      // Cargar posición guardada
+      function loadPosition() {
+        const savedPos = localStorage.getItem('menuTogglePosition');
+        if (savedPos) {
+          try {
+            const { left, top } = JSON.parse(savedPos);
+            menuToggle.style.left = left;
+            menuToggle.style.top = top;
+            menuToggle.style.bottom = 'auto';
+          } catch (e) {
+            console.error('Error loading menu position:', e);
+          }
+        }
+      }
+
+      // Guardar posición
+      function savePosition(left, top) {
+        localStorage.setItem('menuTogglePosition', JSON.stringify({ left, top }));
+      }
+
+      // Iniciar arrastre
+      function startDrag(e) {
+        isDragging = true;
+        hasMoved = false;
+        menuToggle.classList.add('dragging');
+
+        const touch = e.type === 'touchstart' ? e.touches[0] : e;
+        startX = touch.clientX;
+        startY = touch.clientY;
+
+        const rect = menuToggle.getBoundingClientRect();
+        initialLeft = rect.left;
+        initialTop = rect.top;
+
+        e.preventDefault();
+      }
+
+      // Mover
+      function drag(e) {
+        if (!isDragging) return;
+
+        const touch = e.type === 'touchmove' ? e.touches[0] : e;
+        const deltaX = touch.clientX - startX;
+        const deltaY = touch.clientY - startY;
+
+        // Detectar movimiento significativo
+        if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
+          hasMoved = true;
+        }
+
+        let newLeft = initialLeft + deltaX;
+        let newTop = initialTop + deltaY;
+
+        // Límites de pantalla
+        const maxX = window.innerWidth - menuToggle.offsetWidth;
+        const maxY = window.innerHeight - menuToggle.offsetHeight;
+
+        newLeft = Math.max(0, Math.min(newLeft, maxX));
+        newTop = Math.max(0, Math.min(newTop, maxY));
+
+        menuToggle.style.left = newLeft + 'px';
+        menuToggle.style.top = newTop + 'px';
+        menuToggle.style.bottom = 'auto';
+
+        e.preventDefault();
+      }
+
+      // Terminar arrastre
+      function endDrag(e) {
+        if (!isDragging) return;
+
+        isDragging = false;
+        menuToggle.classList.remove('dragging');
+
+        // Guardar posición
+        const rect = menuToggle.getBoundingClientRect();
+        savePosition(rect.left + 'px', rect.top + 'px');
+
+        // Si no se movió significativamente, ejecutar el toggle
+        if (!hasMoved) {
+          toggleSidebar();
+        }
+
+        e.preventDefault();
+      }
+
+      // Event listeners para mouse
+      menuToggle.addEventListener('mousedown', startDrag);
+      document.addEventListener('mousemove', drag);
+      document.addEventListener('mouseup', endDrag);
+
+      // Event listeners para touch
+      menuToggle.addEventListener('touchstart', startDrag, { passive: false });
+      document.addEventListener('touchmove', drag, { passive: false });
+      document.addEventListener('touchend', endDrag, { passive: false });
+
+      // Cargar posición al iniciar
+      loadPosition();
+    })();
   </script>
 </body>
 </html>

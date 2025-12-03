@@ -57,7 +57,8 @@ function doGet(e) {
       'createNewClient': 'newClient/createNewClientForm', 
       'controlIngreso': 'inCotnrol/createControlIngresoForm',
       'addAbono': 'abono/addAbonoForm',
-      'pagoPedido': 'pagoPedido/pagoPedidoForm'
+      'pagoPedido': 'pagoPedido/pagoPedidoForm',
+      'cotizacion': 'cotizacion/cotizacion'
     };
     
     if (pageMap[page]) {
