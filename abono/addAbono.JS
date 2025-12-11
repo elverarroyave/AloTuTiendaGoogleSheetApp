@@ -46,9 +46,12 @@ function createAbono(form) {
     setSequences(abonoSeq.NUMBER, abonoSeq.NEXT);
                 
     return {
+      date: now,
       success: true,
       code: inOutNewCode,
-      value: Number(form.abonoValue)
+      value: Number(form.abonoValue),
+      ventaCode: form.ventaCode,
+      metodoPago: form.metodoPago
     }; 
   } catch (error) {
     console.error("Error al crear el abono. Realizando rollback:", error);
