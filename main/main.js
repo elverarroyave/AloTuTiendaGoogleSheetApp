@@ -1,7 +1,7 @@
 const SPREADSHEET_ID = "17kHi1Cvk-p3c-mzK8jMoY8d2Ser38nm5GyPkUdHhwDI";
 
 function getVersionApp() {
-  return "1.1.3";
+  return "1.1.9";
 }
 
 function onOpen() {

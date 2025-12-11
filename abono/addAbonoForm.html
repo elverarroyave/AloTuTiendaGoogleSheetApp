@@ -265,8 +265,15 @@
 
             DOM.btnSubmit.disabled = true;
             DOM.btnSubmit.innerText = "Verificando...";
-
-            showConfirmationModal();
+            const saleCode = DOM.ventaCode.value.toUpperCase().trim();
+            google.script.run.withSuccessHandler(showConfirmationModal)
+            .withFailureHandler(err => {
+                // console.error("Error al cargar secuencia:", err);
+                showModal('error', 'Error al consultar la venta', err, "Revise que el código de venta exista y tenga saldo pendiente.");
+                DOM.btnSubmit.disabled = false;
+                DOM.btnSubmit.innerText = "Registrar Abono";
+            })
+            .getDataAbono(saleCode);
         }
 
         function onSuccess(res) {
@@ -281,26 +288,32 @@
             // Construir HTML de resumen para el éxito
             const detailsHtml = `
                 <div class="modal-list-item"><span>Fecha</span> <strong>${res.date}</strong></div>
-                <div class="modal-list-item"><span>Código Abono</span> <strong>${res.code}</strong></div>
-                <div class="modal-list-item"><span>Venta Relacionada</span> <strong>${res.ventaCode}</strong></div>
-                <div class="modal-list-item"><span>Valor</span> <strong style="color:var(--success)">${formatCurrency(res.value)}</strong></div>
+                <div class="modal-list-item"><span>Cliente</span> <strong>${res.cliente}</strong></div>
+                <div class="modal-list-item"><span>Producto</span> <strong>${res.producto}</strong></div>
+                <div class="modal-list-item"><span>Valor abonado</span> <strong style="color:var(--success)">${formatCurrency(res.value)}</strong></div>
                 <div class="modal-list-item"><span>Método</span> <strong>${res.metodoPago}</strong></div>
+                <div class="modal-list-item"><span>Saldo Restante</span> <strong>${formatCurrency(res.resta)}</strong></div>
             `;
             
             showModal('success', '¡Abono Registrado!', `El abono se ha completado exitosamente.`, detailsHtml);
         }
 
         // --- 6. Modal de Confirmación ---
-        function showConfirmationModal() {
+        function showConfirmationModal(result) {
+            // Manejo de la respuesta serializada
+            if (typeof result === 'string') {
+                result = JSON.parse(result);
+            }
             const formData = {
                 ventaCode: DOM.ventaCode.value.toUpperCase().trim(),
                 abonoValue: parseFloat(DOM.abonoValue.value),
                 metodoPago: DOM.metodoPago.value,
                 abonoCode: DOM.abonoCodeDisplay.value
-            };
+            };        
 
             const detailsHtml = `
-                <div class="modal-list-item"><span>Código Abono</span> <strong>${formData.abonoCode}</strong></div>
+                <div class="modal-list-item"><span>Cliente</span> <strong>${result.cliente}</strong></div>
+                <div class="modal-list-item"><span>Producto </span> <strong>${result.producto}</strong></div>
                 <div class="modal-list-item"><span>Código Venta</span> <strong>${formData.ventaCode}</strong></div>
                 <div class="modal-list-item"><span>Valor Abono</span> <strong style="color:var(--primary-color)">${formatCurrency(formData.abonoValue)}</strong></div>
                 <div class="modal-list-item"><span>Método Pago</span> <strong>${formData.metodoPago}</strong></div>

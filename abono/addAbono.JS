@@ -44,6 +44,8 @@ function createAbono(form) {
     
     // 5. Actualizar Secuencia
     setSequences(abonoSeq.NUMBER, abonoSeq.NEXT);
+
+    let abonoResult = getDataAbono(form.ventaCode);
                 
     return {
       date: now,
@@ -51,7 +53,11 @@ function createAbono(form) {
       code: inOutNewCode,
       value: Number(form.abonoValue),
       ventaCode: form.ventaCode,
-      metodoPago: form.metodoPago
+      metodoPago: form.metodoPago,
+      cliente: abonoResult.cliente,
+      producto: abonoResult.producto,
+      resta: abonoResult.resta,
+      precio: abonoResult.precio,
     }; 
   } catch (error) {
     console.error("Error al crear el abono. Realizando rollback:", error);
@@ -66,6 +72,28 @@ function createAbono(form) {
     }
     
     throw new Error(`Error en la transacción. Se realizó un rollback. Detalle: ${error.message}`);
+  }
+}
+
+function getDataAbono(saleCode){
+  const sheetName = CONTROL_VENTAS.NAME_TABLE;
+  const dataStartRow = CONTROL_VENTAS.TARGET_ROW;
+  const startColumn = 1;
+  const endColumn = 20;
+  const nameColumnCode = "CODIGO";
+  const code = saleCode;
+  const result = getRowDataAsObjectByNameColumn(sheetName, dataStartRow, startColumn, endColumn, nameColumnCode, code);
+  console.log('Result: ', result); // <--- imprime el objeto encontrado con valores
+  if(result != null){
+    return {
+      cliente: result.CLIENTE,
+      producto: result.PRODUCTO,
+      total: result.TOTAL,
+      resta: result.RESTA,
+      precio: result.PRECIO,
+    }
+  }else{
+    throw new Error("No se encontro la venta");
   }
 }
 

@@ -32,6 +32,8 @@ ABONOS={
 }
 
 CONTROL_VENTAS={
+    NAME_TABLE:'CONTROL_VENTAS',
+    TARGET_ROW:3,
     FECHA:'A',
     NUM:'B',
     CODIGO:'C',
