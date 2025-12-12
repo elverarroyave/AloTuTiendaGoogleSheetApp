@@ -43,6 +43,7 @@ CONTROL_VENTAS={
     COD_PRDT: 'G',
     CANTIDAD: 'I',
     COD_CLNT: 'J',
+    PRECIO_BASE: 'L',
     PRECIO: 'M',
     M_PAGO: 'N',
     PAGO: 'O',

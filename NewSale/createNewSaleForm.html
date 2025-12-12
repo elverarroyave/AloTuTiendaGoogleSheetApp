@@ -403,6 +403,9 @@
     <script>
         // --- 1. Utilidades y Constantes ---
 
+        //Variables
+        let priceBase = 0;
+
         function formatCurrency(value) {
             if (typeof value !== 'number' || Number.isNaN(value)) return '';
             return new Intl.NumberFormat('es-CO', {
@@ -513,6 +516,7 @@
             const totalPrice = calculatePriceByPlazo(productPrices);
             const stock = selectedOption.dataset.stock;
             const code = selectedOption.dataset.code;
+            priceBase = productPrices.UNO;
 
             DOM.priceProductWithOutFormat = totalPrice;
             DOM.priceProduct.value = formatCurrency(totalPrice);
@@ -714,6 +718,7 @@
             const formData = new FormData(form);
             const data = Object.fromEntries(formData);
             data.priceProduct = DOM.priceProductWithOutFormat;
+            data.priceBase = priceBase;
 
             google.script.run
                 .withSuccessHandler(function(response) {

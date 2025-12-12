@@ -27,6 +27,9 @@ function createNewSale(form, saleSequence) {
 
   // --- 4. ESCRITURA DE DATOS EN LA FILA targetRow (Fila 3) ---
   try{
+
+    console.log('Formulario recibido crear nueva venta:', form);
+
     sheet.getRange(CONTROL_VENTAS.FECHA + targetRow).setValue(formattedDate);
     
     sheet.getRange(CONTROL_VENTAS.NUM + targetRow).setValue(newSaleNumber); 
@@ -45,6 +48,8 @@ function createNewSale(form, saleSequence) {
     sheet.getRange(CONTROL_VENTAS.CANTIDAD + targetRow).setValue(form.amount); 
     
     sheet.getRange(CONTROL_VENTAS.COD_CLNT + targetRow).setValue(form.clientCode); 
+    
+    sheet.getRange(CONTROL_VENTAS.PRECIO_BASE + targetRow).setValue(form.priceBase); 
 
     sheet.getRange(CONTROL_VENTAS.PRECIO + targetRow).setValue(form.priceProduct); 
 
