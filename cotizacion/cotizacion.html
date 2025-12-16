@@ -195,6 +195,16 @@
                         </div>
                     </div>
                 </div>
+                
+                <div class="mt-4 text-center border-top pt-3" style="border-color: rgba(255,255,255,0.1) !important;">
+                    <button id="toggleStockBtn" class="btn btn-outline-light btn-sm rounded-pill px-4" type="button">
+                        Ver Stock Disponible
+                    </button>
+                    <div id="stockDisplay" class="mt-2" style="display: none;">
+                         <span class="text-white-50 small">Unidades Disponibles:</span>
+                         <span class="fw-bold ms-2 fs-5" id="stockValueDisplay">—</span>
+                    </div>
+                </div>
             </div>
             
             <div id="defaultMessage">
@@ -237,6 +247,9 @@
             paymentCountDisplay: document.getElementById('paymentCountDisplay'),
             quotationResult: document.getElementById('quotationResult'),
             defaultMessage: document.getElementById('defaultMessage'),
+            toggleStockBtn: document.getElementById('toggleStockBtn'),
+            stockDisplay: document.getElementById('stockDisplay'),
+            stockValueDisplay: document.getElementById('stockValueDisplay'),
         };
 
         const TS = {};
@@ -384,6 +397,14 @@
             DOM.totalPriceDisplay.textContent = formatCurrency(data.totalPrice);
             DOM.priceEachPaymentDisplay.textContent = formatCurrency(data.priceEachPayment);
             DOM.paymentCountDisplay.textContent = data.paymentCount;
+            // Actualizar stock (si data.stock es undefined o null mostrar 0 o -)
+            console.log('stock--->: ', data.stock);
+            console.log('stock typeOf--->: ', typeof data.stock);
+            DOM.stockValueDisplay.textContent = isEmptyOrNull(data.stock) ? '—' : data.stock;
+        }
+
+        function isEmptyOrNull(value) {
+            return value === undefined || value === null || value === '';
         }
 
         /**
@@ -400,6 +421,20 @@
             initializeTomSelect();
             clearQuotationDisplay();
             loadInventoryData();
+
+            // Toggle Stock Logic
+            if(DOM.toggleStockBtn) {
+                DOM.toggleStockBtn.addEventListener('click', function() {
+                    const isHidden = DOM.stockDisplay.style.display === 'none';
+                    if (isHidden) {
+                        DOM.stockDisplay.style.display = 'block';
+                        this.textContent = 'Ocultar Stock';
+                    } else {
+                        DOM.stockDisplay.style.display = 'none';
+                        this.textContent = 'Ver Stock Disponible';
+                    }
+                });
+            }
         });
     </script>
 </body>
