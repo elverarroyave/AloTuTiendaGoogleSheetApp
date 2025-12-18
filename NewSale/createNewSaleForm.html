@@ -266,7 +266,7 @@
                             <div class="row mb-3">
                                 <div class="col-6">
                                     <label for="plazo" class="form-label">Plazo<span class="required-asterisk">*</span></label>
-                                    <select id="plazo" name="plazo">
+                                    <select id="plazo" name="plazo" class="form-select">
                                         <option value="UNO">Contado</option>
                                         <option value="DOS">1 mes</option>
                                         <option value="TRES">2 meses</option>
@@ -296,7 +296,7 @@
 
                             <div class="mb-3">
                                 <label for="paymentMethod" class="form-label">Método de pago<span class="required-asterisk">*</span></label>
-                                <select id="paymentMethod" name="paymentMethod">
+                                <select id="paymentMethod" name="paymentMethod" class="form-select">
                                     <option value="" selected>Seleccione...</option>
                                     <option value="Efectivo">Efectivo</option>
                                     <option value="B/bia K">Bancolombia Katy</option>
@@ -349,7 +349,7 @@
                     <div id="collapseSocio" class="accordion-collapse collapse" data-bs-parent="#accordionVenta">
                         <div class="accordion-body">
                             <label for="socio" class="form-label">Responsable<span class="required-asterisk">*</span></label>
-                            <select id="socio" name="socio"></select>
+                            <select id="socio" name="socio" class="form-select"></select>
                             <input type="hidden" id="socioCode" name="socioCode" readonly>
                         </div>
                     </div>
@@ -499,20 +499,9 @@
             };
 
             try {
-                TS.paymentMethodSelect = new TomSelect(DOM.paymentMethod, {
-                    ...commonConfig,
-                    allowEmptyOption: true,
-                    placeholder: "Seleccione...",
-                    onChange: updateProductValues
-                });
-
-                TS.plazoSelect = new TomSelect(DOM.plazo, {
-                    ...commonConfig,
-                    allowEmptyOption: false,
-                    placeholder: "Plazo",
-                    onChange: updateProductValues
-                });
-
+                // PaymentMethod is now simple select
+                // Plazo is now a simple select, no TomSelect initialization
+                
                 DOM.amount.addEventListener('input', updateProductValues);
 
             } catch (e) { console.warn('TomSelect init error:', e); }
@@ -645,16 +634,16 @@
                 option.value = socio.NOMBRE || ''; option.textContent = socio.NOMBRE; option.dataset.code = socio.CODIGO || '';
                 DOM.socio.appendChild(option);
             }
-            if (TS.socioSelect) TS.socioSelect.destroy();
-            TS.socioSelect = new TomSelect(DOM.socio, {
-                create: false, maxItems: 1, allowEmptyOption: true,
-                placeholder: "Buscar socio...", sortField: { field: 'text', direction: 'asc' },
-                onChange: function() {
-                    const selectedOption = DOM.socio.options[DOM.socio.selectedIndex];
-                    DOM.socioCode.value = selectedOption?.dataset?.code || '';
-                    updateSummary(); validateForm(); 
-                }
-            });
+            // if (TS.socioSelect) TS.socioSelect.destroy();
+            // TS.socioSelect = new TomSelect(DOM.socio, {
+            //     create: false, maxItems: 1, allowEmptyOption: true,
+            //     placeholder: "Buscar socio...", sortField: { field: 'text', direction: 'asc' },
+            //     onChange: function() {
+            //         const selectedOption = DOM.socio.options[DOM.socio.selectedIndex];
+            //         DOM.socioCode.value = selectedOption?.dataset?.code || '';
+            //         updateSummary(); validateForm(); 
+            //     }
+            // });
         }
 
         var saleSequence;
@@ -868,7 +857,6 @@
             if (form) form.reset();
             loadSequencesData();
             try {
-                if (TS.paymentMethodSelect) TS.paymentMethodSelect.clear();
                 if (TS.socioSelect) TS.socioSelect.clear();
                 if (TS.clientNameSelect) TS.clientNameSelect.clear();
                 if (TS.productNameSelect) TS.productNameSelect.clear();
@@ -886,6 +874,15 @@
             initializeTomSelect();
 
             DOM.checkIsCredict.addEventListener("change", toggleFirstPayment);
+            
+            // Add listener for Plazo specifically to update prices
+            DOM.plazo.addEventListener("change", updateProductValues);
+            DOM.paymentMethod.addEventListener("change", updateProductValues);
+            DOM.socio.addEventListener("change", function() {
+                const selectedOption = DOM.socio.options[DOM.socio.selectedIndex];
+                DOM.socioCode.value = selectedOption?.dataset?.code || '';
+                validateForm(); 
+            });
 
             for (const key in DOM) {
                 if (DOM[key] && DOM[key].tagName && DOM[key].id !== 'btnSubmit') {
