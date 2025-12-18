@@ -1,7 +1,7 @@
 const SPREADSHEET_ID = "17kHi1Cvk-p3c-mzK8jMoY8d2Ser38nm5GyPkUdHhwDI";
 
 function getVersionApp() {
-  return "1.1.9";
+  return "1.2.3";
 }
 
 function onOpen() {
@@ -53,7 +53,7 @@ function doGet(e) {
     // Map pages to files with CORRECT PATHS (Folder/File)
     const pageMap = {
       'createNewSale': 'newSale/createNewSaleForm',
-      'createNewProduct': 'newProduct/createNewProductForm',
+      'inventory_product': 'newProduct/createNewProductForm', // Renamed to fix cache/routing issue
       'createNewClient': 'newClient/createNewClientForm', 
       'controlIngreso': 'inCotnrol/createControlIngresoForm',
       'addAbono': 'abono/addAbonoForm',
