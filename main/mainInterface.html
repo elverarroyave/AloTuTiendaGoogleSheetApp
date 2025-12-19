@@ -72,6 +72,12 @@
             <span>Cotización</span>
           </a>
         </li>
+        <li class="nav-item">
+          <a class="nav-link" onclick="showTab('cuadreCaja')">
+            <span class="nav-icon">💰</span>
+            <span>Cuadre de Caja</span>
+          </a>
+        </li>
       </ul>
       <div class="sidebar-footer">
         <p id="version"> ---- </p>
@@ -123,11 +129,16 @@
               <div class="stat-value">Cotización</div>
               <div class="stat-label">Cotización de productos</div>
             </div>
+            <div class="stat-card" onclick="showTab('cuadreCaja')">
+              <div class="stat-icon">💰</div>
+              <div class="stat-value">Cuadre de Caja</div>
+              <div class="stat-label">Realizar cuadre de caja</div>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Application Tabs (Iframes) -->
+      <!-- Application Tabs (Iframes)-->
       <div id="createNewSale" class="tab-content"></div>
       <div id="inventory_product" class="tab-content"></div>
       <div id="createNewClient" class="tab-content"></div>
@@ -135,6 +146,7 @@
       <div id="addAbono" class="tab-content"></div>
       <div id="pagoPedido" class="tab-content"></div>
       <div id="cotizacion" class="tab-content"></div>
+      <div id="cuadreCaja" class="tab-content"></div>
     </div>
   </div>
 

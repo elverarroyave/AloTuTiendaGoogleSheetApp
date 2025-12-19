@@ -1,6 +1,6 @@
-function openAbonoSidebar(){
-    let html = HtmlService.createHtmlOutputFromFile("addAbonoForm").setTitle("Agregar Abono");
-    SpreadsheetApp.getUi().showSidebar(html);
+function openAbonoSidebar() {
+  let html = HtmlService.createHtmlOutputFromFile("addAbonoForm").setTitle("Agregar Abono");
+  SpreadsheetApp.getUi().showSidebar(html);
 }
 
 
@@ -10,20 +10,20 @@ function openAbonoSidebar(){
 
 function createAbono(form) {
   const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-  const sheetIngresoEgreso = ss.getSheetByName(INGRESOS_EGRESOS.NAME_TABLE); 
+  const sheetIngresoEgreso = ss.getSheetByName(INGRESOS_EGRESOS.NAME_TABLE);
   const targetRowIngresoEgreso = INGRESOS_EGRESOS.TARGET_ROW;
-  const sheetAbonos = ss.getSheetByName("ABONOS"); 
+  const sheetAbonos = ss.getSheetByName("ABONOS");
   const targetRowAbonos = 2;
 
   //Obtener secuencia para abonoSeq
-  const abonoSeq = getSequencesAbono();
+  const abonoSeq = getSequence('ABONO');
   const abonoNewCode = abonoSeq.PREFIX + abonoSeq.NEXT;
 
   // 2. Insertar Fila
   sheetAbonos.insertRowBefore(targetRowAbonos);
 
-  try{
-      // 3. Preparar Datos
+  try {
+    // 3. Preparar Datos
     const now = getCurrentDateTime();
     const formulaClientName = '=XLOOKUP(ABONOS[COD_VENTA],CONTROL_VENTAS[CODIGO],CONTROL_VENTAS[CLIENTE],"CLIENTE NO ENCONTRADO")';
     const formulaProductName = '=XLOOKUP(ABONOS[COD_VENTA],CONTROL_VENTAS[CODIGO],CONTROL_VENTAS[PRODUCTO],"PRODUCTO NO ENCONTRADO")';
@@ -41,12 +41,12 @@ function createAbono(form) {
     sheetAbonos.getRange(ABONOS.CLIENTE + targetRowAbonos).setValue(formulaClientName);
     sheetAbonos.getRange(ABONOS.PRODUCTO + targetRowAbonos).setValue(formulaProductName);
     sheetAbonos.getRange(ABONOS.VALOR + targetRowAbonos).setValue(valorAbono);
-    
+
     // 5. Actualizar Secuencia
     setSequences(abonoSeq.NUMBER, abonoSeq.NEXT);
 
     let abonoResult = getDataAbono(form.ventaCode);
-                
+
     return {
       date: now,
       success: true,
@@ -58,24 +58,24 @@ function createAbono(form) {
       producto: abonoResult.producto,
       resta: abonoResult.resta,
       precio: abonoResult.precio,
-    }; 
+    };
   } catch (error) {
     console.error("Error al crear el abono. Realizando rollback:", error);
-    
+
     // --- ROLLBACK: ELIMINAR FILA INSERTADA ---
     try {
-        sheetIngresoEgreso.deleteRow(targetRowIngresoEgreso);
-        sheetAbonos.deleteRow(targetRowAbonos);
-        console.log(`Rollback exitoso: Filas ${targetRowIngresoEgreso} y ${targetRowAbonos} eliminadas de INGRESOS_EGRESOS y ABONOS respectivamente.`);
+      sheetIngresoEgreso.deleteRow(targetRowIngresoEgreso);
+      sheetAbonos.deleteRow(targetRowAbonos);
+      console.log(`Rollback exitoso: Filas ${targetRowIngresoEgreso} y ${targetRowAbonos} eliminadas de INGRESOS_EGRESOS y ABONOS respectivamente.`);
     } catch (e) {
-        console.error("Error en rollback de INGRESOS_EGRESOS y ABONOS:", e);
+      console.error("Error en rollback de INGRESOS_EGRESOS y ABONOS:", e);
     }
-    
+
     throw new Error(`Error en la transacción. Se realizó un rollback. Detalle: ${error.message}`);
   }
 }
 
-function getDataAbono(saleCode){
+function getDataAbono(saleCode) {
   const sheetName = CONTROL_VENTAS.NAME_TABLE;
   const dataStartRow = CONTROL_VENTAS.TARGET_ROW;
   const startColumn = 1;
@@ -84,7 +84,7 @@ function getDataAbono(saleCode){
   const code = saleCode;
   const result = getRowDataAsObjectByNameColumn(sheetName, dataStartRow, startColumn, endColumn, nameColumnCode, code);
   console.log('Result: ', result); // <--- imprime el objeto encontrado con valores
-  if(result != null){
+  if (result != null) {
     return {
       cliente: result.CLIENTE,
       producto: result.PRODUCTO,
@@ -92,12 +92,7 @@ function getDataAbono(saleCode){
       resta: result.RESTA,
       precio: result.PRECIO,
     }
-  }else{
+  } else {
     throw new Error("No se encontro la venta");
   }
-}
-
-function getSequencesAbono(){
-  let sequences = getSequences();
-  return sequences.find(s => s.PREFIX === 'ABONO');
 }

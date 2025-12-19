@@ -1,7 +1,7 @@
-const SPREADSHEET_ID = "17kHi1Cvk-p3c-mzK8jMoY8d2Ser38nm5GyPkUdHhwDI";
+const SPREADSHEET_ID = "1_mslbEGfQn17toTFLfXhPpAZo_S7FX_NgbpxMYo0fgU";
 
 function getVersionApp() {
-  return "1.2.5";
+  return "AloTuTienda 1.2.8";
 }
 
 function onOpen() {
@@ -13,17 +13,26 @@ function onOpen() {
     .addItem("Ingresar pedido", "openControlIngresoModal")
     .addItem("Agregar Abono", "openAbonoSidebar")
     .addItem("Pagar Pedido", "openPagoSidebar")
+    .addItem("Cuadre de Caja", "openCuadreCajaModal")
     .addToUi();
+}
+
+function openCuadreCajaModal() {
+  const html = HtmlService.createTemplateFromFile('cuadreCaja/cuadreCajaForm')
+    .evaluate()
+    .setWidth(1000)
+    .setHeight(800);
+  SpreadsheetApp.getUi().showModalDialog(html, 'Realizar Cuadre de Caja');
 }
 
 function openMainInterface() {
   const template = HtmlService.createTemplateFromFile('mainInterface');
   template.webAppUrl = ScriptApp.getService().getUrl();
-  
+
   const html = template.evaluate()
-      .setWidth(1000)
-      .setHeight(700)
-      .setTitle('Panel Principal - AloTuTienda');
+    .setWidth(1000)
+    .setHeight(700)
+    .setTitle('Panel Principal - AloTuTienda');
   SpreadsheetApp.getUi().showModalDialog(html, 'Panel Principal - AloTuTienda');
 }
 
@@ -34,7 +43,7 @@ function includes(filename) {
 function doGet(e) {
   try {
     const page = e.parameter.page;
-    
+
     if (!page || page === 'home') {
       // Try with folder first, then without
       let template;
@@ -49,18 +58,19 @@ function doGet(e) {
         .addMetaTag('viewport', 'width=device-width, initial-scale=1')
         .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
     }
-    
+
     // Map pages to files with CORRECT PATHS (Folder/File)
     const pageMap = {
       'createNewSale': 'newSale/createNewSaleForm',
       'inventory_product': 'newProduct/createNewProductForm', // Renamed to fix cache/routing issue
-      'createNewClient': 'newClient/createNewClientForm', 
+      'createNewClient': 'newClient/createNewClientForm',
       'controlIngreso': 'inCotnrol/createControlIngresoForm',
       'addAbono': 'abono/addAbonoForm',
       'pagoPedido': 'pagoPedido/pagoPedidoForm',
-      'cotizacion': 'cotizacion/cotizacion'
+      'cotizacion': 'cotizacion/cotizacion',
+      'cuadreCaja': 'cuadreCaja/cuadreCajaForm'
     };
-    
+
     if (pageMap[page]) {
       let template;
       try {
@@ -70,18 +80,18 @@ function doGet(e) {
         const flatName = pageMap[page].split('/').pop();
         template = HtmlService.createTemplateFromFile(flatName);
       }
-      
+
       return template.evaluate()
         .addMetaTag('viewport', 'width=device-width, initial-scale=1')
         .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
     }
-    
+
     return HtmlService.createHtmlOutput('<h2>Página no encontrada</h2><p>La sección solicitada no existe.</p>')
-        .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 
   } catch (error) {
     return HtmlService.createHtmlOutput(`<h2>Error</h2><p>${error.message}</p>`)
-        .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
   }
 }
 

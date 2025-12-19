@@ -634,16 +634,6 @@
                 option.value = socio.NOMBRE || ''; option.textContent = socio.NOMBRE; option.dataset.code = socio.CODIGO || '';
                 DOM.socio.appendChild(option);
             }
-            // if (TS.socioSelect) TS.socioSelect.destroy();
-            // TS.socioSelect = new TomSelect(DOM.socio, {
-            //     create: false, maxItems: 1, allowEmptyOption: true,
-            //     placeholder: "Buscar socio...", sortField: { field: 'text', direction: 'asc' },
-            //     onChange: function() {
-            //         const selectedOption = DOM.socio.options[DOM.socio.selectedIndex];
-            //         DOM.socioCode.value = selectedOption?.dataset?.code || '';
-            //         updateSummary(); validateForm(); 
-            //     }
-            // });
         }
 
         var saleSequence;
