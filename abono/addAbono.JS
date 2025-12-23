@@ -3,6 +3,20 @@ function openAbonoSidebar() {
   SpreadsheetApp.getUi().showSidebar(html);
 }
 
+function getSalesData() {
+  try {
+    if (typeof CONTROL_VENTAS === 'undefined') {
+      throw new Error("CONTROL_VENTAS no está definido. Asegúrate de que tables.js se cargue antes o esté en el proyecto.");
+    }
+    const getSales = getRowDataAsObjects(CONTROL_VENTAS.NAME_TABLE, 3, 1, 19);
+    console.log('getSales count: ', getSales.length);
+    // Stringify to ensure safe transport over google.script.run
+    return JSON.stringify(getSales);
+  } catch (e) {
+    console.error("Error in getSalesData:", e);
+    return JSON.stringify({ error: e.message });
+  }
+}
 
 // ==========================================
 // 2. LÓGICA DE ABONOS (NUEVO)

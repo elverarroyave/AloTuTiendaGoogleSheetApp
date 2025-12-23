@@ -19,15 +19,17 @@
         </div>
 
         <form id="abonoForm" class="card-form mb-5" onsubmit="handleSubmit(event)">
-            
-            <div class="mb-4">
-                <label for="abonoCodeDisplay" class="form-label">Código de Abono (Referencia)</label>
-                <input type="text" class="form-control preview-code" id="abonoCodeDisplay" readonly value="Cargando...">
+
+            <div class="mb-3">
+                <label for="clientName" class="form-label">Cliente<span class="required-asterisk">*</span></label>
+                <select id="clientName" name="clientName"></select>
             </div>
 
-            <div class="mb-4">
-                <label for="ventaCode" class="form-label">Código de Venta<span class="required-asterisk">*</span></label>
-                <input id="ventaCode" class="form-control" name="ventaCode" placeholder="Ej: VENTA000" required>
+            <div class="mb-3">
+                <label for="ventaCode" class="form-label">Venta<span class="required-asterisk">*</span></label>
+                <select id="ventaCode" name="ventaCode" class="form-select" required disabled>
+                    <option value="" selected>Seleccione primero un cliente...</option>
+                </select>
             </div>
 
             <div class="mb-4">
@@ -119,13 +121,55 @@
     <script>
         const DOM = {
             form: document.getElementById('abonoForm'),
-            abonoCodeDisplay: document.getElementById('abonoCodeDisplay'),
+            clientName: document.getElementById('clientName'),
             ventaCode: document.getElementById('ventaCode'),
             abonoValue: document.getElementById('abonoValue'),
             abonoValueDisplay: document.getElementById('abonoValueDisplay'),
             metodoPago: document.getElementById('metodoPago'),
             btnSubmit: document.getElementById('btnSubmit'),
         };
+        const TS = {};
+
+        let sales = [];
+
+        function loadClientsData() { google.script.run.withSuccessHandler(populateClientsSelect).getClients(); }
+        function loadSalesData() { google.script.run.withSuccessHandler(salesDataResponse).getSalesData(); }
+
+        function salesDataResponse(response) {
+            console.log('raw response: ', response);
+            let optionsArray = [];
+            try {
+                optionsArray = (typeof response === 'string') ? JSON.parse(response) : response;
+            } catch (e) {
+                console.error("Error parsing sales data:", e);
+                optionsArray = [];
+            }
+            
+            if (optionsArray.error) {
+                console.error("Server reported error:", optionsArray.error);
+                return;
+            }
+            
+            console.log('parsed optionsArray: ', optionsArray);
+            sales = optionsArray;
+        }
+
+        function setOptionsSalesSelect(clientCode){
+            console.log('clientCode: ', clientCode);
+            const filteredSales = sales.filter(sale => sale.COD_CLNT === clientCode);
+            const options = filteredSales.map(sale => ({
+                value: sale.CODIGO,
+                text: sale.PRODUCTO,
+            }));
+            DOM.ventaCode.innerHTML = '<option value="" disabled selected>Seleccione una venta...</option>';
+            options.forEach(option => {
+                const optionElement = document.createElement('option');
+                optionElement.value = option.value;
+                optionElement.textContent = option.text + ' - ' + option.value;
+                DOM.ventaCode.appendChild(optionElement);
+            });
+            DOM.ventaCode.disabled = false;
+        }
 
         let abonoSeq = null; 
         let lastModalType = ''; 
@@ -138,6 +182,31 @@
                 currency: 'COP', 
                 minimumFractionDigits: 0
             }).format(value);
+        }
+
+        function populateClientsSelect(optionsArray) {
+            if (optionsArray.error) return;
+            DOM.clientName.innerHTML = '<option value="" disabled selected>Buscar cliente...</option>';
+            for (const client of optionsArray) {
+                const option = document.createElement('option');
+                option.value = client.NOMBRE || ''; option.textContent = `${client.NOMBRE}`; option.dataset.code = client.CODIGO || '';
+                DOM.clientName.appendChild(option);
+            }
+            if (TS.clientNameSelect) TS.clientNameSelect.destroy();
+            TS.clientNameSelect = new TomSelect(DOM.clientName, {
+                create: false, maxItems: 1, allowEmptyOption: true,
+                placeholder: "Buscar cliente...", sortField: { field: 'text', direction: 'asc' },
+                onChange: function() {
+                    const selected = DOM.clientName.options[DOM.clientName.selectedIndex];
+                    const clientCode = selected?.dataset?.code || '';
+                    setOptionsSalesSelect(clientCode);
+                    updateSummary(); validateForm(); 
+                }
+            });
+        }
+
+        function updateSummary(){
+            console.log('updateSummary ----->');
         }
 
         function formatValueDisplay() {
@@ -192,28 +261,6 @@
             if (lastModalType === 'success') { resetForm(); }
         }
 
-        // --- 3. Carga de Datos y Secuencia ---
-        function loadData() {
-            google.script.run
-                .withSuccessHandler(displaySequence)
-                .withFailureHandler(err => {
-                    DOM.abonoCodeDisplay.value = "Error";
-                    console.error("Error al cargar secuencia:", err);
-                })
-                .getSequences();
-        }
-        
-        function displaySequence(sequences) {
-            // Asumiendo que la secuencia para Abono es 'INOUT' (entrada/salida de dinero)
-            abonoSeq = sequences.find(s => s.NAME === 'ABONO' || s.PREFIX === 'INOUT'); 
-            
-            if (abonoSeq) {
-                // Usamos el código de la secuencia (PREFIX + NEXT)
-                DOM.abonoCodeDisplay.value = `${abonoSeq.PREFIX}${abonoSeq.NEXT || '0000'}`;
-            } else {
-                DOM.abonoCodeDisplay.value = "ERROR: Secuencia de Abono no encontrada.";
-            }
-        }
 
         // --- 4. Lógica y Validación ---
         function validateForm() {
@@ -292,7 +339,7 @@
                 <div class="modal-list-item"><span>Producto</span> <strong>${res.producto}</strong></div>
                 <div class="modal-list-item"><span>Valor abonado</span> <strong style="color:var(--success)">${formatCurrency(res.value)}</strong></div>
                 <div class="modal-list-item"><span>Método</span> <strong>${res.metodoPago}</strong></div>
-                <div class="modal-list-item"><span>Saldo Restante</span> <strong>${formatCurrency(res.resta)}</strong></div>
+                <div class="modal-list-item"><span>Nuevo Saldo Restante</span> <strong>${formatCurrency(res.resta)}</strong></div>
             `;
             
             showModal('success', '¡Abono Registrado!', `El abono se ha completado exitosamente.`, detailsHtml);
@@ -308,12 +355,13 @@
                 ventaCode: DOM.ventaCode.value.toUpperCase().trim(),
                 abonoValue: parseFloat(DOM.abonoValue.value),
                 metodoPago: DOM.metodoPago.value,
-                abonoCode: DOM.abonoCodeDisplay.value
             };        
 
             const detailsHtml = `
                 <div class="modal-list-item"><span>Cliente</span> <strong>${result.cliente}</strong></div>
                 <div class="modal-list-item"><span>Producto </span> <strong>${result.producto}</strong></div>
+                <div class="modal-list-item"><span>Saldo Restante </span> <strong>${result.resta}</strong></div>
+                <div class="modal-list-item"><span>Estado de venta </span> <strong>${result.estado}</strong></div>
                 <div class="modal-list-item"><span>Código Venta</span> <strong>${formData.ventaCode}</strong></div>
                 <div class="modal-list-item"><span>Valor Abono</span> <strong style="color:var(--primary-color)">${formatCurrency(formData.abonoValue)}</strong></div>
                 <div class="modal-list-item"><span>Método Pago</span> <strong>${formData.metodoPago}</strong></div>
@@ -354,16 +402,18 @@
 
         function resetForm() {
             DOM.form.reset();
+            if (TS.clientNameSelect) TS.clientNameSelect.clear();
+            // Reset Venta Select
+            DOM.ventaCode.innerHTML = '<option value="" selected>Seleccione primero un cliente...</option>';
+            DOM.ventaCode.disabled = true;
             // Recargar secuencia
-            DOM.abonoCodeDisplay.value = "Actualizando...";
-            loadData(); 
-            
             formatValueDisplay(); // Poner en "—"
             validateForm(); // Deshabilitar el botón
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            loadData();
+            loadClientsData(); 
+            loadSalesData();
             addEventListeners();
             formatValueDisplay();
             validateForm();
