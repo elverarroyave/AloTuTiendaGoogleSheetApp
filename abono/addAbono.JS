@@ -105,6 +105,7 @@ function getDataAbono(saleCode) {
       total: result.TOTAL,
       resta: result.RESTA,
       precio: result.PRECIO,
+      estado: result.ESTADO,
     }
   } else {
     throw new Error("No se encontro la venta");

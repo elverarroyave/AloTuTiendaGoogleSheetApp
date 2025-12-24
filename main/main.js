@@ -1,7 +1,7 @@
-const SPREADSHEET_ID = "1_mslbEGfQn17toTFLfXhPpAZo_S7FX_NgbpxMYo0fgU";
+const SPREADSHEET_ID = "17kHi1Cvk-p3c-mzK8jMoY8d2Ser38nm5GyPkUdHhwDI";
 
 function getVersionApp() {
-  return "AloTuTienda 1.2.8";
+  return "1.5.0";
 }
 
 function onOpen() {
@@ -14,11 +14,20 @@ function onOpen() {
     .addItem("Agregar Abono", "openAbonoSidebar")
     .addItem("Pagar Pedido", "openPagoSidebar")
     .addItem("Cuadre de Caja", "openCuadreCajaModal")
+    .addItem("Ingreso Egreso", "openIngresoEgresoModal")
     .addToUi();
 }
 
+function openIngresoEgresoModal() {
+  const html = HtmlService.createTemplateFromFile('ingresoEgresoForm')
+    .evaluate()
+    .setWidth(1000)
+    .setHeight(800);
+  SpreadsheetApp.getUi().showModalDialog(html, 'Realizar Ingreso Egreso');
+}
+
 function openCuadreCajaModal() {
-  const html = HtmlService.createTemplateFromFile('cuadreCaja/cuadreCajaForm')
+  const html = HtmlService.createTemplateFromFile('cuadreCajaForm')
     .evaluate()
     .setWidth(1000)
     .setHeight(800);
@@ -61,14 +70,15 @@ function doGet(e) {
 
     // Map pages to files with CORRECT PATHS (Folder/File)
     const pageMap = {
-      'createNewSale': 'newSale/createNewSaleForm',
-      'inventory_product': 'newProduct/createNewProductForm', // Renamed to fix cache/routing issue
-      'createNewClient': 'newClient/createNewClientForm',
-      'controlIngreso': 'inCotnrol/createControlIngresoForm',
-      'addAbono': 'abono/addAbonoForm',
-      'pagoPedido': 'pagoPedido/pagoPedidoForm',
-      'cotizacion': 'cotizacion/cotizacion',
-      'cuadreCaja': 'cuadreCaja/cuadreCajaForm'
+      'createNewSale': 'createNewSaleForm',
+      'inventory_product': 'createNewProductForm',
+      'createNewClient': 'createNewClientForm',
+      'controlIngreso': 'createControlIngresoForm',
+      'addAbono': 'addAbonoForm',
+      'pagoPedido': 'pagoPedidoForm',
+      'cotizacion': 'cotizacion',
+      'cuadreCaja': 'cuadreCajaForm',
+      'ingresoEgreso': 'ingresoEgresoForm'
     };
 
     if (pageMap[page]) {
