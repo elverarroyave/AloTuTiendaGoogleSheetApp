@@ -129,14 +129,12 @@
             btnSubmit: document.getElementById('btnSubmit'),
         };
         const TS = {};
-
         let sales = [];
 
         function loadClientsData() { google.script.run.withSuccessHandler(populateClientsSelect).getClients(); }
         function loadSalesData() { google.script.run.withSuccessHandler(salesDataResponse).getSalesData(); }
 
         function salesDataResponse(response) {
-            console.log('raw response: ', response);
             let optionsArray = [];
             try {
                 optionsArray = (typeof response === 'string') ? JSON.parse(response) : response;
@@ -150,7 +148,6 @@
                 return;
             }
             
-            console.log('parsed optionsArray: ', optionsArray);
             sales = optionsArray;
         }
 
@@ -347,10 +344,8 @@
 
         // --- 6. Modal de Confirmación ---
         function showConfirmationModal(result) {
+            console.log('result showConfirmationModal: ', result);
             // Manejo de la respuesta serializada
-            if (typeof result === 'string') {
-                result = JSON.parse(result);
-            }
             const formData = {
                 ventaCode: DOM.ventaCode.value.toUpperCase().trim(),
                 abonoValue: parseFloat(DOM.abonoValue.value),
@@ -358,6 +353,7 @@
             };        
 
             const detailsHtml = `
+                <div class="modal-list-item"><span>Fecha de Venta</span> <strong>${result.fechaCompra}</strong></div>
                 <div class="modal-list-item"><span>Cliente</span> <strong>${result.cliente}</strong></div>
                 <div class="modal-list-item"><span>Producto </span> <strong>${result.producto}</strong></div>
                 <div class="modal-list-item"><span>Saldo Restante </span> <strong>${result.resta}</strong></div>
@@ -387,8 +383,10 @@
             const formData = {
                 ventaCode: DOM.ventaCode.value.toUpperCase().trim(),
                 abonoValue: parseFloat(DOM.abonoValue.value),
-                metodoPago: DOM.metodoPago.value
+                metodoPago: DOM.metodoPago.value,
             };
+
+            console.log('formData confirmSubmit: ', formData);
 
             google.script.run
                 .withSuccessHandler(onSuccess)
@@ -397,7 +395,7 @@
                     DOM.btnSubmit.innerText = "Registrar Abono";
                     showModal('error', 'Error al Registrar', err.message || "Ocurrió un error inesperado en el servidor.");
                 })
-                .createAbono(formData, abonoSeq);
+                .createAbono(formData);
         }
 
         function resetForm() {

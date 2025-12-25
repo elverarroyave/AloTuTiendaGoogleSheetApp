@@ -48,6 +48,12 @@ function getCurrentDateTime() {
   return Utilities.formatDate(now, timeZone, "MM/dd/yyyy HH:mm:ss");
 }
 
+function parseDateLocalTime(dateInput) {
+  const date = new Date(dateInput);
+  const timeZone = SpreadsheetApp.getActive().getSpreadsheetTimeZone();
+  return Utilities.formatDate(date, timeZone, "MM/dd/yyyy HH:mm:ss");
+}
+
 function getSequences() {
   const sheetName = "SEQUENCES";
   const rowIndex = 2;
@@ -115,7 +121,6 @@ function getRowExactlyAsObject(sheetName, rowIndex, startColumn, endColumn) {
   }
 }
 
-
 /**
  * Busca una fila específica dentro de un rango de datos en una hoja de cálculo
  * basándose en el valor de una columna y devuelve la fila como un objeto.
@@ -170,6 +175,7 @@ function getRowDataAsObjectByNameColumn(sheetName, dataStartRow, startColumn, en
 
         // 4. Construir el Objeto de la Fila Encontrada
         const rowObject = {};
+        rowObject.index = i + dataStartRow;
         headers.forEach((header, index) => {
           rowObject[header] = row[index];
         });
@@ -189,3 +195,118 @@ function getRowDataAsObjectByNameColumn(sheetName, dataStartRow, startColumn, en
     throw new Error(e.message);
   }
 }
+
+/**
+ * Función genérica para obtener un objeto de una tabla buscando por código.
+ * Utiliza las constantes definidas en tables.js.
+ * 
+ * @param {Object} tableConfig El objeto de configuración de la tabla (ej: CONTROL_VENTAS).
+ * @param {string} code El código a buscar (ej: "VENTA404").
+ * @param {string} columnHeaderName El nombre del encabezado de la columna donde buscar (default: "CODIGO").
+ * @returns {Object|null} El objeto de la fila encontrada o null.
+ */
+function getObjectByCode(tableConfig, code, columnHeaderName = "CODIGO") {
+  if (!tableConfig || tableConfig.NAME_TABLE === undefined) {
+    throw new Error("Configuración de tabla no válida.");
+  }
+
+  const sheetName = tableConfig.NAME_TABLE;
+  const dataStartRow = tableConfig.TARGET_ROW || 2;
+  const startColumn = 1;
+
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sheet = ss.getSheetByName(sheetName);
+  if (!sheet) throw new Error(`Hoja no encontrada: ${sheetName}`);
+
+  const endColumn = sheet.getLastColumn();
+
+  return getRowDataAsObjectByNameColumn(sheetName, dataStartRow, startColumn, endColumn, columnHeaderName, code);
+}
+
+// Dame una funcion que setee un valor en una celda exacta, que reciba el codigo de la fila y la columna
+function setValueByCodeAndColumn(tableConfig, column, row, value) {
+  console.log('column:', column);
+  console.log('row:', row);
+  console.log('value:', value);
+  if (!tableConfig || tableConfig.NAME_TABLE === undefined) {
+    throw new Error("Configuración de tabla no válida.");
+  }
+
+  const sheetName = tableConfig.NAME_TABLE;
+
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sheet = ss.getSheetByName(sheetName);
+  if (!sheet) throw new Error(`Hoja no encontrada: ${sheetName}`);
+
+  let target = column + row;
+  console.log('target:', target);
+  sheet.getRange(target).setValue(value);
+  console.log(`Valor '${value}' seteado en ${sheetName}!${target}`);
+}
+
+/**
+ * Calcula la cantidad de días transcurridos entre dos fechas, normalizando a medianoche.
+ * 
+ * @param {Date|string|number} fechaInicio - Fecha inicial.
+ * @param {Date|string|number} fechaFin - Fecha final.
+ * @returns {number} Número de días transcurridos.
+ */
+function diasTranscurridosCoutner(fechaInicio, fechaFin) {
+  const MILISEGUNDOS_POR_DIA = 1000 * 60 * 60 * 24;
+  const inicio = new Date(fechaInicio);
+  const fin = new Date(fechaFin);
+
+  // Normalizar horas a medianoche para evitar errores por desfases horarios
+  inicio.setHours(0, 0, 0, 0);
+  fin.setHours(0, 0, 0, 0);
+
+  const diferencia = fin.getTime() - inicio.getTime();
+  return Math.floor(diferencia / MILISEGUNDOS_POR_DIA);
+}
+
+/**
+ * Determina el estado de una venta (AL DIA o ATRAZADO) basándose en los días transcurridos,
+ * el plan de pagos pactado y el monto total abonado hasta la fecha.
+ * 
+ * @param {Object} ventaResult - Objeto con datos de la venta.
+ * @param {string} ventaResult.cPagos - Clave del plan de pagos (ej: "UNO", "DOS").
+ * @param {Date|string} ventaResult.fechaCompra - Fecha en que se realizó la venta.
+ * @param {number} ventaResult.precio - Precio total de la venta ($).
+ * @param {number} ventaResult.total - Total abonado hasta el momento ($).
+ * @returns {string} Estado de la venta (de ESTADO_VENTA).
+ */
+function definirEstadoVenta(ventaResult) {
+  const cPagosObject = CANTIDADA_PAGOS[ventaResult.cPagos];
+  if (!cPagosObject) return ESTADO_VENTA.AL_DIA; // O manejar error según convenga
+
+  const fechaCompra = new Date(ventaResult.fechaCompra);
+  const valorCadaPago = ventaResult.precio / cPagosObject.valor;
+  const diasTranscurridos = diasTranscurridosCoutner(fechaCompra, new Date());
+
+  console.log('Días transcurridos:', diasTranscurridos);
+
+  // Calculamos cuántos pagos deberían haberse realizado según los plazos transcurridos
+  let cantidadPagosExigibles = cPagosObject.valor; // Por defecto todos ya vencieron
+
+  const hitosPago = Object.values(CANTIDADA_PAGOS);
+  for (const hito of hitosPago) {
+    if (diasTranscurridos < hito.plazo) {
+      // Si aún no llegamos a este hito de plazo, el total de pagos exigibles es 
+      // el número de pagos del hito previo (hito.valor - 1)
+      cantidadPagosExigibles = hito.valor - 1;
+      break;
+    }
+  }
+
+  // No podemos exigir más pagos de los que tiene el plan original de esta venta
+  cantidadPagosExigibles = Math.min(cantidadPagosExigibles, cPagosObject.valor);
+
+  const valorPagoIdeal = valorCadaPago * cantidadPagosExigibles;
+  const valorAbonado = ventaResult.total;
+
+  return valorAbonado >= valorPagoIdeal
+    ? ESTADO_VENTA.AL_DIA
+    : ESTADO_VENTA.ATRAZADO;
+}
+
+

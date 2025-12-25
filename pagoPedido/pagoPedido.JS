@@ -1,4 +1,4 @@
-function openPagoSidebar(){
+function openPagoSidebar() {
     let html = HtmlService.createHtmlOutputFromFile("pagoPedidoForm").setTitle("Agregar Pago");
     SpreadsheetApp.getUi().showSidebar(html);
 }
@@ -32,7 +32,10 @@ function crearPago(form) {
         const now = getCurrentDateTime();
         const formulaProductName = '=XLOOKUP(PAGOS_PEDIDOS[COD_IN],CONTROL_INGRESO[CODIGO],CONTROL_INGRESO[PRODUCTO],"NONE")';
         const payValue = Number(form.payValue);
-        const controlIngresoRow = getRowDataAsObjectByNameColumn("CONTROL_INGRESO", 3, 1, 15, "CODIGO", form.inCode);
+        // const controlIngresoRow = getRowDataAsObjectByNameColumn("CONTROL_INGRESO", 3, 1, 15, "CODIGO", form.inCode);
+        const code = form.inCode;
+        const controlIngresoRow = getObjectByCode(CONTROL_INGRESO, code)
+
         console.log("controlIngresoRow:", controlIngresoRow);
         const detalle = `Pago de pedido ${form.inCode} - ${controlIngresoRow.METODO_PAGO}`;
 
@@ -61,9 +64,9 @@ function crearPago(form) {
         // En caso de CUALQUIER error (inserción, escritura o actualización de secuencia),
         // se ejecuta el rollback.
         console.error("Error al crear el pago. Realizando rollback:", error);
-        
+
         // --- ROLLBACK: ELIMINAR FILAS INSERTADAS ---
-        
+
         // 1. Eliminar la fila de PAGOS_PEDIDOS
         // La instrucción deleteRow es segura aunque haya fallado la inserción, 
         // ya que simplemente eliminará la fila en esa posición.
@@ -81,12 +84,12 @@ function crearPago(form) {
         } catch (e) {
             console.error("Error en rollback de INGRESOS_EGRESOS:", e);
         }
-        
+
         throw new Error(`Error en la transacción. Se realizó un rollback. Detalle: ${error.message}`);
     }
 }
 
-function getSequencesPago(){
-  let sequences = getSequences();
-  return sequences.find(s => s.PREFIX === 'PAGO');
+function getSequencesPago() {
+    let sequences = getSequences();
+    return sequences.find(s => s.PREFIX === 'PAGO');
 }

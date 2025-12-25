@@ -23,6 +23,7 @@ function getSalesData() {
 // ==========================================
 
 function createAbono(form) {
+  console.log('form createAbono: ', form);
   const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   const sheetIngresoEgreso = ss.getSheetByName(INGRESOS_EGRESOS.NAME_TABLE);
   const targetRowIngresoEgreso = INGRESOS_EGRESOS.TARGET_ROW;
@@ -59,7 +60,16 @@ function createAbono(form) {
     // 5. Actualizar Secuencia
     setSequences(abonoSeq.NUMBER, abonoSeq.NEXT);
 
-    let abonoResult = getDataAbono(form.ventaCode);
+    let ventaResult = getDataAbono(form.ventaCode);
+    console.log('ventaResult: ', ventaResult);
+    //Si resta es igual a 0 cambiar estado de la venta a PAGADO
+    if (ventaResult.resta <= 0) {
+      // (tableConfig, column, row, value)
+      setValueByCodeAndColumn(CONTROL_VENTAS, CONTROL_VENTAS.ESTADO, ventaResult.index, ESTADO_VENTA.PAGADO);
+    } else {
+      const estadoVenta = definirEstadoVenta(ventaResult);
+      setValueByCodeAndColumn(CONTROL_VENTAS, CONTROL_VENTAS.ESTADO, ventaResult.index, estadoVenta);
+    }
 
     return {
       date: now,
@@ -68,10 +78,10 @@ function createAbono(form) {
       value: Number(form.abonoValue),
       ventaCode: form.ventaCode,
       metodoPago: form.metodoPago,
-      cliente: abonoResult.cliente,
-      producto: abonoResult.producto,
-      resta: abonoResult.resta,
-      precio: abonoResult.precio,
+      cliente: ventaResult.cliente,
+      producto: ventaResult.producto,
+      resta: ventaResult.resta,
+      precio: ventaResult.precio,
     };
   } catch (error) {
     console.error("Error al crear el abono. Realizando rollback:", error);
@@ -90,16 +100,12 @@ function createAbono(form) {
 }
 
 function getDataAbono(saleCode) {
-  const sheetName = CONTROL_VENTAS.NAME_TABLE;
-  const dataStartRow = CONTROL_VENTAS.TARGET_ROW;
-  const startColumn = 1;
-  const endColumn = 20;
-  const nameColumnCode = "CODIGO";
-  const code = saleCode;
-  const result = getRowDataAsObjectByNameColumn(sheetName, dataStartRow, startColumn, endColumn, nameColumnCode, code);
-  console.log('Result: ', result); // <--- imprime el objeto encontrado con valores
+  const result = getObjectByCode(CONTROL_VENTAS, saleCode);
   if (result != null) {
-    return {
+    response = {
+      index: result.index,
+      fechaCompra: parseDateLocalTime(result.FECHA),
+      cPagos: result.C_PAGOS,
       cliente: result.CLIENTE,
       producto: result.PRODUCTO,
       total: result.TOTAL,
@@ -107,6 +113,7 @@ function getDataAbono(saleCode) {
       precio: result.PRECIO,
       estado: result.ESTADO,
     }
+    return response;
   } else {
     throw new Error("No se encontro la venta");
   }
