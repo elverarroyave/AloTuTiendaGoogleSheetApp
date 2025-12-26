@@ -268,6 +268,7 @@
                                     <label for="plazo" class="form-label">Plazo<span class="required-asterisk">*</span></label>
                                     <select id="plazo" name="plazo" class="form-select">
                                         <option value="UNO">Contado</option>
+                                        <option value="DOS">CrediContado</option>
                                         <option value="DOS">1 mes</option>
                                         <option value="TRES">2 meses</option>
                                         <option value="CUATRO">3 meses</option>
@@ -518,16 +519,21 @@
 
         function calculatePriceByPlazo(product) {
             const plazo = DOM.plazo.value || 'UNO';
+            const plazoText = DOM.plazo.options[DOM.plazo.selectedIndex].text;
             const amount = Number(DOM.amount.value) || 1;
             let priceResult;
 
-            switch (plazo) {
-                case 'UNO': priceResult = product.UNO; break;
-                case 'DOS': priceResult = product.DOS; break;
-                case 'TRES': priceResult = product.TRES; break;
-                case 'CUATRO': priceResult = product.CUATRO; break;
-                case 'CINCO': priceResult = product.CINCO; break;
-                default: priceResult = product.UNO;
+            if(plazoText !== 'CrediContado'){
+                switch (plazo) {
+                    case 'UNO': priceResult = product.UNO; break;
+                    case 'DOS': priceResult = product.DOS; break;
+                    case 'TRES': priceResult = product.TRES; break;
+                    case 'CUATRO': priceResult = product.CUATRO; break;
+                    case 'CINCO': priceResult = product.CINCO; break;
+                    default: priceResult = product.UNO;
+                }
+            }else{
+                priceResult = product.UNO;
             }
             return Number(priceResult) * amount;
         }

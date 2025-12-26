@@ -36,9 +36,24 @@ function getSocios() {
   const sheetName = "SOCIOS";
   const rowIndex = 2;
   const startColumn = 1;
-  const endColumn = 6;
+  const endColumn = 7;
   const socios = getRowDataAsObjects(sheetName, rowIndex, startColumn, endColumn);
   return socios.filter(socio => socio.ACTIVO === true);
+}
+
+function getSalesData() {
+  try {
+    if (typeof CONTROL_VENTAS === 'undefined') {
+      throw new Error("CONTROL_VENTAS no está definido. Asegúrate de que tables.js se cargue antes o esté en el proyecto.");
+    }
+    const getSales = getRowDataAsObjects(CONTROL_VENTAS.NAME_TABLE, CONTROL_VENTAS.TARGET_ROW, 1, 19);
+    console.log('getSales count: ', getSales.length);
+    // Stringify to ensure safe transport over google.script.run
+    return JSON.stringify(getSales);
+  } catch (e) {
+    console.error("Error in getSalesData:", e);
+    return JSON.stringify({ error: e.message });
+  }
 }
 
 function getCurrentDateTime() {
@@ -85,12 +100,13 @@ function getRowDataAsObjects(sheetName, rowIndex, startColumn, endColumn) {
     const values = sheet.getRange(rowIndex, startColumn, lastRow - rowIndex + 1, numColumns).getValues();
     const headers = sheet.getRange(rowIndex - 1, startColumn, 1, numColumns).getValues()[0];
     const result = [];
-    values.forEach(row => {
+    values.forEach((row, i) => {
       if (row.every(cell => cell === '')) return;
       const rowObject = {};
       headers.forEach((header, index) => {
         rowObject[header] = row[index];
       });
+      rowObject.index = rowIndex + i;
       result.push(rowObject);
     });
     return result;
@@ -225,9 +241,6 @@ function getObjectByCode(tableConfig, code, columnHeaderName = "CODIGO") {
 
 // Dame una funcion que setee un valor en una celda exacta, que reciba el codigo de la fila y la columna
 function setValueByCodeAndColumn(tableConfig, column, row, value) {
-  console.log('column:', column);
-  console.log('row:', row);
-  console.log('value:', value);
   if (!tableConfig || tableConfig.NAME_TABLE === undefined) {
     throw new Error("Configuración de tabla no válida.");
   }
@@ -239,9 +252,8 @@ function setValueByCodeAndColumn(tableConfig, column, row, value) {
   if (!sheet) throw new Error(`Hoja no encontrada: ${sheetName}`);
 
   let target = column + row;
-  console.log('target:', target);
   sheet.getRange(target).setValue(value);
-  console.log(`Valor '${value}' seteado en ${sheetName}!${target}`);
+  console.log(`Valor '${value}' seteado en ${sheetName} - index ${target}`);
 }
 
 /**
@@ -277,7 +289,7 @@ function diasTranscurridosCoutner(fechaInicio, fechaFin) {
  */
 function definirEstadoVenta(ventaResult) {
   const cPagosObject = CANTIDADA_PAGOS[ventaResult.cPagos];
-  if (!cPagosObject) return ESTADO_VENTA.AL_DIA; // O manejar error según convenga
+  if (!cPagosObject) throw new Error("Plan de pagos no encontrado");
 
   const fechaCompra = new Date(ventaResult.fechaCompra);
   const valorCadaPago = ventaResult.precio / cPagosObject.valor;
@@ -304,9 +316,14 @@ function definirEstadoVenta(ventaResult) {
   const valorPagoIdeal = valorCadaPago * cantidadPagosExigibles;
   const valorAbonado = ventaResult.total;
 
-  return valorAbonado >= valorPagoIdeal
+  const estado = valorAbonado >= valorPagoIdeal
     ? ESTADO_VENTA.AL_DIA
     : ESTADO_VENTA.ATRAZADO;
+
+  return {
+    saldoParaPagoIdeal: valorPagoIdeal - valorAbonado,
+    estado: estado,
+  }
 }
 
 

@@ -123,6 +123,11 @@ ESTADO_VENTA = {
     FACTURADA: 'FACTURADA',
 }
 
+CARGOS_SOCIOS = {
+    ADMIN: 'ADMINISTRADOR',
+    VENDEDOR: 'VENDEDOR',
+}
+
 CANTIDADA_PAGOS = {
     UNO: {
         valor: 1,

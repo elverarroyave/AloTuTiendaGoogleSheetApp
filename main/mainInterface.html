@@ -145,6 +145,9 @@
               <div class="stat-value">Ingreso Egreso</div>
               <div class="stat-label">Registrar Ingresos/Egresos</div>
             </div>
+            <div class="button-test">
+              <button onclick="callTest()">Test</button>
+            </div>
           </div>
         </div>
       </div>
@@ -194,6 +197,10 @@
         document.getElementById('sidebar').classList.remove('active');
       }
       google.script.run.withSuccessHandler(getVersion).getVersionApp();
+    }
+
+    function callTest() {
+      google.script.run.withSuccessHandler(() => console.log('Test ejecutado')).triggerUpdateSaleStatus();
     }
 
     function getVersion(version) {
