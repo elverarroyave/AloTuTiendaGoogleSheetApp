@@ -12,6 +12,18 @@ INGRESOS_EGRESOS = {
     M_PAGO: 'H',
 }
 
+SOCIOS = {
+    NAME_TABLE: 'SOCIOS',
+    TARGET_ROW: 2,
+    NOMBRE: 'A',
+    CODIGO: 'B',
+    ACTIVO: 'C',
+    DOCUMENTO: 'D',
+    CARGO: 'E',
+    TELEFONO: 'F',
+    EMAIL: 'G'
+}
+
 PAGO_PEDIDOS = {
     FECHA: 'A',
     CODIGO: 'B',
@@ -60,14 +72,15 @@ INVENTARIO = {
 }
 
 CLIENTES = {
+    NAME_TABLE: 'CLIENTES',
+    TARGET_ROW: 3,
     NOMBRE: 'A',
-    NUM: 'B',
-    CODIGO: 'C',
-    DOCUMENTO: 'D',
-    TELEFONO: 'E',
-    CORREO: 'F',
-    DIRECCION: 'G',
-    SOCIO: 'H'
+    CODIGO: 'B',
+    DOCUMENTO: 'C',
+    TELEFONO: 'D',
+    CORREO: 'E',
+    DIRECCION: 'F',
+    SOCIO: 'G'
 }
 
 CONTROL_INGRESO = {

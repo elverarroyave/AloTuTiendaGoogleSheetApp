@@ -25,16 +25,16 @@ function getActivePaymentMethods() {
 }
 
 function getClients() {
-  const sheetName = "CLIENTES";
-  const rowIndex = 3;
+  const sheetName = CLIENTES.NAME_TABLE;
+  const rowIndex = CLIENTES.TARGET_ROW;
   const startColumn = 1;
-  const endColumn = 3;
+  const endColumn = 7;
   return getRowDataAsObjects(sheetName, rowIndex, startColumn, endColumn);
 }
 
 function getSocios() {
-  const sheetName = "SOCIOS";
-  const rowIndex = 2;
+  const sheetName = SOCIOS.NAME_TABLE;
+  const rowIndex = SOCIOS.TARGET_ROW;
   const startColumn = 1;
   const endColumn = 7;
   const socios = getRowDataAsObjects(sheetName, rowIndex, startColumn, endColumn);
@@ -115,6 +115,7 @@ function getRowDataAsObjects(sheetName, rowIndex, startColumn, endColumn) {
   }
 }
 
+/*obtener una fila exacta como objeto*/
 function getRowExactlyAsObject(sheetName, rowIndex, startColumn, endColumn) {
   try {
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(sheetName);

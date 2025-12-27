@@ -321,6 +321,7 @@
         }
 
         function onSuccess(res) {
+            console.log('res onSuccess: ', res);
             DOM.btnSubmit.innerText = "Registrar Abono";
 
             if (res.error) {
@@ -337,9 +338,19 @@
                 <div class="modal-list-item"><span>Valor abonado</span> <strong style="color:var(--success)">${formatCurrency(res.value)}</strong></div>
                 <div class="modal-list-item"><span>Método</span> <strong>${res.metodoPago}</strong></div>
                 <div class="modal-list-item"><span>Nuevo Saldo Restante</span> <strong>${formatCurrency(res.resta)}</strong></div>
+                <div class="modal-list-item"><span>Estado</span> <strong>${res.estado}</strong></div>
             `;
             
             showModal('success', '¡Abono Registrado!', `El abono se ha completado exitosamente.`, detailsHtml);
+            //Send nofification abono
+            google.script.run.withSuccessHandler(() => {
+                console.log('Notificación enviada exitosamente');
+            })
+            .withFailureHandler(err => {
+                console.error("Error al enviar notificación:", err);
+                showModal('error', 'Error al enviar notificación', err);
+            })
+            .sendNotification(res);
         }
 
         // --- 6. Modal de Confirmación ---

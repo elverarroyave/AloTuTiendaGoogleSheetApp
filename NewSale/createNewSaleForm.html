@@ -265,8 +265,8 @@
 
                             <div class="row mb-3">
                                 <div class="col-6">
-                                    <label for="plazo" class="form-label">Plazo<span class="required-asterisk">*</span></label>
-                                    <select id="plazo" name="plazo" class="form-select">
+                                    <label for="cPagos" class="form-label">Plazo<span class="required-asterisk">*</span></label>
+                                    <select id="cPagos" name="cPagos" class="form-select">
                                         <option value="UNO">Contado</option>
                                         <option value="DOS">CrediContado</option>
                                         <option value="DOS">1 mes</option>
@@ -465,7 +465,7 @@
             clientName: document.getElementById('clientName'),
             clientCode: document.getElementById('clientCode'),
             socioCode: document.getElementById('socioCode'),
-            plazo: document.getElementById('plazo'),
+            cPagos: document.getElementById('cPagos'),
             amount: document.getElementById('amount'),
             checkIsCredict: document.getElementById('checkIsCredict'),
             firstPayment: document.getElementById('firstPayment'),
@@ -518,13 +518,13 @@
         // --- 4. Lógica de Negocio ---
 
         function calculatePriceByPlazo(product) {
-            const plazo = DOM.plazo.value || 'UNO';
-            const plazoText = DOM.plazo.options[DOM.plazo.selectedIndex].text;
+            const cPagos = DOM.cPagos.value || 'UNO';
+            const plazoText = DOM.cPagos.options[DOM.cPagos.selectedIndex].text;
             const amount = Number(DOM.amount.value) || 1;
             let priceResult;
 
             if(plazoText !== 'CrediContado'){
-                switch (plazo) {
+                switch (cPagos) {
                     case 'UNO': priceResult = product.UNO; break;
                     case 'DOS': priceResult = product.DOS; break;
                     case 'TRES': priceResult = product.TRES; break;
@@ -540,7 +540,7 @@
 
         function updateProductValues() {
             const selectedOption = DOM.productName.options[DOM.productName.selectedIndex];
-            DOM.resPlazo.textContent = DOM.plazo.options[DOM.plazo.selectedIndex].text;
+            DOM.resPlazo.textContent = DOM.cPagos.options[DOM.cPagos.selectedIndex].text;
             
             if (!selectedOption || selectedOption.value === "") {
                 DOM.priceProduct.value = '—';
@@ -613,11 +613,15 @@
         }
 
         function populateClientsSelect(optionsArray) {
+            console.log('clientes: ', optionsArray);
             if (optionsArray.error) return;
             DOM.clientName.innerHTML = '<option value="" disabled selected>Buscar cliente...</option>';
             for (const client of optionsArray) {
                 const option = document.createElement('option');
-                option.value = client.NOMBRE || ''; option.textContent = `${client.NOMBRE}`; option.dataset.code = client.CODIGO || '';
+                option.value = client.NOMBRE || '';
+                option.textContent = `${client.NOMBRE}`;
+                option.dataset.code = client.CODIGO || '';
+                option.dataset.correo = client.CORREO || '';
                 DOM.clientName.appendChild(option);
             }
             if (TS.clientNameSelect) TS.clientNameSelect.destroy();
@@ -637,7 +641,10 @@
             DOM.socio.innerHTML = '<option value="" disabled selected>Buscar socio...</option>';
             for (const socio of optionsArray) {
                 const option = document.createElement('option');
-                option.value = socio.NOMBRE || ''; option.textContent = socio.NOMBRE; option.dataset.code = socio.CODIGO || '';
+                option.value = socio.NOMBRE || '';
+                option.textContent = socio.NOMBRE;
+                option.dataset.code = socio.CODIGO || '';
+                option.dataset.correo = socio.EMAIL || '';
                 DOM.socio.appendChild(option);
             }
         }
@@ -708,7 +715,7 @@
             let errorMsg = '';
 
             if (!DOM.clientName.value) { isValid = false; errorMsg = "Debes seleccionar un cliente."; }
-            else if (!DOM.plazo.value) { isValid = false; errorMsg = "Selecciona un plazo de pago."; }
+            else if (!DOM.cPagos.value) { isValid = false; errorMsg = "Selecciona un plazo de pago."; }
             else if (!DOM.productName.value) { isValid = false; errorMsg = "Selecciona un producto."; }
             else if (!DOM.socio.value) { isValid = false; errorMsg = "Selecciona el vendedor responsable."; }
             else if (!DOM.paymentMethod.value) { isValid = false; errorMsg = "Selecciona un método de pago."; }
@@ -809,6 +816,10 @@
             const data = Object.fromEntries(formData);
             data.priceProduct = DOM.priceProductWithOutFormat;
             data.priceBase = priceBase;
+            data.clientCorreo = DOM.clientName.options[DOM.clientName.selectedIndex].dataset.correo;
+            data.socioCorreo = DOM.socio.options[DOM.socio.selectedIndex].dataset.correo;
+            data.productName = DOM.productName.options[DOM.productName.selectedIndex].text;
+            data.plazo = DOM.cPagos.options[DOM.cPagos.selectedIndex].text;
 
             google.script.run
                 .withSuccessHandler(function(response) {
@@ -832,6 +843,7 @@
                     }
 
                     const detailsHtml = `
+                        <div class="modal-list-item"><span>Fecha</span> <strong>${response.date}</strong></div>
                         <div class="modal-list-item"><span>Código</span> <strong>${response.saleCode}</strong></div>
                         <div class="modal-list-item"><span>Cliente</span> <strong>${DOM.clientName.value}</strong></div>
                         <div class="modal-list-item"><span>Producto</span> <strong>${DOM.productName.options[DOM.productName.selectedIndex].text.split('(')[0]}</strong></div>
@@ -872,7 +884,7 @@
             DOM.checkIsCredict.addEventListener("change", toggleFirstPayment);
             
             // Add listener for Plazo specifically to update prices
-            DOM.plazo.addEventListener("change", updateProductValues);
+            DOM.cPagos.addEventListener("change", updateProductValues);
             DOM.paymentMethod.addEventListener("change", updateProductValues);
             DOM.socio.addEventListener("change", function() {
                 const selectedOption = DOM.socio.options[DOM.socio.selectedIndex];
