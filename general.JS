@@ -296,8 +296,6 @@ function definirEstadoVenta(ventaResult) {
   const valorCadaPago = ventaResult.precio / cPagosObject.valor;
   const diasTranscurridos = diasTranscurridosCoutner(fechaCompra, new Date());
 
-  console.log('Días transcurridos:', diasTranscurridos);
-
   // Calculamos cuántos pagos deberían haberse realizado según los plazos transcurridos
   let cantidadPagosExigibles = cPagosObject.valor; // Por defecto todos ya vencieron
 
@@ -317,6 +315,15 @@ function definirEstadoVenta(ventaResult) {
   const valorPagoIdeal = valorCadaPago * cantidadPagosExigibles;
   const valorAbonado = ventaResult.total;
 
+  // Determine deadline for the current overdue payment
+  let deadline = 0;
+  if (cantidadPagosExigibles > 0) {
+    // Find the milestone matching the number of exigible payments
+    // We search through values of CANTIDADA_PAGOS
+    const deadlineHito = Object.values(CANTIDADA_PAGOS).find(h => h.valor === cantidadPagosExigibles);
+    if (deadlineHito) deadline = deadlineHito.plazo;
+  }
+
   const estado = valorAbonado >= valorPagoIdeal
     ? ESTADO_VENTA.AL_DIA
     : ESTADO_VENTA.ATRAZADO;
@@ -324,6 +331,7 @@ function definirEstadoVenta(ventaResult) {
   return {
     saldoParaPagoIdeal: valorPagoIdeal - valorAbonado,
     estado: estado,
+    diasAtraso: estado === ESTADO_VENTA.ATRAZADO ? (diasTranscurridos - deadline) : 0,
   }
 }
 

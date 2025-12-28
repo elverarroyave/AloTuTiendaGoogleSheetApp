@@ -113,7 +113,7 @@ function getDataAbono(saleCode) {
   }
 }
 
-function sendNotification(data) {
+function sendNotificationAbono(data) {
   const cliente = getObjectByCode(CLIENTES, data.clienteCodigo);
   console.log('cliente: ', cliente);
   const socio = getObjectByCode(SOCIOS, data.socioCodigo);
