@@ -44,8 +44,14 @@
         </li>
         <li class="nav-item">
           <a class="nav-link" onclick="showTab('createNewClient')">
-            <span class="nav-icon">👥</span>
+            <span class="nav-icon">👤</span>
             <span>Nuevo Cliente</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" onclick="showTab('clientsList')">
+            <span class="nav-icon">👥</span>
+            <span>Clientes</span>
           </a>
         </li>
         <li class="nav-item">
@@ -111,10 +117,15 @@
               <div class="stat-label">Añadir al inventario</div>
             </div>
             <div class="stat-card" onclick="showTab('createNewClient')">
-              <div class="stat-icon">👥</div>
+              <div class="stat-icon">👤</div>
               <div class="stat-value">Nuevo Cliente</div>
               <div class="stat-label">Registrar cliente</div>
             </div>
+            <div class="stat-card" onclick="showTab('clientsList')">
+              <div class="stat-icon">👥</div>
+              <div class="stat-value">Clientes</div>
+              <div class="stat-label">Ver listado de clientes</div>
+            </div>  
             <div class="stat-card" onclick="showTab('controlIngreso')">
               <div class="stat-icon">🚛</div>
               <div class="stat-value">Ingresar Pedido</div>
@@ -145,9 +156,9 @@
               <div class="stat-value">Ingreso Egreso</div>
               <div class="stat-label">Registrar Ingresos/Egresos</div>
             </div>
-            <div class="button-test">
+            <!-- <div class="button-test">
               <button onclick="callTest()">Test</button>
-            </div>
+            </div> -->
           </div>
         </div>
       </div>
@@ -156,6 +167,7 @@
       <div id="createNewSale" class="tab-content"></div>
       <div id="inventory_product" class="tab-content"></div>
       <div id="createNewClient" class="tab-content"></div>
+      <div id="clientsList" class="tab-content"></div>
       <div id="controlIngreso" class="tab-content"></div>
       <div id="addAbono" class="tab-content"></div>
       <div id="pagoPedido" class="tab-content"></div>

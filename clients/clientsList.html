@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <base target="_top">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background-color: #f8f9fa; padding: 20px; }
+        .search-container {
+            position: relative;
+            margin-bottom: 30px;
+        }
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+        }
+        .search-input {
+            padding-left: 40px;
+            border-radius: 25px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border: 1px solid #dee2e6;
+            height: 50px;
+            font-size: 1.1rem;
+        }
+        .search-input:focus {
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            border-color: #0d6efd;
+        }
+        .client-card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+            background: white;
+            height: 100%;
+        }
+        .client-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+        .card-header-custom {
+            background-color: transparent;
+            border-bottom: 1px solid #f0f0f0;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .avatar-circle {
+            width: 45px;
+            height: 45px;
+            background-color: #e9ecef;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #495057;
+            font-size: 1.2rem;
+            margin-right: 15px;
+        }
+        .client-info { flex-grow: 1; }
+        .client-name {
+            font-weight: 700;
+            color: #212529;
+            margin: 0;
+            font-size: 1.1rem;
+        }
+        .client-doc {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+        .card-body-custom { padding: 20px; }
+        .info-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+            color: #495057;
+        }
+        .info-row i {
+            width: 25px;
+            color: #0d6efd;
+        }
+        .status-badge {
+            font-size: 0.8rem;
+            padding: 5px 10px;
+            border-radius: 15px;
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            font-weight: 600;
+        }
+        .loading-spinner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 300px;
+            color: #6c757d;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #6c757d;
+        }
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: #dee2e6;
+        }
+        .sale-item {
+            border-left: 4px solid #0d6efd;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            padding: 15px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .sale-item:hover {
+            background-color: #e9ecef;
+        }
+        .sale-item.overdue {
+            border-left-color: #dc3545;
+            background-color: #fff5f5;
+        }
+        .sale-item.overdue:hover {
+            background-color: #ffe0e0;
+        }
+        .sale-item.paid {
+            border-left-color: #198754;
+            background-color: #f0fdf4;
+        }
+        .sale-item.paid:hover {
+            background-color: #dcfce7;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="row mb-4 align-items-center">
+            <div class="col-md-6">
+                <h2 class="mb-0 fw-bold text-dark"><i class="fas fa-users me-2 text-primary"></i>Clientes</h2>
+                <p class="text-muted small mb-0">Gestiona y visualiza la información de tus clientes</p>
+            </div>
+            <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                <!-- Optional Action Buttons -->
+            </div>
+        </div>
+
+        <div class="search-container">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" class="form-control search-input" id="searchInput" placeholder="Buscar por nombre, documento o teléfono..." onkeyup="filterClients()">
+        </div>
+
+        <div id="clientsContainer" class="row g-4">
+            <!-- Loading State -->
+            <div class="col-12 loading-spinner">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Cargando...</span>
+                </div>
+                <div class="mt-3">Cargando clientes...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sales Modal -->
+    <div class="modal fade" id="salesModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="fas fa-shopping-bag me-2"></i>Historial de Ventas</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body bg-light">
+                    <div id="modalClientInfo" class="mb-4 p-3 bg-white rounded shadow-sm border">
+                        <!-- Client Header Info -->
+                    </div>
+                    <div id="salesListContainer">
+                        <div class="text-center py-5">
+                            <div class="spinner-border text-primary" role="status"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Abonos Modal (Nested/Stacked) -->
+    <div class="modal fade" id="abonosModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title"><i class="fas fa-money-bill-wave me-2"></i>Historial de Abonos</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body bg-light">
+                    <div id="modalSaleInfo" class="mb-3 fw-bold text-dark border-bottom pb-2"></div>
+                    <div id="abonosListContainer">
+                        <div class="text-center py-3">
+                            <div class="spinner-border text-success" role="status"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Volver</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let allClients = [];
+        const salesModal = new bootstrap.Modal(document.getElementById('salesModal'));
+        const abonosModal = new bootstrap.Modal(document.getElementById('abonosModal'));
+
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+            loadClients();
+        });
+
+        function loadClients() {
+            google.script.run
+                .withSuccessHandler(renderClients)
+                .withFailureHandler(showError)
+                .getClients();
+        }
+
+        function renderClients(clients) {
+            const container = document.getElementById('clientsContainer');
+            if (!clients || clients.length === 0) {
+                container.innerHTML = `
+                    <div class="col-12 empty-state">
+                        <i class="fas fa-user-slash"></i>
+                        <h4>No hay clientes registrados</h4>
+                        <p>Los clientes que registres aparecerán aquí.</p>
+                    </div>`;
+                return;
+            }
+
+            allClients = clients;
+            displayClients(allClients);
+        }
+
+        function displayClients(clientsToDisplay) {
+            const container = document.getElementById('clientsContainer');
+            container.innerHTML = '';
+
+            clientsToDisplay.forEach(client => {
+                const card = document.createElement('div');
+                card.className = 'col-12 col-md-6 col-lg-4';
+                
+                // Initials for avatar
+                const initials = client.NOMBRE ? client.NOMBRE.substring(0,2).toUpperCase() : '??';
+
+                card.innerHTML = `
+                    <div class="client-card">
+                        <div class="card-header-custom">
+                            <div class="d-flex align-items-center w-100">
+                                <div class="avatar-circle">${initials}</div>
+                                <div class="client-info text-truncate">
+                                    <h5 class="client-name text-truncate" title="${client.NOMBRE}">${client.NOMBRE}</h5>
+                                    <p class="client-doc"><i class="fas fa-id-card me-1"></i>${client.DOCUMENTO || 'Sin Doc'}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body-custom">
+                            <div class="info-row" title="Teléfono">
+                                <i class="fas fa-phone-alt"></i>
+                                <span>${client.TELEFONO || '---'}</span>
+                            </div>
+                            <div class="info-row" title="Socio Responsable">
+                                <i class="fas fa-user-tie"></i>
+                                <span class="text-truncate">${client.SOCIO || 'Sin Asignar'}</span>
+                            </div>
+                            <div class="info-row" title="Dirección">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span class="text-truncate">${client.DIRECCION || '---'}</span>
+                            </div>
+                            
+                            <div class="d-grid mt-4">
+                                <button class="btn btn-outline-primary btn-sm rounded-pill" onclick="openSalesModal('${client.CODIGO}', '${client.NOMBRE}')">
+                                    <i class="fas fa-eye me-1"></i> Ver Ventas
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function filterClients() {
+            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+            if (!query) {
+                displayClients(allClients);
+                return;
+            }
+
+            const filtered = allClients.filter(client => {
+                const name = (client.NOMBRE || '').toLowerCase();
+                const doc = (String(client.DOCUMENTO) || '').toLowerCase();
+                const tel = (String(client.TELEFONO) || '').toLowerCase();
+                return name.includes(query) || doc.includes(query) || tel.includes(query);
+            });
+
+            if (filtered.length === 0) {
+                document.getElementById('clientsContainer').innerHTML = `
+                    <div class="col-12 empty-state">
+                        <i class="fas fa-search-minus"></i>
+                        <h4>No se encontraron resultados</h4>
+                        <p>Intenta con otro nombre o documento.</p>
+                    </div>`;
+            } else {
+                displayClients(filtered);
+            }
+        }
+
+        function openSalesModal(clientCode, clientName) {
+            // Reset Modal Content
+            document.getElementById('modalClientInfo').innerHTML = `<h5 class="mb-0 fw-bold">${clientName}</h5><small class="text-muted">Código: ${clientCode}</small>`;
+            document.getElementById('salesListContainer').innerHTML = `
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="mt-2 text-muted">Buscando ventas...</p>
+                </div>
+            `;
+            
+            salesModal.show();
+
+            // Fetch Sales
+            google.script.run
+                .withSuccessHandler(renderSalesList)
+                .withFailureHandler(showSalesError)
+                .getSalesByClient(clientCode);
+        }
+
+        function renderSalesList(sales) {
+            const container = document.getElementById('salesListContainer');
+        
+            let salesArray = sales;
+            if (typeof sales === 'string') {
+                try { salesArray = JSON.parse(sales); } catch(e) { salesArray = []; }
+            }
+
+            if (!salesArray || salesArray.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-4 text-muted">
+                        <i class="fas fa-folder-open fa-3x mb-3 text-secondary" style="opacity: 0.5"></i>
+                        <p>Este cliente no tiene ventas registradas.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const listHtml = salesArray.map(sale => {
+                // Determine styling based on status
+                let statusClass = '';
+                let statusIcon = 'fa-clock';
+                const estado = (sale.ESTADO || '').toUpperCase();
+
+                if (estado === 'ATRAZADO') {
+                    statusClass = 'overdue';
+                    statusIcon = 'fa-exclamation-circle text-danger';
+                } else if (estado === 'PAGADO' || estado === 'AL DIA') {
+                    statusClass = 'paid';
+                    statusIcon = 'fa-check-circle text-success';
+                }
+
+                return `
+                    <div class="sale-item ${statusClass}" onclick="openAbonosModal('${sale.CODIGO}')" title="Clic para ver abonos">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="mb-1 fw-bold text-dark">Venta #${sale.CODIGO}</h6>
+                                <div class="small text-muted mb-1"><i class="far fa-calendar-alt me-1"></i>${sale.FECHA}</div>
+                                <div class="small text-dark"><strong>Producto:</strong> ${sale.PRODUCTO || sale.COD_PRDT}</div>
+                            </div>
+                            <div class="text-end">
+                                <div class="mb-1"><span class="badge bg-light text-dark border">${sale.ESTADO}</span></div>
+                                <div class="fw-bold text-primary">$${Number(sale.PRECIO || 0).toLocaleString()}</div>
+                            </div>
+                        </div>
+                        <div class="mt-2 pt-2 border-top border-light d-flex justify-content-between small text-muted">
+                            <span>Pagado: $${Number(sale.TOTAL || 0).toLocaleString()}</span>
+                            <span>Saldo: $${Number(sale.RESTA || 0).toLocaleString()}</span>
+                        </div>
+                        <div class="mt-2 text-end">
+                            ${sale.RESTA > 0 ? 
+                                `<button class="btn btn-sm btn-outline-success rounded-pill" onclick="event.stopPropagation(); openAddAbonoModal('${sale.CODIGO}')">
+                                    <i class="fas fa-plus-circle me-1"></i>Agregar Abono
+                                </button>` 
+                            : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = listHtml;
+        }
+
+        function openAbonosModal(saleCode) {
+            document.getElementById('modalSaleInfo').innerText = `Venta ${saleCode}`;
+            document.getElementById('abonosListContainer').innerHTML = `
+                <div class="text-center py-3">
+                    <div class="spinner-border text-primary" role="status"></div>
+                </div>
+            `;
+            
+            abonosModal.show();
+
+            google.script.run
+                .withSuccessHandler(renderAbonosList)
+                .withFailureHandler((err) => {
+                    document.getElementById('abonosListContainer').innerHTML = `<div class="alert alert-danger">Error: ${err.message}</div>`;
+                })
+                .getAbonosData(saleCode);
+        }
+
+        function showError(err) {
+            document.getElementById('clientsContainer').innerHTML = `<div class="alert alert-danger">Error al cargar clientes: ${err.message}</div>`;
+        }
+
+        function showSalesError(err) {
+            document.getElementById('salesListContainer').innerHTML = `<div class="alert alert-danger">Error al cargar ventas: ${err.message}</div>`;
+        }
+
+        function openAddAbonoModal(saleCode) {
+            // Redirect to addAbono form with saleCode
+            google.script.run.withSuccessHandler(url => {
+                 window.top.location.href = url + '?page=addAbono&saleCode=' + saleCode;
+            }).getUrl();
+        }
+
+        function openAbonoSidebar(saleCode) {
+            document.getElementById('modalSaleInfo').innerText = `Venta ${saleCode}`;
+            document.getElementById('abonosListContainer').innerHTML = `
+                <div class="text-center py-3">
+                    <div class="spinner-border text-success" role="status"></div>
+                </div>
+            `;
+            
+            abonosModal.show();
+
+            google.script.run
+                .withSuccessHandler(renderAbonosList)
+                .withFailureHandler((err) => {
+                    document.getElementById('abonosListContainer').innerHTML = `<div class="alert alert-danger">Error: ${err.message}</div>`;
+                })
+                .getAbonosData(saleCode);
+        }
+
+        function renderAbonosList(abonos) {
+            const container = document.getElementById('abonosListContainer');
+            
+            let abonosArray = abonos;
+            if (typeof abonos === 'string') {
+                try { abonosArray = JSON.parse(abonos); } catch(e) { abonosArray = []; }
+            }
+
+            if (!abonosArray || abonosArray.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-3 text-muted">
+                        <i class="fas fa-receipt fa-2x mb-2" style="opacity: 0.5"></i>
+                        <p class="mb-0 small">No hay abonos registrados.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const listHtml = `
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th class="text-end">Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${abonosArray.map(abono => `
+                                <tr>
+                                    <td>${abono.FECHA || 'N/A'}</td>
+                                    <td class="text-end fw-bold">$${Number(abono.VALOR || 0).toLocaleString()}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            container.innerHTML = listHtml;
+        }
+    </script>
+</body>
+</html>

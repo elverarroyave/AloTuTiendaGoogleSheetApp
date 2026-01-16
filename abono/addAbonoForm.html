@@ -20,6 +20,11 @@
 
         <form id="abonoForm" class="card-form mb-5" onsubmit="handleSubmit(event)">
 
+            <script>
+                // Recibir parámetro de la URL
+                var PRELOAD_SALE_CODE = "<?= (params && params.saleCode) ? params.saleCode : '' ?>";
+            </script>
+
             <div class="mb-3">
                 <label for="clientName" class="form-label">Cliente<span class="required-asterisk">*</span></label>
                 <select id="clientName" name="clientName"></select>
@@ -166,6 +171,18 @@
                 DOM.ventaCode.appendChild(optionElement);
             });
             DOM.ventaCode.disabled = false;
+
+            // If we have a preload code, select it
+            if (PRELOAD_SALE_CODE) {
+                // Check if the sale exists in the options we just added
+                const saleExists = filteredSales.find(s => s.CODIGO === PRELOAD_SALE_CODE);
+                if (saleExists) {
+                    DOM.ventaCode.value = PRELOAD_SALE_CODE;
+                    // Trigger validation explicitly since setting value programmatically might not trigger events?
+                    // Actually, let's just leave it selected. User can see it.
+                    validateForm();
+                }
+            }
         }
 
         let abonoSeq = null; 
@@ -200,6 +217,36 @@
                     updateSummary(); validateForm(); 
                 }
             });
+
+            // Handle Preload if exists and clients are loaded
+            if (PRELOAD_SALE_CODE) {
+                handlePreloadSequence(PRELOAD_SALE_CODE);
+            }
+        }
+
+        function handlePreloadSequence(saleCode) {
+            // Get Sale Data to identify Client
+           google.script.run.withSuccessHandler((saleData) => {
+                if (saleData && saleData.clienteCodigo) {
+                    // Find the option with this client code
+                    // Since TomSelect value is 'NOMBRE' (based on user change), we need to find text?
+                    // Wait, user set value=client.NOMBRE. 
+                    
+                    // We need to find the option element with data-code == clientCode
+                    const options = Array.from(DOM.clientName.options);
+                    const matchingOption = options.find(opt => opt.dataset.code === saleData.clienteCodigo);
+                    
+                    if (matchingOption && TS.clientNameSelect) {
+                        TS.clientNameSelect.setValue(matchingOption.value); // This value is Name
+                        // The onChange triggers setOptionsSalesSelect
+                        
+                        // NOTE: setOptionsSalesSelect relies on PRELOAD_SALE_CODE global 
+                        // to auto-select the sale.
+                    }
+                }
+            }).withFailureHandler((err) => {
+                console.error("Error preloading sale client:", err);
+            }).getDataAbono(saleCode);
         }
 
         function updateSummary(){

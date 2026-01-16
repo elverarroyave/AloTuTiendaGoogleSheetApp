@@ -58,7 +58,7 @@ function getDataIngresoEgreso() {
     const dataStartRow = DATA_CATEGORIA_INGRESOS_EGRESOS.TARGET_ROW;
     const startColumn = DATA_CATEGORIA_INGRESOS_EGRESOS.NOMBRE;
     const endColumn = DATA_CATEGORIA_INGRESOS_EGRESOS.REFERENCIA;
-    const result = getRowDataAsObjects(sheetName, dataStartRow, startColumn, endColumn);
+    const result = getRowDataAsObjectsWithLimits(sheetName, dataStartRow, startColumn, endColumn);
     console.log('getDataIngresoEgreso: ', result);
     return JSON.stringify(result);
 }

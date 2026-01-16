@@ -78,7 +78,8 @@ function doGet(e) {
       'pagoPedido': 'pagoPedidoForm',
       'cotizacion': 'cotizacion',
       'cuadreCaja': 'cuadreCajaForm',
-      'ingresoEgreso': 'ingresoEgresoForm'
+      'ingresoEgreso': 'ingresoEgresoForm',
+      'clientsList': 'clientsList'
     };
 
     if (pageMap[page]) {
@@ -89,6 +90,10 @@ function doGet(e) {
         // Fallback: try flat name if folder path fails
         const flatName = pageMap[page].split('/').pop();
         template = HtmlService.createTemplateFromFile(flatName);
+      }
+
+      if (e.parameter) {
+        template.params = e.parameter;
       }
 
       return template.evaluate()

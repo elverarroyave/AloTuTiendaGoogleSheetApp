@@ -4,40 +4,38 @@
 
 
 function getInventory() {
-  const sheetName = "INVENTARIO";
-  const rowIndex = 3;
-  const startColumn = 1;
-  const endColumn = 14;
-  return getRowDataAsObjects(sheetName, rowIndex, startColumn, endColumn);
+  return getRowDataAsObjects(INVENTARIO);
+}
+
+function getAbonos() {
+  return getRowDataAsObjects(ABONOS);
 }
 
 function getActiveSuppliers() {
   // PROVEEDORES: A hasta H. Filtramos por ACTIVO (Col D)
-  const suppliers = getRowDataAsObjects("PROVEEDORES", 2, 1, 7);
-  return suppliers.filter(supplier => supplier.ACTIVO === true);
+  const suppliers = getRowDataAsObjects(PROVEEDORES);
+  return suppliers.filter(supplier => {
+    supplier.CREATED_DATETIME = parseDateLocalTime(supplier.CREATED_DATETIME);
+    return supplier.ACTIVO === true
+  });
 }
 
 function getActivePaymentMethods() {
   // METODO_DE_PAGO: A hasta D. Filtramos por ACTIVO (Col D)
-  const paymentMethods = getRowDataAsObjects("METODO_DE_PAGO", 3, 1, 4);
+  const paymentMethods = getRowDataAsObjects(METODO_DE_PAGO);
   console.log('paymentMethodsL: ', paymentMethods);
-  return paymentMethods.filter(method => method.ACTIVO === true);
+  return paymentMethods.filter(method => {
+    method.CREATED_DATETIME = parseDateLocalTime(method.CREATED_DATETIME);
+    return method.ACTIVO === true
+  });
 }
 
 function getClients() {
-  const sheetName = CLIENTES.NAME_TABLE;
-  const rowIndex = CLIENTES.TARGET_ROW;
-  const startColumn = 1;
-  const endColumn = 7;
-  return getRowDataAsObjects(sheetName, rowIndex, startColumn, endColumn);
+  return getRowDataAsObjects(CLIENTES);
 }
 
 function getSocios() {
-  const sheetName = SOCIOS.NAME_TABLE;
-  const rowIndex = SOCIOS.TARGET_ROW;
-  const startColumn = 1;
-  const endColumn = 7;
-  const socios = getRowDataAsObjects(sheetName, rowIndex, startColumn, endColumn);
+  const socios = getRowDataAsObjects(SOCIOS);
   return socios.filter(socio => socio.ACTIVO === true);
 }
 
@@ -46,7 +44,7 @@ function getSalesData() {
     if (typeof CONTROL_VENTAS === 'undefined') {
       throw new Error("CONTROL_VENTAS no está definido. Asegúrate de que tables.js se cargue antes o esté en el proyecto.");
     }
-    const getSales = getRowDataAsObjects(CONTROL_VENTAS.NAME_TABLE, CONTROL_VENTAS.TARGET_ROW, 1, 19);
+    const getSales = getRowDataAsObjects(CONTROL_VENTAS);
     console.log('getSales count: ', getSales.length);
     // Stringify to ensure safe transport over google.script.run
     return JSON.stringify(getSales);
@@ -70,11 +68,7 @@ function parseDateLocalTime(dateInput) {
 }
 
 function getSequences() {
-  const sheetName = "SEQUENCES";
-  const rowIndex = 2;
-  const startColumn = 1;
-  const endColumn = 5;
-  return getRowDataAsObjects(sheetName, rowIndex, startColumn, endColumn);
+  return getRowDataAsObjects(SEQUENCES);
 }
 
 function getSequence(prefix) {
@@ -90,10 +84,16 @@ function setSequences(sequenceNumber, newCurrentValue) {
   sheet.getRange('D' + rowToUpdate).setValue(newCurrentValue);
 }
 
-function getRowDataAsObjects(sheetName, rowIndex, startColumn, endColumn) {
+
+function getRowDataAsObjects(table) {
+  const sheetName = table.NAME_TABLE;
+  if (!sheetName) throw new Error(`Hoja no encontrada: ${sheetName}`);
+  const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(sheetName);
+  const rowIndex = table.TARGET_ROW;
+  if (!rowIndex) throw new Error(`Row start index no especificado: ${rowIndex}`);
+  const startColumn = 1;
+  const endColumn = sheet.getLastColumn();
   try {
-    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(sheetName);
-    if (!sheet) throw new Error(`Hoja no encontrada: ${sheetName}`);
     const lastRow = sheet.getLastRow();
     if (lastRow < rowIndex) return [];
     const numColumns = endColumn - startColumn + 1;
@@ -107,6 +107,31 @@ function getRowDataAsObjects(sheetName, rowIndex, startColumn, endColumn) {
         rowObject[header] = row[index];
       });
       rowObject.index = rowIndex + i;
+      result.push(rowObject);
+    });
+    console.log(`getRowDataAsObjects ${table.NAME_TABLE}: `, result);
+    return result;
+  } catch (e) {
+    return { error: e.message };
+  }
+}
+
+function getRowDataAsObjectsWithLimits(sheetName, rowIndex, startColumn, endColumn) {
+  try {
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(sheetName);
+    if (!sheet) throw new Error(`Hoja no encontrada: ${sheetName}`);
+    const lastRow = sheet.getLastRow();
+    if (lastRow < rowIndex) return [];
+    const numColumns = endColumn - startColumn + 1;
+    const values = sheet.getRange(rowIndex, startColumn, lastRow - rowIndex + 1, numColumns).getValues();
+    const headers = sheet.getRange(rowIndex - 1, startColumn, 1, numColumns).getValues()[0];
+    const result = [];
+    values.forEach(row => {
+      if (row.every(cell => cell === '')) return;
+      const rowObject = {};
+      headers.forEach((header, index) => {
+        rowObject[header] = row[index];
+      });
       result.push(rowObject);
     });
     return result;
@@ -288,6 +313,44 @@ function diasTranscurridosCoutner(fechaInicio, fechaFin) {
  * @param {number} ventaResult.total - Total abonado hasta el momento ($).
  * @returns {string} Estado de la venta (de ESTADO_VENTA).
  */
+
+
+/*
+{ FECHA: '2025-10-06T20:45:50.000Z',
+    NUM: 397,
+    CODIGO: 'VENTA397',
+    COD_SOCIO: 'SOCIO1',
+    SOCIO: 'ELVER ARROYAVE',
+    C_PAGOS: 'CUATRO',
+    COD_PRDT: 'PDCT015',
+    PRODUCTO: 'Televisor CAIXUN 65 Pulgadas LED Uhd4K Android TV',
+    CANTIDAD: 1,
+    COD_CLNT: 'CLNT067',
+    CLIENTE: 'ESAUL DAVID VILLALBA MADRD',
+    'PRECIO BASE': 2350000,
+    PRECIO: 2702500,
+    'M. PAGO': 'Efectivo',
+    PAGO: 600000,
+    ABONO: 675000,
+    RESTA: 1427500,
+    TOTAL: 1275000,
+    ESTADO: 'ATRAZADO',
+    DateMA: '#ERROR!',
+    'Enlace de factura': '',
+    index: 48,
+    SALDO_PAGO_IDEAL: 1427500,
+    DIAS_ATRASO: 2 },
+
+    let definirVenta = {
+      fechaCompra: sale.FECHA,
+      cPagos: sale.C_PAGOS,
+      precio: sale.PRECIO,
+      total: sale.TOTAL,
+    }
+
+    const saleStatus = definirEstadoVenta(definirVenta);
+*/
+
 function definirEstadoVenta(ventaResult) {
   const cPagosObject = CANTIDADA_PAGOS[ventaResult.cPagos];
   if (!cPagosObject) throw new Error("Plan de pagos no encontrado");
@@ -295,43 +358,153 @@ function definirEstadoVenta(ventaResult) {
   const fechaCompra = new Date(ventaResult.fechaCompra);
   const valorCadaPago = ventaResult.precio / cPagosObject.valor;
   const diasTranscurridos = diasTranscurridosCoutner(fechaCompra, new Date());
+  let cantidadPagosExigibles = cPagosObject.valor;
 
-  // Calculamos cuántos pagos deberían haberse realizado según los plazos transcurridos
-  let cantidadPagosExigibles = cPagosObject.valor; // Por defecto todos ya vencieron
+  /* 
+    NUEVA LÓGICA DE CÁLCULO DE ATRASO:
+    1. Calcular cuántas cuotas completas cubren los pagos realizados.
+    2. Identificar la siguiente cuota a pagar (la primera no cubierta).
+    3. Determinar el deadline acumulado para esa cuota específica.
+    4. Calcular días de atraso basándose en ese deadline.
+  */
 
-  const hitosPago = Object.values(CANTIDADA_PAGOS);
-  for (const hito of hitosPago) {
-    if (diasTranscurridos < hito.plazo) {
-      // Si aún no llegamos a este hito de plazo, el total de pagos exigibles es 
-      // el número de pagos del hito previo (hito.valor - 1)
-      cantidadPagosExigibles = hito.valor - 1;
-      break;
+  // 1. Calcular pagos realizados
+  // Math.floor(Total Pagado / Valor Cuota) = Cantidad de cuotas totalmente pagadas
+  // Ejemplo: Si debe 4 cuotas de 100 y ha pagado 150.
+  // cuotasPagadas = floor(150/100) = 1.
+  // La deuda está en la cuota #2.
+
+  // Nota: valorCadaPago podría tener decimales, asegurar precisión si es necesario, pero JS maneja esto bien generalmente.
+  const cuotasPagadas = Math.floor(ventaResult.total / valorCadaPago);
+
+  // 2. Identificar siguiente cuota a pagar
+  // Si ha pagado 1, la exigible es la 2.
+  // Limitamos a que no supere el total de pagos del plan.
+  let siguienteCuotaExigible = Math.min(cuotasPagadas + 1, cPagosObject.valor);
+
+  // 3. Obtener deadline de esa cuota
+  let deadline = 0;
+  if (siguienteCuotaExigible > 0) {
+    const hito = Object.values(CANTIDADA_PAGOS).find(h => h.valor === siguienteCuotaExigible);
+    if (hito) {
+      deadline = hito.plazo;
     }
   }
 
-  // No podemos exigir más pagos de los que tiene el plan original de esta venta
-  cantidadPagosExigibles = Math.min(cantidadPagosExigibles, cPagosObject.valor);
+  // Verificar si la fecha actual ha superado el deadline
+  // Si diasTranscurridos > deadline, hay atraso.
+  // Pero ESTADO_VENTA.ATRAZADO se define si valorAbonado < valorPagoIdeal.
+  // valorPagoIdeal se calcula segun el tiempo transcurrido.
 
-  const valorPagoIdeal = valorCadaPago * cantidadPagosExigibles;
-  const valorAbonado = ventaResult.total;
+  // -- Recalculamos valorPagoIdeal basado en dias transcurridos para determinar el ESTADO --
+  // Esto mantiene la logica original de "cuanto deberia haber pagado a hoy"
+  let cuotasExigiblesPorTiempo = 0;
+  const hitosPago = Object.values(CANTIDADA_PAGOS);
+  // Ordenamos para asegurar que iteramos correctamente, aunque los valores parecen ordenados
+  // Pero mejor iterar buscando el hito adecuado.
 
-  // Determine deadline for the current overdue payment
-  let deadline = 0;
-  if (cantidadPagosExigibles > 0) {
-    // Find the milestone matching the number of exigible payments
-    // We search through values of CANTIDADA_PAGOS
-    const deadlineHito = Object.values(CANTIDADA_PAGOS).find(h => h.valor === cantidadPagosExigibles);
-    if (deadlineHito) deadline = deadlineHito.plazo;
+  // Buscamos el hito cuyo plazo es inmeditamente mayor a diasTranscurridos, 
+  // o el ultimo hito si ya pasaron todos.
+  // Logica original:
+  let cantidadPagosExigiblesHoy = cPagosObject.valor; // Asumimos todo exigible por defecto
+
+  for (const hito of hitosPago) {
+    if (diasTranscurridos < hito.plazo) {
+      cantidadPagosExigiblesHoy = hito.valor - 1;
+      break;
+    }
   }
+  // Ajustamos límites
+  cantidadPagosExigiblesHoy = Math.min(cantidadPagosExigiblesHoy, cPagosObject.valor);
 
-  const estado = valorAbonado >= valorPagoIdeal
+  const valorPagoIdealHoy = valorCadaPago * cantidadPagosExigiblesHoy;
+
+  // Determinar estado
+  // Si lo que pagó es mayor o igual a lo que debería haber pagado a hoy -> AL DIA
+  const estado = ventaResult.total >= valorPagoIdealHoy
     ? ESTADO_VENTA.AL_DIA
     : ESTADO_VENTA.ATRAZADO;
 
+  // Calcular Días de Atraso
+  // Solo tiene sentido si está atrasado.
+  // Si está atrasado, usamos el deadline de la 'siguienteCuotaExigible' (la más vieja sin pagar)
+  // en lugar del deadline de la cuota actual del tiempo.
+
+  let diasAtrasoCalc = 0;
+  if (estado === ESTADO_VENTA.ATRAZADO) {
+    diasAtrasoCalc = diasTranscurridos - deadline;
+    // Si por alguna razón da negativo (ej. lógica de fechas rara), lo dejamos en 0
+    if (diasAtrasoCalc < 0) diasAtrasoCalc = 0;
+  }
+
   return {
-    saldoParaPagoIdeal: valorPagoIdeal - valorAbonado,
+    saldoParaPagoIdeal: valorPagoIdealHoy - ventaResult.total,
     estado: estado,
-    diasAtraso: estado === ESTADO_VENTA.ATRAZADO ? (diasTranscurridos - deadline) : 0,
+    diasAtraso: diasAtrasoCalc,
+  }
+}
+
+
+
+/**
+ * Obtiene todas las ventas de un cliente específico.
+ * @param {string} clientCode - El código del cliente (ej: CLNT001).
+ * @returns {Array|Object} Lista de ventas o error.
+ */
+function getSalesByClient(clientCode) {
+  if (!clientCode) return [];
+
+  try {
+    const salesDataStr = getSalesData();
+    const salesData = JSON.parse(salesDataStr);
+
+    if (salesData.error) return salesData;
+
+    const clientSales = salesData.filter(sale => {
+      sale.FECHA = parseDateLocalTime(sale.FECHA);
+      return sale.COD_CLNT === clientCode
+    });
+
+    return JSON.stringify(clientSales);
+  } catch (e) {
+    console.error("Error getting sales by client:", e);
+    return JSON.stringify({ error: e.message });
+  }
+}
+
+function getAbonosBySale(saleCode) {
+  if (!saleCode) return [];
+
+  try {
+    const abonosDataStr = getAbonosData();
+    const abonosData = JSON.parse(abonosDataStr);
+
+    if (abonosData.error) return abonosData;
+
+    // Filter by COD_VENTA (Column J in ABONOS) or Name?
+    // Assuming abonosData objects have keys from headers.
+    const saleAbonos = abonosData.filter(abono => abono.COD_VENTA === saleCode);
+
+    return JSON.stringify(saleAbonos);
+  } catch (e) {
+    console.error("Error getting abonos by sale:", e);
+    return JSON.stringify({ error: e.message });
+  }
+}
+
+function getAbonosData(saleCode) {
+  if (!saleCode) return [];
+  try {
+    const abonos = getAbonos();
+    const saleAbonos = abonos.filter(abono => {
+      abono.FECHA = parseDateLocalTime(abono.FECHA);
+      return abono.COD_VENTA === saleCode
+    });
+    console.log('saleAbonos: ', saleAbonos);
+    return JSON.stringify(saleAbonos);
+  } catch (e) {
+    console.error("Error getting abonos by sale:", e);
+    return JSON.stringify({ error: e.message });
   }
 }
 

@@ -1,6 +1,6 @@
 function calcularVentasCuadre() {
     const lastCuadre = getRowExactlyAsObject(CUADRE_CAJA.NAME_TABLE, 2, 1, 12);
-    const getSales = getRowDataAsObjects(CONTROL_VENTAS.NAME_TABLE, 3, 1, 19);
+    const getSales = getRowDataAsObjects(CONTROL_VENTAS);
 
     // Validate if FECHA exists, otherwise use a default or handle gracefully
     const lastDate = lastCuadre.FECHA instanceof Date ? lastCuadre.FECHA : new Date(0);

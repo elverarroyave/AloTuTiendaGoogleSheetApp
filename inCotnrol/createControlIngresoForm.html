@@ -448,6 +448,7 @@
         function loadData() {
             // Cargar Productos
             google.script.run.withSuccessHandler(products => {
+                console.log('result loadData: ', products);
                 const options = products.map(p => ({
                     value: p.CODIGO,
                     text: `${p.NOMBRE} (${p.CODIGO})`, 
@@ -459,6 +460,7 @@
 
             // Cargar Proveedores
             google.script.run.withSuccessHandler(providers => {
+                console.log('result Proveedores: ', providers);
                 const options = providers.map(p => ({
                     value: p.CODIGO,
                     text: p.NOMBRE, 
@@ -470,6 +472,7 @@
 
             // Cargar Métodos de Pago
             google.script.run.withSuccessHandler(methods => {
+                console.log('result Metodos de Pago: ', methods);
                 const options = methods.map(m => ({
                     value: m.NOMBRE, 
                     text: m.NOMBRE

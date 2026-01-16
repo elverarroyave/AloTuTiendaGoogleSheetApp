@@ -12,6 +12,34 @@ INGRESOS_EGRESOS = {
     M_PAGO: 'H',
 }
 
+METODO_DE_PAGO = {
+    NAME_TABLE: 'METODO_DE_PAGO',
+    TARGET_ROW: 3,
+    NOMBRE: 'A',
+    CODIGO: 'B',
+    ACTIVO: 'C',
+    CUPO_TOTAL: 'D',
+}
+
+INVENTARIO = {
+    NAME_TABLE: 'INVENTARIO',
+    TARGET_ROW: 3,
+    NOMBRE: 'A',
+    CODIGO: 'B',
+    CATEGORIA: 'C',
+    UNO: 'D',
+    DOS: 'E',
+    TRES: 'F',
+    CUATRO: 'G',
+    CINCO: 'H',
+    SEIS: 'I',
+    SIETE: 'J',
+    INGRESOS: 'K',
+    VENTAS: 'L',
+    STOCK: 'M',
+    TOTAL: 'N',
+}
+
 SOCIOS = {
     NAME_TABLE: 'SOCIOS',
     TARGET_ROW: 2,
@@ -35,6 +63,8 @@ PAGO_PEDIDOS = {
 }
 
 ABONOS = {
+    NAME_TABLE: 'ABONOS',
+    TARGET_ROW: 2,
     FECHA: 'A',
     CODIGO: 'B',
     COD_IN_OUT: 'C',
@@ -61,14 +91,6 @@ CONTROL_VENTAS = {
     M_PAGO: 'N',
     PAGO: 'O',
     ESTADO: 'S',
-}
-
-INVENTARIO = {
-    NOMBRE: 'A',
-    NUM: 'B',
-    CODIGO: 'C',
-    CATEGORIA: 'D',
-    UNO: 'E'
 }
 
 CLIENTES = {
@@ -102,6 +124,17 @@ CONTROL_INGRESO = {
     PAGADO: 'N',
     ESTADO: 'O',
     ENLACE_FACTURA: 'P'
+}
+
+PROVEEDORES = {
+    NAME_TABLE: 'PROVEEDORES',
+    TARGET_ROW: 2,
+    NOMBRE: 'A',
+    CODIGO: 'B',
+    ACTIVO: 'C',
+    ENLACE: 'D',
+    CONTACTO: 'E',
+    CIUDAD: 'F'
 }
 
 CUADRE_CAJA = {
@@ -139,6 +172,16 @@ ESTADO_VENTA = {
 CARGOS_SOCIOS = {
     ADMIN: 'ADMINISTRADOR',
     VENDEDOR: 'VENDEDOR',
+}
+
+SEQUENCES = {
+    NAME_TABLE: 'SEQUENCES',
+    TARGET_ROW: 2,
+    NUMBER: 'A',
+    NAME: 'B',
+    PREFIX: 'C',
+    CURRENT: 'D',
+    NEXT: 'E',
 }
 
 CANTIDADA_PAGOS = {
