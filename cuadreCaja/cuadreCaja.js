@@ -61,6 +61,7 @@ function saveCuadreCaja(form) {
         sheetCuadre.getRange(CUADRE_CAJA.SOBRANTE + targetRow).setValue(form.sobre);
         //Actualizar secuencia
         setSequences(cuadreSeq.NUMBER, cuadreSeq.NEXT);
+        // updateStatusSalesPayed();
 
         return { success: true, code: cuadreNewCode, date: date };
 
@@ -76,4 +77,39 @@ function saveCuadreCaja(form) {
         throw new Error(`Error en la transacción. Se realizó un rollback. Detalle: ${e.message}`);
     }
 
+}
+
+function updateStatusSalesPayed() {
+    //Get sales payed
+    const salesString = getSalesData();
+    let sales = JSON.parse(salesString);
+    sales = sales.filter(sale => sale.ESTADO === ESTADO_VENTA.PAGADO);
+    console.log('sales updateStatusSalesPayed: ', sales.length);
+
+    // Get socios
+    const socios = getSocios();
+    console.log('socios: ', socios.length);
+    console.log('socios: ', socios[0]);
+
+    socios.forEach(socio => {
+        const salesBySocio = sales.filter(sale => sale.COD_SOCIO === socio.CODIGO);
+        console.log('salesBySocio: ', salesBySocio.length);
+        console.log('salesBySocio: ', salesBySocio[0]);
+
+        if (salesBySocio.length > 0) {
+            const resume = calculateCommision(salesBySocio);
+            resume.socio = socio;
+            console.log('resume addCommission: ', resume);
+            addCommission(resume);
+            //update sales status
+            updateSalesStatus(salesBySocio);
+            sendCommissionEmail(resume);
+        }
+    });
+}
+
+function updateSalesStatus(sales) {
+    sales.forEach(sale => {
+        setValueByCodeAndColumn(CONTROL_VENTAS, CONTROL_VENTAS.ESTADO, sale.index, ESTADO_VENTA.COMISIONADA);
+    });
 }

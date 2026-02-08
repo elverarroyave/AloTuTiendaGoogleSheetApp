@@ -71,6 +71,14 @@ function getSequences() {
   return getRowDataAsObjects(SEQUENCES);
 }
 
+function formatCurrency(value) {
+  return new Intl.NumberFormat('es-CO', {
+    style: 'currency',
+    currency: 'COP',
+    minimumFractionDigits: 0
+  }).format(value);
+}
+
 function getSequence(prefix) {
   let sequences = getSequences();
   return sequences.find(s => s.PREFIX === prefix);
@@ -109,7 +117,7 @@ function getRowDataAsObjects(table) {
       rowObject.index = rowIndex + i;
       result.push(rowObject);
     });
-    console.log(`getRowDataAsObjects ${table.NAME_TABLE}: `, result);
+    // console.log(`getRowDataAsObjects ${table.NAME_TABLE}: `, result);
     return result;
   } catch (e) {
     return { error: e.message };
@@ -313,44 +321,6 @@ function diasTranscurridosCoutner(fechaInicio, fechaFin) {
  * @param {number} ventaResult.total - Total abonado hasta el momento ($).
  * @returns {string} Estado de la venta (de ESTADO_VENTA).
  */
-
-
-/*
-{ FECHA: '2025-10-06T20:45:50.000Z',
-    NUM: 397,
-    CODIGO: 'VENTA397',
-    COD_SOCIO: 'SOCIO1',
-    SOCIO: 'ELVER ARROYAVE',
-    C_PAGOS: 'CUATRO',
-    COD_PRDT: 'PDCT015',
-    PRODUCTO: 'Televisor CAIXUN 65 Pulgadas LED Uhd4K Android TV',
-    CANTIDAD: 1,
-    COD_CLNT: 'CLNT067',
-    CLIENTE: 'ESAUL DAVID VILLALBA MADRD',
-    'PRECIO BASE': 2350000,
-    PRECIO: 2702500,
-    'M. PAGO': 'Efectivo',
-    PAGO: 600000,
-    ABONO: 675000,
-    RESTA: 1427500,
-    TOTAL: 1275000,
-    ESTADO: 'ATRAZADO',
-    DateMA: '#ERROR!',
-    'Enlace de factura': '',
-    index: 48,
-    SALDO_PAGO_IDEAL: 1427500,
-    DIAS_ATRASO: 2 },
-
-    let definirVenta = {
-      fechaCompra: sale.FECHA,
-      cPagos: sale.C_PAGOS,
-      precio: sale.PRECIO,
-      total: sale.TOTAL,
-    }
-
-    const saleStatus = definirEstadoVenta(definirVenta);
-*/
-
 function definirEstadoVenta(ventaResult) {
   const cPagosObject = CANTIDADA_PAGOS[ventaResult.cPagos];
   if (!cPagosObject) throw new Error("Plan de pagos no encontrado");
@@ -358,89 +328,43 @@ function definirEstadoVenta(ventaResult) {
   const fechaCompra = new Date(ventaResult.fechaCompra);
   const valorCadaPago = ventaResult.precio / cPagosObject.valor;
   const diasTranscurridos = diasTranscurridosCoutner(fechaCompra, new Date());
-  let cantidadPagosExigibles = cPagosObject.valor;
 
-  /* 
-    NUEVA LÓGICA DE CÁLCULO DE ATRASO:
-    1. Calcular cuántas cuotas completas cubren los pagos realizados.
-    2. Identificar la siguiente cuota a pagar (la primera no cubierta).
-    3. Determinar el deadline acumulado para esa cuota específica.
-    4. Calcular días de atraso basándose en ese deadline.
-  */
+  // Calculamos cuántos pagos deberían haberse realizado según los plazos transcurridos
+  let cantidadPagosExigibles = cPagosObject.valor; // Por defecto todos ya vencieron
 
-  // 1. Calcular pagos realizados
-  // Math.floor(Total Pagado / Valor Cuota) = Cantidad de cuotas totalmente pagadas
-  // Ejemplo: Si debe 4 cuotas de 100 y ha pagado 150.
-  // cuotasPagadas = floor(150/100) = 1.
-  // La deuda está en la cuota #2.
-
-  // Nota: valorCadaPago podría tener decimales, asegurar precisión si es necesario, pero JS maneja esto bien generalmente.
-  const cuotasPagadas = Math.floor(ventaResult.total / valorCadaPago);
-
-  // 2. Identificar siguiente cuota a pagar
-  // Si ha pagado 1, la exigible es la 2.
-  // Limitamos a que no supere el total de pagos del plan.
-  let siguienteCuotaExigible = Math.min(cuotasPagadas + 1, cPagosObject.valor);
-
-  // 3. Obtener deadline de esa cuota
-  let deadline = 0;
-  if (siguienteCuotaExigible > 0) {
-    const hito = Object.values(CANTIDADA_PAGOS).find(h => h.valor === siguienteCuotaExigible);
-    if (hito) {
-      deadline = hito.plazo;
-    }
-  }
-
-  // Verificar si la fecha actual ha superado el deadline
-  // Si diasTranscurridos > deadline, hay atraso.
-  // Pero ESTADO_VENTA.ATRAZADO se define si valorAbonado < valorPagoIdeal.
-  // valorPagoIdeal se calcula segun el tiempo transcurrido.
-
-  // -- Recalculamos valorPagoIdeal basado en dias transcurridos para determinar el ESTADO --
-  // Esto mantiene la logica original de "cuanto deberia haber pagado a hoy"
-  let cuotasExigiblesPorTiempo = 0;
   const hitosPago = Object.values(CANTIDADA_PAGOS);
-  // Ordenamos para asegurar que iteramos correctamente, aunque los valores parecen ordenados
-  // Pero mejor iterar buscando el hito adecuado.
-
-  // Buscamos el hito cuyo plazo es inmeditamente mayor a diasTranscurridos, 
-  // o el ultimo hito si ya pasaron todos.
-  // Logica original:
-  let cantidadPagosExigiblesHoy = cPagosObject.valor; // Asumimos todo exigible por defecto
-
   for (const hito of hitosPago) {
     if (diasTranscurridos < hito.plazo) {
-      cantidadPagosExigiblesHoy = hito.valor - 1;
+      // Si aún no llegamos a este hito de plazo, el total de pagos exigibles es 
+      // el número de pagos del hito previo (hito.valor - 1)
+      cantidadPagosExigibles = hito.valor - 1;
       break;
     }
   }
-  // Ajustamos límites
-  cantidadPagosExigiblesHoy = Math.min(cantidadPagosExigiblesHoy, cPagosObject.valor);
 
-  const valorPagoIdealHoy = valorCadaPago * cantidadPagosExigiblesHoy;
+  // No podemos exigir más pagos de los que tiene el plan original de esta venta
+  cantidadPagosExigibles = Math.min(cantidadPagosExigibles, cPagosObject.valor);
 
-  // Determinar estado
-  // Si lo que pagó es mayor o igual a lo que debería haber pagado a hoy -> AL DIA
-  const estado = ventaResult.total >= valorPagoIdealHoy
+  const valorPagoIdeal = valorCadaPago * cantidadPagosExigibles;
+  const valorAbonado = ventaResult.total;
+
+  // Determine deadline for the current overdue payment
+  let deadline = 0;
+  if (cantidadPagosExigibles > 0) {
+    // Find the milestone matching the number of exigible payments
+    // We search through values of CANTIDADA_PAGOS
+    const deadlineHito = Object.values(CANTIDADA_PAGOS).find(h => h.valor === cantidadPagosExigibles);
+    if (deadlineHito) deadline = deadlineHito.plazo;
+  }
+
+  const estado = valorAbonado >= valorPagoIdeal
     ? ESTADO_VENTA.AL_DIA
     : ESTADO_VENTA.ATRAZADO;
 
-  // Calcular Días de Atraso
-  // Solo tiene sentido si está atrasado.
-  // Si está atrasado, usamos el deadline de la 'siguienteCuotaExigible' (la más vieja sin pagar)
-  // en lugar del deadline de la cuota actual del tiempo.
-
-  let diasAtrasoCalc = 0;
-  if (estado === ESTADO_VENTA.ATRAZADO) {
-    diasAtrasoCalc = diasTranscurridos - deadline;
-    // Si por alguna razón da negativo (ej. lógica de fechas rara), lo dejamos en 0
-    if (diasAtrasoCalc < 0) diasAtrasoCalc = 0;
-  }
-
   return {
-    saldoParaPagoIdeal: valorPagoIdealHoy - ventaResult.total,
+    saldoParaPagoIdeal: valorPagoIdeal - valorAbonado,
     estado: estado,
-    diasAtraso: diasAtrasoCalc,
+    diasAtraso: estado === ESTADO_VENTA.ATRAZADO ? (diasTranscurridos - deadline) : 0,
   }
 }
 

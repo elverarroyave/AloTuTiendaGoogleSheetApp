@@ -107,8 +107,8 @@ function createOverdueSalesTemplate(sales, message) {
       <td style="padding: 10px; border-bottom: 1px solid #ddd;">${sale.CLIENTE || 'N/A'}</td>
       <td style="padding: 10px; border-bottom: 1px solid #ddd;">${sale.PRODUCTO || 'N/A'}</td>
       <td style="padding: 10px; border-bottom: 1px solid #ddd;">${sale.DIAS_ATRASO} ${sale.DIAS_ATRASO === 1 ? 'día' : 'días'}</td>
-      <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: right;">$${Number(sale.SALDO_PAGO_IDEAL).toLocaleString()}</td>
-      <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: right;">$${Number(sale.RESTA).toLocaleString()}</td>
+      <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: right;">$${formatCurrency(sale.SALDO_PAGO_IDEAL)}</td>
+      <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: right;">$${formatCurrency(sale.RESTA)}</td>
       <td style="padding: 10px; border-bottom: 1px solid #ddd; color: #d9534f; font-weight: bold;">${sale.ESTADO}</td>
     </tr>
   `).join('');

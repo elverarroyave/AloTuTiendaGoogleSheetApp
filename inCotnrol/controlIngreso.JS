@@ -1,8 +1,8 @@
-function openControlIngresoModal(){
-    let html = HtmlService.createHtmlOutputFromFile("createControlIngresoForm")
-        .setWidth(900)
-        .setHeight(750);
-    SpreadsheetApp.getUi().showModalDialog(html, "Control de Ingreso de Mercancía");
+function openControlIngresoModal() {
+  let html = HtmlService.createHtmlOutputFromFile("createControlIngresoForm")
+    .setWidth(900)
+    .setHeight(750);
+  SpreadsheetApp.getUi().showModalDialog(html, "Control de Ingreso de Mercancía");
 }
 
 // ==========================================
@@ -15,12 +15,12 @@ function createControlIngreso(form) {
   const targetRow = 3; // Insertar en fila 3
 
   // 1. Obtener Secuencia
-  const sequences = getSequences(); 
-  const ingresoSequence = sequences.find(seq => seq.NAME === 'INGRESO'); 
-  
+  const sequences = getSequences();
+  const ingresoSequence = sequences.find(seq => seq.NAME === 'INGRESO');
+
   if (!ingresoSequence) throw new Error("No se encontró la secuencia de INGRESO");
 
-  const nextNum = ingresoSequence.NEXT; 
+  const nextNum = ingresoSequence.NEXT;
   const fullCode = ingresoSequence.PREFIX + nextNum; // Ej: IN186
 
   try {
@@ -29,13 +29,14 @@ function createControlIngreso(form) {
 
     // 3. Preparar Datos Calculados
     let now = getCurrentDateTime();
-    
+
     // Parsear números para asegurar cálculos correctos
     const cantidad = Number(form.cantidad);
     const precioUnitario = Number(form.precioUnitario);
     const total = cantidad * precioUnitario;
 
     const formulaSaldoRestante = '=SUMIF(PAGOS_PEDIDOS[COD_IN],CONTROL_INGRESO[CODIGO],PAGOS_PEDIDOS[VALOR])';
+    const formulaPagado = '=IF(CONTROL_INGRESO[SALDO_PAGADO]>=CONTROL_INGRESO[TOTAL],TRUE,FALSE)';
 
     // 4. Escribir Datos (Mapeo exacto a columnas A-N)
     sheet.getRange(CONTROL_INGRESO.FECHA + targetRow).setValue(now);          // FECHA
@@ -51,7 +52,7 @@ function createControlIngreso(form) {
     sheet.getRange(CONTROL_INGRESO.METODO_DE_PAGO + targetRow).setValue(form.metodoPago);        // MÉTODO DE PAGO
     sheet.getRange(CONTROL_INGRESO.SALDO_PAGADO + targetRow).setValue(formulaSaldoRestante);   // formula saldo restante
     sheet.getRange(CONTROL_INGRESO.TOTAL + targetRow).setValue(total);                  // TOTAL
-    sheet.getRange(CONTROL_INGRESO.PAGADO + targetRow).setValue('FALSE');                // PAGADO
+    sheet.getRange(CONTROL_INGRESO.PAGADO + targetRow).setValue(formulaPagado);                // PAGADO
     sheet.getRange(CONTROL_INGRESO.ESTADO + targetRow).setValue(form.estado);            // ESTADO
     sheet.getRange(CONTROL_INGRESO.ENLACE_FACTURA + targetRow).setValue(form.enlaceFactura);     // ENLACE DE FACTURA
 
@@ -66,15 +67,15 @@ function createControlIngreso(form) {
 
   } catch (error) {
     console.error("Error al crear el ingreso. Realizando rollback:", error);
-    
+
     // --- ROLLBACK: ELIMINAR FILA INSERTADA ---
     try {
-        sheet.deleteRow(targetRow);
-        console.log(`Rollback exitoso: Fila ${targetRow} eliminada de CONTROL_INGRESO.`);
+      sheet.deleteRow(targetRow);
+      console.log(`Rollback exitoso: Fila ${targetRow} eliminada de CONTROL_INGRESO.`);
     } catch (e) {
-        console.error("Error en rollback de CONTROL_INGRESO:", e);
+      console.error("Error en rollback de CONTROL_INGRESO:", e);
     }
-    
+
     throw new Error(`Error en la transacción. Se realizó un rollback. Detalle: ${error.message}`);
   }
 }
