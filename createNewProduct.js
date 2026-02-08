@@ -1,5 +1,6 @@
 function openProductModal() {
   // 1. Crear el HTML desde el archivo
+  includes("componentCss.html");
   let html = HtmlService.createHtmlOutputFromFile("createNewProductForm")
       .setWidth(800)   // Ancho en píxeles (puedes ajustarlo, ej: 800 o 1000)
       .setHeight(700); // Alto en píxeles (ajusta según el largo de tu formulario)
@@ -42,7 +43,6 @@ function createNewProduct(form) {
       // Estructura: | NOMBRE (A) | NUM (B) | CODIGO (C) | CATEGORIA (D) | UNO/PRECIO (E) |
       
       sheet.getRange(INVENTARIO.NOMBRE + targetRow).setValue(form.productName.toUpperCase()); // Nombre
-      sheet.getRange(INVENTARIO.NUM + targetRow).setValue(nextNum);          // Num
       sheet.getRange(INVENTARIO.CODIGO + targetRow).setValue(fullCode);         // Código Completo
       sheet.getRange(INVENTARIO.CATEGORIA + targetRow).setValue(form.category);    // Categoría
       sheet.getRange(INVENTARIO.UNO + targetRow).setValue(form.salePrice);   // Precio (Columna UNO)

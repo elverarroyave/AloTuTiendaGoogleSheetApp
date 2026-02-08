@@ -460,7 +460,7 @@
 
             // Cargar Proveedores
             google.script.run.withSuccessHandler(providers => {
-                console.log('result Proveedores: ', providers);
+                console.log('result loadData: ', providers);
                 const options = providers.map(p => ({
                     value: p.CODIGO,
                     text: p.NOMBRE, 
@@ -472,7 +472,7 @@
 
             // Cargar Métodos de Pago
             google.script.run.withSuccessHandler(methods => {
-                console.log('result Metodos de Pago: ', methods);
+                console.log('result loadData: ', methods);
                 const options = methods.map(m => ({
                     value: m.NOMBRE, 
                     text: m.NOMBRE

@@ -66,4 +66,4 @@ function getDataIngresoEgreso() {
 function getSequenceInOut() {
     let sequences = getSequences();
     return sequences.find(s => s.PREFIX === 'INOUT');
-}
+}    
