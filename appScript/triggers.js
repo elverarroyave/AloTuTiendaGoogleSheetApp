@@ -13,6 +13,7 @@ function updateSaleStatus() {
       cPagos: sale.C_PAGOS,
       precio: sale.PRECIO,
       total: sale.TOTAL,
+      mPago: sale.M_PAGO,
     }
     const saleStatus = definirEstadoVenta(definirVenta);
     sale.SALDO_PAGO_IDEAL = saleStatus.saldoParaPagoIdeal;
@@ -37,9 +38,17 @@ function sendEmailSalesOverdue(salesOverdue) {
   let socios = getSocios();
   let clientes = getClients();
   let sociosAdmin = socios.filter(socio => socio.CARGO === CARGOS_SOCIOS.ADMIN);
+
+  // Administradores reciben todas las notificaciones de ventas atrasadas
   sendNotification(sociosAdmin, salesOverdue, `<p>Hola Administrador.</p><p>Se han detectado las siguientes ventas en estado <strong>ATRAZADO</strong>:</p>`);
-  sendNotificationForSocios(socios, salesOverdue, `<p>Hola Socio.</p><p>Se ha detectato que algunos de tus clientes tienen ventas en estado <strong>ATRAZADO</strong>:</p>`);
-  sendNotificationsClientes(clientes, salesOverdue);
+
+  // Filtrar ventas de Addi y SisteCredito para no notificar a socios ni clientes
+  let salesOverdueNormal = salesOverdue.filter(sale => sale.M_PAGO !== 'Addi' && sale.M_PAGO !== 'SisteCredito');
+
+  if (salesOverdueNormal.length > 0) {
+    sendNotificationForSocios(socios, salesOverdueNormal, `<p>Hola Socio.</p><p>Se ha detectato que algunos de tus clientes tienen ventas en estado <strong>ATRAZADO</strong>:</p>`);
+    sendNotificationsClientes(clientes, salesOverdueNormal);
+  }
 }
 
 function sendNotification(socios, sales, message) {

@@ -724,8 +724,18 @@
             if (isNaN(amountVal) || amountVal <= 0) { isValid = false; errorMsg = "La cantidad debe ser mayor a 0."; }
             
             if (DOM.checkIsCredict.checked) {
-                if (!DOM.firstPayment.value || DOM.firstPayment.value.trim() === "") {
+                const isSpecialMethod = DOM.paymentMethod.value === 'Addi' || DOM.paymentMethod.value === 'SisteCredito';
+                const firstPaymentStr = DOM.firstPayment.value ? DOM.firstPayment.value.trim() : "";
+                const firstPaymentNum = parseFloat(firstPaymentStr);
+
+                if (isSpecialMethod && (firstPaymentStr === "" || firstPaymentNum === 0)) {
+                    // Permitido: 0 o vacío para Addi/SisteCredito
+                } else if (firstPaymentStr === "") {
                     isValid = false; errorMsg = "En ventas a crédito, el primer abono es obligatorio.";
+                } else if (isNaN(firstPaymentNum) || firstPaymentNum < 0) {
+                    isValid = false; errorMsg = "El abono debe ser un número válido.";
+                } else if (!isSpecialMethod && firstPaymentNum === 0) {
+                    isValid = false; errorMsg = "El primer abono debe ser mayor a 0 para este método de pago.";
                 }
             }
 
@@ -738,7 +748,14 @@
             document.getElementById("resPrecio").innerText = DOM.priceProduct.value || "—";
             document.getElementById("resEsCredito").innerText = DOM.checkIsCredict.checked ? "Sí" : "No";
             const firstPaymentValue = parseFloat(DOM.firstPayment.value);
-            document.getElementById("resValorPrimerAbono").innerText = !isNaN(firstPaymentValue) ? formatCurrency(firstPaymentValue) : "—";
+            const isSpecialMethod = DOM.paymentMethod.value === 'Addi' || DOM.paymentMethod.value === 'SisteCredito';
+            let formattedAbono = "—";
+            if (!isNaN(firstPaymentValue)) {
+                formattedAbono = formatCurrency(firstPaymentValue);
+            } else if (isSpecialMethod && DOM.checkIsCredict.checked) {
+                formattedAbono = formatCurrency(0);
+            }
+            document.getElementById("resValorPrimerAbono").innerText = formattedAbono;
             
             // Update Product and Responsible
             const displayProduct = DOM.productName.options[DOM.productName.selectedIndex]?.text.split('(')[0] || "—";
@@ -814,6 +831,9 @@
             const formElement = document.querySelector('form');
             const formData = new FormData(formElement);
             const data = Object.fromEntries(formData);
+            if (DOM.checkIsCredict.checked && (!data.firstPayment || data.firstPayment.trim() === "")) {
+                data.firstPayment = 0;
+            }
             data.priceProduct = DOM.priceProductWithOutFormat;
             data.priceBase = priceBase;
             data.clientCorreo = DOM.clientName.options[DOM.clientName.selectedIndex].dataset.correo;

@@ -357,14 +357,31 @@ function definirEstadoVenta(ventaResult) {
     if (deadlineHito) deadline = deadlineHito.plazo;
   }
 
-  const estado = valorAbonado >= valorPagoIdeal
-    ? ESTADO_VENTA.AL_DIA
-    : ESTADO_VENTA.ATRAZADO;
+  const isSpecialMethod = ventaResult.mPago === 'Addi' || ventaResult.mPago === 'SisteCredito';
+
+  let estado;
+  let diasAtraso = 0;
+  let saldoParaPagoIdeal = valorPagoIdeal - valorAbonado;
+
+  if (isSpecialMethod) {
+    // Para Addi y SisteCredito, ignoramos los abonos y solo miramos el plazo total (C_PAGOS)
+    if (diasTranscurridos > cPagosObject.plazo) {
+      estado = ESTADO_VENTA.ATRAZADO;
+      diasAtraso = diasTranscurridos - cPagosObject.plazo;
+    } else {
+      estado = ESTADO_VENTA.AL_DIA;
+    }
+    // Mostramos todo lo que falta sin calcular fragmentos ideales
+    saldoParaPagoIdeal = ventaResult.precio - valorAbonado; 
+  } else {
+    estado = valorAbonado >= valorPagoIdeal ? ESTADO_VENTA.AL_DIA : ESTADO_VENTA.ATRAZADO;
+    diasAtraso = estado === ESTADO_VENTA.ATRAZADO ? (diasTranscurridos - deadline) : 0;
+  }
 
   return {
-    saldoParaPagoIdeal: valorPagoIdeal - valorAbonado,
+    saldoParaPagoIdeal: saldoParaPagoIdeal > 0 ? saldoParaPagoIdeal : 0,
     estado: estado,
-    diasAtraso: estado === ESTADO_VENTA.ATRAZADO ? (diasTranscurridos - deadline) : 0,
+    diasAtraso: diasAtraso,
   }
 }
 
